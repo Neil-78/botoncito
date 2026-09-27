@@ -102,6 +102,8 @@
             z-index: 25;
             cursor: pointer;
             transition: opacity 0.4s ease;
+            padding: 16px;
+            text-align: center;
         }
 
         .play-overlay.hidden {
@@ -119,6 +121,7 @@
             font-weight: 600;
             box-shadow: 0 0 25px rgba(255, 25, 100, 0.7);
             animation: pulseBtn 1.6s infinite;
+            cursor: pointer;
         }
 
         @keyframes pulseBtn {
@@ -796,11 +799,15 @@
             z-index: 2;
         }
 
+        /* Reproductor de 200x200 escalado para cumplir el tamaño mínimo que exige YouTube sin verse */
         #yt-player-container {
             position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
+            top: 0;
+            left: 0;
+            width: 200px;
+            height: 200px;
+            transform: scale(0.26);
+            transform-origin: top left;
             opacity: 0.01;
             pointer-events: none;
             z-index: 1;
@@ -884,7 +891,7 @@
 
         .sp-playlist-drawer {
             display: none;
-            max-height: 140px;
+            max-height: 155px;
             overflow-y: auto;
             margin-top: 9px;
             padding-top: 6px;
@@ -1008,13 +1015,12 @@
          ===================================================== -->
     <div id="video-screen" class="screen active">
         <div class="video-container">
-            <video id="surprise-video" controls playsinline webkit-playsinline preload="auto">
-                <source src="0926.mp4" type="video/mp4">
+            <video id="surprise-video" src="0926.mp4" controls playsinline webkit-playsinline preload="metadata">
                 Tu navegador no soporta videos HTML5.
             </video>
 
             <div id="play-overlay" class="play-overlay">
-                <button class="play-btn-initial">▶️ Toca para ver tu sorpresa, Gigi ❤️</button>
+                <button id="play-btn-initial" class="play-btn-initial">▶️ Toca para ver tu sorpresa, Gigi ❤️</button>
             </div>
 
             <button id="heart-button" class="heart-btn" aria-label="Ir a la sorpresa">❤️</button>
@@ -1226,7 +1232,7 @@
             <div class="sp-info">
                 <div id="sp-title" class="sp-title">Cargando playlist...</div>
                 <div id="sp-artist" class="sp-artist">Para mi Gigi ❤️</div>
-                <div id="sp-counter" class="sp-counter">Canción 1 de 13</div>
+                <div id="sp-counter" class="sp-counter">Canción 1 de 29</div>
             </div>
         </div>
 
@@ -1308,14 +1314,14 @@
 
     <script>
         /* =========================================================
-           1. PLAYLIST ESPECIALIZADA DE 13 CANCIONES (YOUTUBE API)
+           1. PLAYLIST COMPLETA DE 29 CANCIONES (CON RESPALDOS ANTI-BLOQUEO)
            ========================================================= */
         const playlist = [
             { id: 'C0OXsyR2mMM', title: 'Catorce (Sinónimo de amor ♡)', artist: 'Sebastián Romero • oliver UnU' },
             { id: 'WqKqj3Q1wrw', title: 'Eres mi recuerdo favorito', artist: 'Andrecito' },
             { id: 'IYsQDbvfzrE', title: 'Quédate un minuto más', artist: 'Andrecito' },
-            { id: 'sVdxA0rFN5c', title: 'Te Alejas Más De Mí', artist: 'Esteman, Daniela Spalla' },
-            { id: 'MDSZK3PSjlY', title: 'Cafuné', artist: 'Micro TDH' },
+            { id: 'sVdxA0rFN5c', backups: ['SNGAd7rgec0', 'WgEw5Zfbeqg', 'x44rj5iPR20'], title: 'Te Alejas Más De Mí', artist: 'Esteman, Daniela Spalla' },
+            { id: '7AHcCUWQevg', backups: ['duyi3KWe5es', '0YLZMsgRL1k', 'mOrs6dKpppk', 'fsq5jz59AKQ'], title: 'Cafuné', artist: 'Micro TDH' },
             { id: '7E9-c2Z6adU', title: 'Toda Esta Ciudad', artist: 'Kevin Kaarl' },
             { id: 'UuD4gzxUcnc', title: 'Todavía duermo en mi lado de mi cama', artist: 'Andrecito' },
             { id: 'sZpJ_4lj0y8', title: 'Me enamoré de alguien que también se enamoró', artist: '𝐴𝑛𝑎アナ' },
@@ -1323,12 +1329,29 @@
             { id: 'WA05n3EKUQU', title: 'Enamorado Tuyo ❤️', artist: 'Cuarteto de Nos' },
             { id: 'k1_4jrRwvjQ', title: 'Si tú supieras', artist: 'solamentedan' },
             { id: 'n2Cld9aU1vU', title: 'Te Amo Y Más', artist: 'Diego Luna' },
-            { id: 'pHKfPt_fmDM', title: 'Iguales', artist: 'AmorGrande' }
+            { id: 'pHKfPt_fmDM', title: 'Iguales', artist: 'AmorGrande' },
+            { id: 'tJA_mxEIJ2E', title: 'Sexto Sentido', artist: '008RACCA' },
+            { id: 'KHBi-luZMq4', backups: ['9vDw0sqKruM', 'b0YyWYqCcbo', '4FjwWKmNeVg'], title: 'Mar', artist: 'Esteman ft. Jósean Log' },
+            { id: 'I7dgtVwFMps', title: 'Piel Morena', artist: 'Sous Sol' },
+            { id: 'YWeo5f60eP8', title: 'Morena', artist: 'Vitor Kley ft. Mariana Nolasco' },
+            { id: '2yHxI4g7bsg', title: 'Batman x Catwoman Rap', artist: 'Kronno Zomber' },
+            { id: 'MyZ5zIzqbHQ', title: 'Una tarde juntos', artist: 'Darviin' },
+            { id: 'AP5Y4Q4ZdUE', title: '99,99%', artist: 'El Riqué' },
+            { id: 'dnDMe4jSlDE', title: 'Canela', artist: 'Darviin' },
+            { id: '3TXnYMT9Ju8', title: 'Luciérnagas', artist: 'Milo J, Silvio Rodríguez' },
+            { id: 'c3aN6Tv4WLA', backups: ['Hmc2UKFNGzM', 'gWzjjbp_V64', 'kCkxviLkNok'], title: 'Alma Dinamita', artist: 'WOS' },
+            { id: 'E39rJACLXcE', title: 'La razón', artist: 'ROCKO' },
+            { id: 'MA5v9VNJ-2Q', backups: ['9t27ErTpe0I', '6Se4nwQtDs8', 'O8-Q6chPjQ0'], title: 'Okupa', artist: 'WOS' },
+            { id: '86EzBBQwloo', title: 'Dos Lunas', artist: 'Anthrés' },
+            { id: 'F4i3O7T488I', backups: ['z6KufiKMVKw', 'WdSEw73Vfyc', 'yx2ecYv4VZQ'], title: 'Ya Me Hiciste Mal', artist: 'Rayos Laser' },
+            { id: 'G2iKFUu1itI', title: 'Hasta Viejos', artist: 'Sebastián Romero ft. Les Cafeteres' },
+            { id: 'Ym99t7VTy0g', title: 'Si la noche es infinita como tú', artist: 'Anthrés' }
         ];
 
         let ytPlayer = null;
         let ytReady = false;
         let currentTrack = 0;
+        let currentBackupIdx = 0;
         let isPlayingMusic = false;
         let startMusicWhenReady = false;
 
@@ -1373,17 +1396,22 @@
         updatePlayerUI();
 
         window.onYouTubeIframeAPIReady = function() {
+            const vars = {
+                autoplay: 0,
+                controls: 0,
+                playsinline: 1,
+                rel: 0,
+                modestbranding: 1
+            };
+            if (window.location.protocol.startsWith('http')) {
+                vars.origin = window.location.origin;
+            }
+
             ytPlayer = new YT.Player('yt-player', {
-                height: '52',
-                width: '52',
+                height: '200',
+                width: '200',
                 videoId: playlist[currentTrack].id,
-                playerVars: {
-                    autoplay: 0,
-                    controls: 0,
-                    playsinline: 1,
-                    rel: 0,
-                    modestbranding: 1
-                },
+                playerVars: vars,
                 events: {
                     onReady: (event) => {
                         ytReady = true;
@@ -1404,7 +1432,15 @@
                         }
                     },
                     onError: () => {
-                        nextTrack();
+                        // Si un video oficial tiene bloqueo de inserción (Error 101/150), prueba sus respaldos con letra antes de saltar
+                        const song = playlist[currentTrack];
+                        if (song.backups && currentBackupIdx < song.backups.length) {
+                            const backupVideoId = song.backups[currentBackupIdx];
+                            currentBackupIdx++;
+                            ytPlayer.loadVideoById(backupVideoId);
+                        } else {
+                            nextTrack();
+                        }
                     }
                 }
             });
@@ -1412,6 +1448,7 @@
 
         function loadTrack(index, autoPlay = true) {
             currentTrack = (index + playlist.length) % playlist.length;
+            currentBackupIdx = 0;
             updatePlayerUI();
             if (ytReady && ytPlayer && ytPlayer.loadVideoById) {
                 ytPlayer.loadVideoById(playlist[currentTrack].id);
@@ -1464,10 +1501,11 @@
         });
 
         /* =========================================================
-           2. CONTROL DEL VIDEO 0926.mp4 Y NAVEGACIÓN ENTRE PANTALLAS
+           2. BUSCADOR AUTOMÁTICO DE 0926.mp4 PARA GITHUB PAGES
            ========================================================= */
         const surpriseVideo = document.getElementById('surprise-video');
         const playOverlay = document.getElementById('play-overlay');
+        const playBtnInitial = document.getElementById('play-btn-initial');
         const heartButton = document.getElementById('heart-button');
         const skipButton = document.getElementById('skip-button');
         const videoScreen = document.getElementById('video-screen');
@@ -1476,6 +1514,33 @@
         const kittyPeekBtn = document.getElementById('kitty-peek-btn');
 
         let galaxyInitialized = false;
+
+        // Genera rutas alternativas por si GitHub Pages usa mayúsculas (.MP4) o Git LFS
+        const videoCandidates = ['./0926.mp4', '0926.MP4', './0926.MP4', 'video/0926.mp4'];
+        if (window.location.hostname.endsWith('github.io')) {
+            const user = window.location.hostname.split('.')[0];
+            const pathParts = window.location.pathname.split('/').filter(Boolean);
+            const repo = pathParts[0] || `${user}.github.io`;
+            videoCandidates.push(
+                `https://media.githubusercontent.com/media/${user}/${repo}/main/0926.mp4`,
+                `https://media.githubusercontent.com/media/${user}/${repo}/master/0926.mp4`,
+                `https://raw.githubusercontent.com/${user}/${repo}/main/0926.mp4`,
+                `https://raw.githubusercontent.com/${user}/${repo}/master/0926.mp4`,
+                `https://media.githubusercontent.com/media/${user}/${repo}/main/0926.MP4`
+            );
+        }
+
+        let candidateIndex = 0;
+        surpriseVideo.addEventListener('error', () => {
+            if (candidateIndex < videoCandidates.length) {
+                const nextUrl = videoCandidates[candidateIndex++];
+                surpriseVideo.src = nextUrl;
+                surpriseVideo.load();
+            } else {
+                // Si el video aún no está en GitHub, igual muestra el corazón para que pueda entrar a la sorpresa
+                heartButton.classList.add('visible');
+            }
+        });
 
         window.addEventListener('load', () => {
             const playPromise = surpriseVideo.play();
@@ -1490,7 +1555,9 @@
 
         playOverlay.addEventListener('click', () => {
             playOverlay.classList.add('hidden');
-            surpriseVideo.play();
+            surpriseVideo.play().catch(() => {
+                heartButton.classList.add('visible');
+            });
         });
 
         surpriseVideo.addEventListener('play', () => {
@@ -1514,7 +1581,7 @@
 
         skipButton.addEventListener('click', () => {
             playOverlay.classList.add('hidden');
-            if (surpriseVideo.duration) {
+            if (surpriseVideo.duration && !isNaN(surpriseVideo.duration)) {
                 surpriseVideo.currentTime = Math.max(0, surpriseVideo.duration - 10);
             } else {
                 surpriseVideo.currentTime = 312;
