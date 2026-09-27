@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Feliz Cumpleaños Gigi ❤️</title>
     <style>
+        :root {
+            --bg-dark: #0c0014;
+            --bg-purple: #2d004d;
+            --bg-glow: #5a008a;
+            --accent-pink: #ff6ec7;
+            --accent-light: #e0aaff;
+            --card-bg: rgba(255, 255, 255, 0.07);
+            --card-border: rgba(255, 110, 199, 0.25);
+            --text-white: #ffffff;
+            --text-soft: #e2d4f0;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -18,15 +30,15 @@
         body, html {
             width: 100%;
             height: 100%;
-            height: 100dvh; /* Ideal para celulares y iPad */
+            height: 100dvh;
             background-color: #050108;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Poppins, Roboto, sans-serif;
             color: white;
             overflow: hidden;
-            position: fixed; /* Evita rebotes de scroll en iOS/iPadOS */
+            position: fixed;
         }
 
-        /* CONTROL DE PANTALLAS */
+        /* CONTROL DE PANTALLAS PRINCIPALES */
         .screen {
             display: none;
             width: 100%;
@@ -40,10 +52,10 @@
 
         .screen.active {
             display: flex;
-            animation: fadeIn 0.8s ease-out;
+            animation: fadeInScreen 0.7s ease-out;
         }
 
-        @keyframes fadeIn {
+        @keyframes fadeInScreen {
             from { opacity: 0; }
             to { opacity: 1; }
         }
@@ -57,7 +69,6 @@
             padding: 12px;
         }
 
-        /* Mantiene proporción exacta 16:9 para que el corazón nunca se desfase de tus manos */
         .video-container {
             position: relative;
             width: min(96vw, calc(82dvh * 16 / 9));
@@ -71,14 +82,13 @@
             background: #000;
         }
 
-        video {
+        #surprise-video {
             width: 100%;
             height: 100%;
             object-fit: cover;
             border-radius: 14px;
         }
 
-        /* Botón por si el celular/iPad bloquea el autoplay con sonido */
         .play-overlay {
             position: absolute;
             inset: 0;
@@ -116,7 +126,6 @@
             50% { transform: scale(1.06); }
         }
 
-        /* Corazón pequeño en los últimos 10 segundos (anclado a tus manos) */
         .heart-btn {
             position: absolute;
             top: 62%;
@@ -124,7 +133,7 @@
             transform: translate(-50%, -50%) scale(0.85);
             background: none;
             border: none;
-            font-size: clamp(34px, 6vw, 56px); /* Se adapta al tamaño de celular o iPad */
+            font-size: clamp(34px, 6vw, 56px);
             cursor: pointer;
             opacity: 0;
             pointer-events: none;
@@ -132,7 +141,7 @@
             z-index: 20;
             filter: drop-shadow(0 0 15px #ff1744);
             will-change: opacity, transform;
-            padding: 15px; /* Área táctil más cómoda para el dedo */
+            padding: 15px;
         }
 
         .heart-btn.visible {
@@ -146,7 +155,6 @@
             50% { transform: translate(-50%, -50%) scale(1.25); }
         }
 
-        /* Botón "saltalo si quieres gigi" adaptado a bordes de celular y iPad */
         .skip-btn {
             position: fixed;
             bottom: max(20px, calc(env(safe-area-inset-bottom) + 14px));
@@ -171,23 +179,23 @@
         }
 
         /* =========================================
-           PANTALLA 2: GALAXIA FLUIDA SIN LAG
+           PANTALLA 2: GALAXIA LIMPIA Y FLUIDA
            ========================================= */
         #galaxy-screen {
             position: relative;
-            background: radial-gradient(circle at center, #180618 0%, #040106 100%);
+            background: radial-gradient(circle at center, #140414 0%, #030005 100%);
         }
 
         #galaxy-canvas {
             width: 100%;
             height: 100%;
             display: block;
-            touch-action: none; /* Permite girar con 1 dedo y hacer zoom con 2 dedos en celular/iPad */
+            touch-action: none;
         }
 
         .top-title {
             position: absolute;
-            top: max(5%, calc(env(safe-area-inset-top) + 18px));
+            top: max(4%, calc(env(safe-area-inset-top) + 14px));
             left: 50%;
             transform: translateX(-50%);
             font-family: 'Georgia', 'Times New Roman', serif;
@@ -200,28 +208,714 @@
             white-space: nowrap;
         }
 
+        /* HELLO KITTY ASOMÁNDOSE EN LA ESQUINA SUPERIOR DERECHA */
+        .kitty-peek-btn {
+            position: absolute;
+            top: max(10px, env(safe-area-inset-top));
+            right: -8px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            z-index: 35;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transform: rotate(-18deg) translateX(6px);
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            filter: drop-shadow(0 4px 14px rgba(255, 42, 133, 0.65));
+            animation: kittyPeekAnim 3s ease-in-out infinite;
+        }
+
+        .kitty-peek-btn:hover, .kitty-peek-btn:active {
+            transform: rotate(-8deg) translateX(-4px) scale(1.08);
+        }
+
+        @keyframes kittyPeekAnim {
+            0%, 100% { transform: rotate(-18deg) translate(6px, 0px); }
+            50% { transform: rotate(-14deg) translate(0px, 4px); }
+        }
+
+        .kitty-peek-bubble {
+            background: rgba(255, 255, 255, 0.95);
+            color: #d81b60;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 5px 10px;
+            border-radius: 14px;
+            border: 2px solid #ff6ec7;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+            white-space: nowrap;
+            transform: rotate(14deg);
+        }
+
+        .kitty-peek-svg {
+            width: clamp(68px, 14vw, 88px);
+            height: clamp(68px, 14vw, 88px);
+            display: block;
+        }
+
         .hint-text {
             position: absolute;
-            bottom: max(18px, calc(env(safe-area-inset-bottom) + 12px));
+            bottom: max(14px, calc(env(safe-area-inset-bottom) + 10px));
             left: 50%;
             transform: translateX(-50%);
             width: 90%;
             max-width: 420px;
-            font-size: clamp(11px, 2.6vw, 13px);
+            font-size: clamp(11px, 2.5vw, 13px);
             color: rgba(255, 215, 235, 0.8);
             pointer-events: none;
             z-index: 10;
             text-align: center;
             background: rgba(15, 4, 15, 0.6);
             border: 1px solid rgba(255, 100, 160, 0.25);
-            padding: 8px 14px;
+            padding: 7px 14px;
             border-radius: 20px;
             backdrop-filter: blur(4px);
             -webkit-backdrop-filter: blur(4px);
         }
 
         /* =========================================
-           CARTAS EMERGENTES (RESPONSIVE MÓVIL/IPAD)
+           PANTALLA 3: PÁGINA "NUESTROS RECUERDOS"
+           ========================================= */
+        #memories-page-screen {
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            background: radial-gradient(circle at 20% 30%, var(--bg-glow) 0%, var(--bg-purple) 35%, var(--bg-dark) 85%);
+            z-index: 38;
+        }
+
+        .mem-header {
+            position: sticky;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(12, 0, 20, 0.82);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            z-index: 1000;
+            padding: max(14px, env(safe-area-inset-top)) 16px 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .mem-nav {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .mem-nav a {
+            color: var(--text-soft);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: clamp(0.82rem, 2.5vw, 0.95rem);
+            padding: 7px 14px;
+            border-radius: 20px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .mem-nav a:hover,
+        .mem-nav a.active {
+            color: var(--text-white);
+            background: rgba(255, 110, 199, 0.18);
+            box-shadow: 0 0 15px rgba(255, 110, 199, 0.35);
+            transform: translateY(-2px);
+        }
+
+        /* Botón especial para regresar a la Galaxia */
+        .back-galaxy-btn {
+            background: linear-gradient(135deg, #ff2a85, #7b1fa2);
+            color: #fff !important;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            box-shadow: 0 0 14px rgba(255, 42, 133, 0.5);
+        }
+
+        .back-galaxy-btn:hover {
+            transform: scale(1.05) !important;
+        }
+
+        .mem-main {
+            flex: 1;
+            padding-top: 30px;
+            padding-bottom: 110px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        .mem-section {
+            display: none;
+            width: 100%;
+            max-width: 1100px;
+            padding: 20px;
+            text-align: center;
+            animation: memFadeIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .mem-section.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes memFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .mem-section h1, .mem-section h2 {
+            font-size: clamp(1.8rem, 5vw, 2.3rem);
+            margin-bottom: 16px;
+            color: #f3d1ff;
+            text-shadow: 0 0 18px rgba(255, 110, 199, 0.45);
+        }
+
+        .home-subtitle {
+            max-width: 680px;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            color: var(--text-soft);
+            margin-bottom: 40px;
+        }
+
+        .quote-box {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 24px 36px;
+            border-radius: 16px;
+            max-width: 650px;
+            font-style: italic;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: var(--text-white);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(8px);
+            margin-bottom: 60px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .quote-box:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 36px rgba(255, 110, 199, 0.25);
+        }
+
+        .footer-note {
+            font-size: 0.95rem;
+            color: var(--accent-light);
+            opacity: 0.9;
+            margin-top: 20px;
+        }
+
+        /* SECCIÓN RECUERDOS */
+        .memories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 22px;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .memory-card {
+            position: relative;
+            border-radius: 18px;
+            overflow: hidden;
+            aspect-ratio: 1 / 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.45);
+            cursor: pointer;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        .memory-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 14px 35px rgba(255, 110, 199, 0.4);
+        }
+
+        .memory-card img,
+        .memory-card video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+
+        .memory-card:hover img,
+        .memory-card:hover video {
+            transform: scale(1.07);
+        }
+
+        .memory-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 12px 14px;
+            background: linear-gradient(transparent, rgba(12, 0, 20, 0.9));
+            color: #fff;
+            font-size: 0.9rem;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+
+        .memory-card:hover .memory-caption {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* En pantallas táctiles mostramos siempre el subtítulo de cada foto */
+        @media (hover: none) {
+            .memory-caption {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* SECCIÓN GALERÍA 3D */
+        .gallery-wrapper {
+            perspective: 1200px;
+            width: 100%;
+            height: 440px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+            overflow: visible;
+        }
+
+        .carousel {
+            position: relative;
+            width: 210px;
+            height: 270px;
+            transform-style: preserve-3d;
+            animation: rotateCarousel 28s infinite linear;
+        }
+
+        .carousel:hover, .carousel:active {
+            animation-play-state: paused;
+        }
+
+        .carousel-item {
+            position: absolute;
+            width: 210px;
+            height: 270px;
+            left: 0;
+            top: 0;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 110, 199, 0.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            background: #1a002c;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .carousel-item img,
+        .carousel-item video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .carousel-item:nth-child(1) { transform: rotateY(0deg) translateZ(340px); }
+        .carousel-item:nth-child(2) { transform: rotateY(40deg) translateZ(340px); }
+        .carousel-item:nth-child(3) { transform: rotateY(80deg) translateZ(340px); }
+        .carousel-item:nth-child(4) { transform: rotateY(120deg) translateZ(340px); }
+        .carousel-item:nth-child(5) { transform: rotateY(160deg) translateZ(340px); }
+        .carousel-item:nth-child(6) { transform: rotateY(200deg) translateZ(340px); }
+        .carousel-item:nth-child(7) { transform: rotateY(240deg) translateZ(340px); }
+        .carousel-item:nth-child(8) { transform: rotateY(280deg) translateZ(340px); }
+        .carousel-item:nth-child(9) { transform: rotateY(320deg) translateZ(340px); }
+
+        @keyframes rotateCarousel {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+
+        .gallery-hint {
+            font-size: 0.9rem;
+            color: var(--text-soft);
+            margin-top: 20px;
+            opacity: 0.8;
+        }
+
+        /* SECCIÓN MENSAJE */
+        .message-card {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 36px 28px;
+            max-width: 720px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(12px);
+            line-height: 1.8;
+            font-size: 1.05rem;
+            color: var(--text-white);
+            text-align: center;
+        }
+
+        .message-card h3 {
+            color: var(--accent-pink);
+            margin-bottom: 18px;
+            font-size: 1.4rem;
+        }
+
+        .message-card p {
+            margin-bottom: 16px;
+            color: var(--text-soft);
+        }
+
+        /* SECCIÓN 100 RAZONES */
+        .reasons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 14px;
+            width: 100%;
+            margin-top: 25px;
+        }
+
+        .reason-item {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 110, 199, 0.2);
+            padding: 14px 18px;
+            border-radius: 12px;
+            font-size: 0.92rem;
+            color: var(--text-white);
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .reason-item:hover {
+            background: rgba(255, 110, 199, 0.2);
+            border-color: var(--accent-pink);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 18px rgba(255, 110, 199, 0.3);
+        }
+
+        /* LIGHTBOX PARA VER FOTOS Y VIDEOS DE RECUERDOS */
+        .lightbox {
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 0, 10, 0.88);
+            backdrop-filter: blur(8px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .lightbox.open {
+            display: flex;
+        }
+
+        .lightbox-content {
+            max-width: 90vw;
+            max-height: 85vh;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px solid var(--accent-pink);
+            box-shadow: 0 0 40px rgba(255, 110, 199, 0.5);
+            position: relative;
+            background: #000;
+        }
+
+        .lightbox-content img,
+        .lightbox-content video {
+            max-width: 90vw;
+            max-height: 80vh;
+            display: block;
+            object-fit: contain;
+        }
+
+        .close-lightbox {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 2.4rem;
+            color: #fff;
+            cursor: pointer;
+            z-index: 2100;
+        }
+
+        @media (max-width: 768px) {
+            .carousel { width: 145px; height: 195px; }
+            .carousel-item { width: 145px; height: 195px; }
+            .carousel-item:nth-child(1) { transform: rotateY(0deg) translateZ(215px); }
+            .carousel-item:nth-child(2) { transform: rotateY(40deg) translateZ(215px); }
+            .carousel-item:nth-child(3) { transform: rotateY(80deg) translateZ(215px); }
+            .carousel-item:nth-child(4) { transform: rotateY(120deg) translateZ(215px); }
+            .carousel-item:nth-child(5) { transform: rotateY(160deg) translateZ(215px); }
+            .carousel-item:nth-child(6) { transform: rotateY(200deg) translateZ(215px); }
+            .carousel-item:nth-child(7) { transform: rotateY(240deg) translateZ(215px); }
+            .carousel-item:nth-child(8) { transform: rotateY(280deg) translateZ(215px); }
+            .carousel-item:nth-child(9) { transform: rotateY(320deg) translateZ(215px); }
+        }
+
+        /* =========================================
+           VIÑETA FLOTANTE ESTILO SPOTIFY (GLOBAL)
+           ========================================= */
+        .spotify-widget {
+            position: fixed;
+            bottom: max(56px, calc(env(safe-area-inset-bottom) + 50px));
+            right: max(14px, calc(env(safe-area-inset-right) + 12px));
+            width: min(310px, 88vw);
+            background: rgba(18, 18, 22, 0.94);
+            border: 1px solid rgba(255, 90, 150, 0.4);
+            border-radius: 18px;
+            padding: 12px 14px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.65), 0 0 20px rgba(255, 30, 100, 0.2);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 1500;
+            display: none;
+            transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s ease;
+        }
+
+        .spotify-widget.unlocked {
+            display: block;
+        }
+
+        .spotify-widget.minimized {
+            transform: translateX(calc(100% + 30px));
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .spotify-mini-tab {
+            position: fixed;
+            bottom: max(60px, calc(env(safe-area-inset-bottom) + 54px));
+            right: max(14px, calc(env(safe-area-inset-right) + 12px));
+            background: linear-gradient(135deg, #1db954 0%, #ff2a85 100%);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-radius: 30px;
+            padding: 9px 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+            z-index: 1499;
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.85);
+            transition: all 0.3s ease;
+        }
+
+        .spotify-mini-tab.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1);
+        }
+
+        .sp-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 6px;
+        }
+
+        .sp-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: #1ed760;
+        }
+
+        .sp-header-btns {
+            display: flex;
+            gap: 6px;
+        }
+
+        .sp-icon-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #e0e0e0;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .sp-icon-btn:hover, .sp-icon-btn:active {
+            background: rgba(255, 42, 133, 0.6);
+            color: white;
+        }
+
+        .sp-main {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            margin-bottom: 10px;
+        }
+
+        .sp-cover-wrapper {
+            position: relative;
+            width: 52px;
+            height: 52px;
+            border-radius: 10px;
+            overflow: hidden;
+            flex-shrink: 0;
+            background: #111;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .sp-cover-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: relative;
+            z-index: 2;
+        }
+
+        #yt-player-container {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.01;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .sp-info {
+            flex: 1;
+            min-width: 0;
+            text-align: left;
+        }
+
+        .sp-title {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: #ffffff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 2px;
+        }
+
+        .sp-artist {
+            font-size: 11.5px;
+            color: #b3b3b3;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sp-counter {
+            font-size: 10px;
+            color: #ff6b95;
+            margin-top: 2px;
+        }
+
+        .sp-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 8px;
+        }
+
+        .sp-ctrl-btn {
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .sp-play-btn {
+            background: #1ed760;
+            color: #000000;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 15px;
+            font-weight: bold;
+            box-shadow: 0 0 12px rgba(30, 215, 96, 0.5);
+        }
+
+        .sp-volume-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #cccccc;
+        }
+
+        .sp-volume-slider {
+            flex: 1;
+            accent-color: #1ed760;
+            height: 4px;
+            cursor: pointer;
+        }
+
+        .sp-playlist-drawer {
+            display: none;
+            max-height: 140px;
+            overflow-y: auto;
+            margin-top: 9px;
+            padding-top: 6px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sp-playlist-drawer.open {
+            display: block;
+        }
+
+        .sp-track-item {
+            padding: 6px 8px;
+            border-radius: 8px;
+            font-size: 11.5px;
+            color: #d0d0d0;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 6px;
+            text-align: left;
+        }
+
+        .sp-track-item:hover, .sp-track-item.active {
+            background: rgba(255, 42, 133, 0.25);
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        /* =========================================
+           CARTAS EMERGENTES DE LA GALAXIA
            ========================================= */
         .modal-overlay {
             position: fixed;
@@ -309,40 +1003,254 @@
 </head>
 <body>
 
-    <!-- PANTALLA 1: VIDEO 0926.mp4 -->
+    <!-- =====================================================
+         PANTALLA 1: VIDEO 0926.mp4
+         ===================================================== -->
     <div id="video-screen" class="screen active">
         <div class="video-container">
-            <!-- playsinline y webkit-playsinline evitan que el iPhone tape el corazón con pantalla completa -->
             <video id="surprise-video" controls playsinline webkit-playsinline preload="auto">
                 <source src="0926.mp4" type="video/mp4">
                 Tu navegador no soporta videos HTML5.
             </video>
 
-            <!-- Capa táctil inicial por si iPhone/iPad pide un toque para activar el sonido -->
             <div id="play-overlay" class="play-overlay">
                 <button class="play-btn-initial">▶️ Toca para ver tu sorpresa, Gigi ❤️</button>
             </div>
 
-            <!-- Corazón chico rojo en los últimos 10 segundos -->
             <button id="heart-button" class="heart-btn" aria-label="Ir a la sorpresa">❤️</button>
         </div>
 
-        <!-- Botón para saltar a los últimos 10 segundos -->
         <button id="skip-button" class="skip-btn">saltalo si quieres gigi</button>
     </div>
 
-    <!-- PANTALLA 2: GALAXIA INTERACTIVA 3D -->
+    <!-- =====================================================
+         PANTALLA 2: GALAXIA INTERACTIVA 3D
+         ===================================================== -->
     <div id="galaxy-screen" class="screen">
-        <div class="top-title">Te Amo, Botoncito ❤️</div>
-        <canvas id="galaxy-canvas"></canvas>
-        <div class="hint-text">Desliza para girar • Toca las frases o dibujos para abrir tus cartas ✨</div>
+        <div class="top-title">Te Amo, Gigi ❤️</div>
 
-        <audio id="bg-music" loop preload="auto">
-            <source src="musica.mp3" type="audio/mpeg">
-        </audio>
+        <!-- HELLO KITTY ASOMÁNDOSE EN LA ESQUINA SUPERIOR DERECHA -->
+        <button id="kitty-peek-btn" class="kitty-peek-btn" title="Ir a Nuestros Recuerdos 💖">
+            <span class="kitty-peek-bubble">¡Pícame, Gigi! 🎀</span>
+            <svg class="kitty-peek-svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+                <!-- Orejas -->
+                <path d="M25 52 Q18 15 50 32 Z" fill="#ffffff" stroke="#221118" stroke-width="4" stroke-linejoin="round"/>
+                <path d="M95 52 Q102 15 70 32 Z" fill="#ffffff" stroke="#221118" stroke-width="4" stroke-linejoin="round"/>
+                <!-- Cabeza -->
+                <ellipse cx="60" cy="62" rx="42" ry="33" fill="#ffffff" stroke="#221118" stroke-width="4"/>
+                <!-- Moño rojo en oreja derecha -->
+                <g transform="translate(82, 34) rotate(15)">
+                    <ellipse cx="-11" cy="0" rx="11" ry="8" fill="#ff1744" stroke="#221118" stroke-width="3"/>
+                    <ellipse cx="11" cy="0" rx="11" ry="8" fill="#ff1744" stroke="#221118" stroke-width="3"/>
+                    <circle cx="0" cy="0" r="6" fill="#ff1744" stroke="#221118" stroke-width="3"/>
+                </g>
+                <!-- Ojos -->
+                <ellipse cx="42" cy="64" rx="3.8" ry="5.5" fill="#1a0d12"/>
+                <ellipse cx="78" cy="64" rx="3.8" ry="5.5" fill="#1a0d12"/>
+                <!-- Nariz amarilla -->
+                <ellipse cx="60" cy="71" rx="5" ry="3.6" fill="#ffcc00" stroke="#221118" stroke-width="2.5"/>
+                <!-- Bigotes -->
+                <line x1="22" y1="60" x2="6" y2="57" stroke="#221118" stroke-width="3" stroke-linecap="round"/>
+                <line x1="21" y1="67" x2="5" y2="67" stroke="#221118" stroke-width="3" stroke-linecap="round"/>
+                <line x1="23" y1="74" x2="8" y2="77" stroke="#221118" stroke-width="3" stroke-linecap="round"/>
+                <line x1="98" y1="60" x2="114" y2="57" stroke="#221118" stroke-width="3" stroke-linecap="round"/>
+                <line x1="99" y1="67" x2="115" y2="67" stroke="#221118" stroke-width="3" stroke-linecap="round"/>
+                <line x1="97" y1="74" x2="112" y2="77" stroke="#221118" stroke-width="3" stroke-linecap="round"/>
+                <!-- Manitas asomándose -->
+                <ellipse cx="36" cy="93" rx="10" ry="7" fill="#ffffff" stroke="#221118" stroke-width="3.5"/>
+                <ellipse cx="84" cy="93" rx="10" ry="7" fill="#ffffff" stroke="#221118" stroke-width="3.5"/>
+            </svg>
+        </button>
+
+        <canvas id="galaxy-canvas"></canvas>
+        <div class="hint-text">Desliza para girar • Toca las frases, dibujos o a Hello Kitty arriba ✨</div>
     </div>
 
-    <!-- MODAL DE CARTAS PERSONALIZADAS -->
+    <!-- =====================================================
+         PANTALLA 3: PÁGINA "NUESTROS RECUERDOS"
+         ===================================================== -->
+    <div id="memories-page-screen" class="screen">
+        <!-- BARRA DE NAVEGACIÓN CON BOTÓN PARA REGRESAR -->
+        <header class="mem-header">
+            <nav class="mem-nav">
+                <a class="back-galaxy-btn" onclick="backToGalaxy()">🪐 Volver a la Galaxia</a>
+                <a class="mem-nav-link active" onclick="showMemSection('inicio', this)">Inicio</a>
+                <a class="mem-nav-link" onclick="showMemSection('recuerdos', this)">Recuerdos</a>
+                <a class="mem-nav-link" onclick="showMemSection('galeria', this)">Galería</a>
+                <a class="mem-nav-link" onclick="showMemSection('mensaje', this)">Mensaje</a>
+                <a class="mem-nav-link" onclick="showMemSection('razones', this)">Razones</a>
+            </nav>
+        </header>
+
+        <main class="mem-main">
+            <!-- 1. SECCIÓN INICIO -->
+            <section id="inicio" class="mem-section active">
+                <h1>Bienvenida, Mi Amor 💖</h1>
+                <p class="home-subtitle">
+                    Esta página web es para guardar nuestros recuerdos de cada mes que hemos pasado juntos, y cómo hemos superado cada obstáculo que encontramos. En las buenas y en las malas, seguimos juntos, siempre más fuertes.
+                </p>
+
+                <div class="quote-box">
+                    “El amor no se trata de cuántos días o meses llevan juntos, se trata de cuánto se aman el uno al otro cada día.” 💞
+                </div>
+
+                <p class="footer-note">Por siempre y para siempre, Tuyo ❤️</p>
+            </section>
+
+            <!-- 2. SECCIÓN RECUERDOS (FOTOS Y VIDEOS) -->
+            <section id="recuerdos" class="mem-section">
+                <h2>Nuestros Recuerdos 💞</h2>
+                <div class="memories-grid">
+                    <!-- 7 Fotos -->
+                    <div class="memory-card" onclick="openMediaModal('image', 'foto1.jpg')">
+                        <img src="foto1.jpg" alt="Viajaría miles de millas" />
+                        <div class="memory-caption">“Viajaría miles de millas” 💜</div>
+                    </div>
+
+                    <div class="memory-card" onclick="openMediaModal('image', 'foto2.jpg')">
+                        <img src="foto2.jpg" alt="Juntos frente al espejo" />
+                        <div class="memory-caption">Siempre mirándote oveo</div>
+                    </div>
+
+                    <div class="memory-card" onclick="openMediaModal('image', 'foto3.jpg')">
+                        <img src="foto3.jpg" alt="Selfie en el elevador" />
+                        <div class="memory-caption">facheritos </div>
+                    </div>
+
+                    <div class="memory-card" onclick="openMediaModal('image', 'foto4.jpg')">
+                        <img src="foto4.jpg" alt="Comiendo helado" />
+                        <div class="memory-caption">heladito 🍦</div>
+                    </div>
+
+                    <div class="memory-card" onclick="openMediaModal('image', 'foto5.jpg')">
+                        <img src="foto5.jpg" alt="Lleno de tus besos" />
+                        <div class="memory-caption">Lleno de tus besos chiquita💋</div>
+                    </div>
+
+                    <div class="memory-card" onclick="openMediaModal('image', 'foto6.jpg')">
+                        <img src="foto6.jpg" alt="Paseo en la naturaleza" />
+                        <div class="memory-caption">.</div>
+                    </div>
+
+                    <div class="memory-card" onclick="openMediaModal('image', 'foto7.jpg')">
+                        <img src="foto7.jpg" alt="Risas con la serpiente" />
+                        <div class="memory-caption">casi morimos gg</div>
+                    </div>
+
+                    <!-- 2 Videos -->
+                    <div class="memory-card" onclick="openMediaModal('video', 'video1.mp4')">
+                        <video src="video1.mp4" muted loop playsinline onmouseover="this.play()" onmouseout="this.pause()"></video>
+                        <div class="memory-caption"> Cantando juntos</div>
+                    </div>
+
+                    <div class="memory-card" onclick="openMediaModal('video', 'video2.mp4')">
+                        <video src="video2.mp4" muted loop playsinline onmouseover="this.play()" onmouseout="this.pause()"></video>
+                        <div class="memory-caption">En el cerro coronel (Clic para ver)</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. SECCIÓN GALERÍA 3D -->
+            <section id="galeria" class="mem-section">
+                <h2>Galería 🌸</h2>
+                <div class="gallery-wrapper">
+                    <div class="carousel">
+                        <div class="carousel-item"><img src="foto1.jpg" alt="Foto 1" /></div>
+                        <div class="carousel-item"><img src="foto2.jpg" alt="Foto 2" /></div>
+                        <div class="carousel-item"><img src="foto3.jpg" alt="Foto 3" /></div>
+                        <div class="carousel-item"><img src="foto4.jpg" alt="Foto 4" /></div>
+                        <div class="carousel-item"><img src="foto5.jpg" alt="Foto 5" /></div>
+                        <div class="carousel-item"><img src="foto6.jpg" alt="Foto 6" /></div>
+                        <div class="carousel-item"><img src="foto7.jpg" alt="Foto 7" /></div>
+                        <div class="carousel-item"><video src="video1.mp4" autoplay muted loop playsinline></video></div>
+                        <div class="carousel-item"><video src="video2.mp4" autoplay muted loop playsinline></video></div>
+                    </div>
+                </div>
+                <p class="gallery-hint">✨ Pasa el cursor o toca la galería para pausar el giro ✨</p>
+            </section>
+
+            <!-- 4. SECCIÓN MENSAJE -->
+            <section id="mensaje" class="mem-section">
+                <div class="message-card">
+                    <h2>¡Feliz Cumpleaños amorchisssssssss! 💖</h2>
+                    <h3>Querido amor mío,</h3>
+                    <p>
+                        Te amo muchísimo. Gracias por estar siempre ahí para mí, por comprenderme, perdonarme, cuidarme y amarme de una manera tan incondicional. A pesar de que claramente no se como amar bien o la distancia, siempre salimos adelante juntos.
+                    </p>
+                    <p>
+                        Cada recuerdo a tu lado es mi favorito, por eso siempre seras mi recuerdo favorito: desde comer un helado juntos, llenarme la cara de besos, gritar en vez de cantar “La Puerta es el Amor”, reírnos con una serpiente en los hombros o simplemente ver toda la ciudad desde lo alto del cerro coronel viendo esa sonrisa.
+                    </p>
+                    <p>
+                        Me haces sentir la persona más afortunada del mundo por tener a alguien tan tierna, hermosa y única como tú. Prometo esforzarme cada día para ser mejor para ti, apoyarte en todo lo que hagas y cuidarte siempre.
+                    </p>
+                    <p>
+                        <strong>Te amo hoy, mañana y siempre, mi niña hermosa. ❤️</strong>
+                    </p>
+                </div>
+            </section>
+
+            <!-- 5. SECCIÓN 100 RAZONES -->
+            <section id="razones" class="mem-section">
+                <h2>100 razones por las que te amo</h2>
+                <div id="reasons-container" class="reasons-grid"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL / LIGHTBOX PARA AMPLIAR FOTOS Y VIDEOS DE RECUERDOS -->
+    <div id="lightbox" class="lightbox" onclick="closeMediaModal()">
+        <span class="close-lightbox">&times;</span>
+        <div id="lightbox-body" class="lightbox-content" onclick="event.stopPropagation()"></div>
+    </div>
+
+    <!-- VIÑETA FLOTANTE ESTILO SPOTIFY (ACTIVA EN GALAXIA Y EN RECUERDOS) -->
+    <div id="spotify-widget" class="spotify-widget">
+        <div class="sp-header">
+            <div class="sp-badge">
+                <span>🟢</span>
+                <span>Playlist para Gigi ❤️</span>
+            </div>
+            <div class="sp-header-btns">
+                <button id="sp-toggle-list" class="sp-icon-btn" title="Ver canciones">📋 Lista</button>
+                <button id="sp-minimize" class="sp-icon-btn" title="Ocultar viñeta">Ocultar —</button>
+            </div>
+        </div>
+
+        <div class="sp-main">
+            <div class="sp-cover-wrapper">
+                <img id="sp-cover" src="https://i.ytimg.com/vi/C0OXsyR2mMM/mqdefault.jpg" alt="Portada">
+                <div id="yt-player-container">
+                    <div id="yt-player"></div>
+                </div>
+            </div>
+            <div class="sp-info">
+                <div id="sp-title" class="sp-title">Cargando playlist...</div>
+                <div id="sp-artist" class="sp-artist">Para mi Gigi ❤️</div>
+                <div id="sp-counter" class="sp-counter">Canción 1 de 13</div>
+            </div>
+        </div>
+
+        <div class="sp-controls">
+            <button id="sp-prev" class="sp-ctrl-btn" title="Canción anterior">⏮</button>
+            <button id="sp-play" class="sp-ctrl-btn sp-play-btn" title="Reproducir / Pausar">⏸</button>
+            <button id="sp-next" class="sp-ctrl-btn" title="Siguiente canción">⏭</button>
+        </div>
+
+        <div class="sp-volume-row">
+            <span>🔉</span>
+            <input id="sp-volume" type="range" class="sp-volume-slider" min="0" max="100" value="70">
+            <span id="sp-vol-label" style="width: 32px; text-align: right;">70%</span>
+        </div>
+
+        <div id="sp-playlist-drawer" class="sp-playlist-drawer"></div>
+    </div>
+
+    <button id="spotify-mini-tab" class="spotify-mini-tab">
+        <span>🎵</span>
+        <span>Playlist de Gigi</span>
+    </button>
+
+    <!-- MODAL DE CARTAS PERSONALIZADAS DE LA GALAXIA -->
     <div id="letter-modal" class="modal-overlay">
         <div class="letter-card">
             <button id="close-modal" class="close-card">×</button>
@@ -352,11 +1260,12 @@
         </div>
     </div>
 
-    <!-- Librería Three.js y OrbitControls -->
+    <!-- Librería Three.js, OrbitControls y API de YouTube -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
 
-    <!-- SHADERS EN GLSL (C++ en la GPU para 0 lag en celular y iPad) -->
+    <!-- SHADERS EN GLSL (Con pocas partículas, limpias y sin lag) -->
     <script id="vertexShader" type="x-shader/x-vertex">
         uniform float uTime;
         uniform float uSize;
@@ -370,17 +1279,17 @@
 
             float angle = atan(modelPosition.x, modelPosition.z);
             float distanceToCenter = length(modelPosition.xz);
-            float angleOffset = (1.0 / (distanceToCenter + 1.5)) * uTime * 0.4;
+            float angleOffset = (1.0 / (distanceToCenter + 1.5)) * uTime * 0.35;
             angle += angleOffset;
 
             modelPosition.x = cos(angle) * distanceToCenter + aRandomness.x;
-            modelPosition.y += sin(uTime * 1.5 + distanceToCenter) * 0.12 + aRandomness.y;
+            modelPosition.y += sin(uTime * 1.2 + distanceToCenter) * 0.1 + aRandomness.y;
             modelPosition.z = sin(angle) * distanceToCenter + aRandomness.z;
 
             vec4 viewPosition = viewMatrix * modelPosition;
             gl_Position = projectionMatrix * viewPosition;
 
-            gl_PointSize = uSize * aScale * (120.0 / -viewPosition.z);
+            gl_PointSize = uSize * aScale * (75.0 / -viewPosition.z);
         }
     </script>
 
@@ -391,15 +1300,171 @@
             float strength = distance(gl_PointCoord, vec2(0.5));
             strength = 1.0 - strength * 2.0;
             strength = clamp(strength, 0.0, 1.0);
-            strength = pow(strength, 1.8);
+            strength = pow(strength, 2.2);
 
-            gl_FragColor = vec4(vColor, strength);
+            gl_FragColor = vec4(vColor, strength * 0.85);
         }
     </script>
 
     <script>
         /* =========================================================
-           1. CONTROL DEL VIDEO EN CELULAR / IPAD / PC
+           1. PLAYLIST ESPECIALIZADA DE 13 CANCIONES (YOUTUBE API)
+           ========================================================= */
+        const playlist = [
+            { id: 'C0OXsyR2mMM', title: 'Catorce (Sinónimo de amor ♡)', artist: 'Sebastián Romero • oliver UnU' },
+            { id: 'WqKqj3Q1wrw', title: 'Eres mi recuerdo favorito', artist: 'Andrecito' },
+            { id: 'IYsQDbvfzrE', title: 'Quédate un minuto más', artist: 'Andrecito' },
+            { id: 'sVdxA0rFN5c', title: 'Te Alejas Más De Mí', artist: 'Esteman, Daniela Spalla' },
+            { id: 'MDSZK3PSjlY', title: 'Cafuné', artist: 'Micro TDH' },
+            { id: '7E9-c2Z6adU', title: 'Toda Esta Ciudad', artist: 'Kevin Kaarl' },
+            { id: 'UuD4gzxUcnc', title: 'Todavía duermo en mi lado de mi cama', artist: 'Andrecito' },
+            { id: 'sZpJ_4lj0y8', title: 'Me enamoré de alguien que también se enamoró', artist: '𝐴𝑛𝑎アナ' },
+            { id: 'Zd1Flawc1-I', title: 'Seguro Te Pierdo', artist: 'KID FLEX, Sergi' },
+            { id: 'WA05n3EKUQU', title: 'Enamorado Tuyo ❤️', artist: 'Cuarteto de Nos' },
+            { id: 'k1_4jrRwvjQ', title: 'Si tú supieras', artist: 'solamentedan' },
+            { id: 'n2Cld9aU1vU', title: 'Te Amo Y Más', artist: 'Diego Luna' },
+            { id: 'pHKfPt_fmDM', title: 'Iguales', artist: 'AmorGrande' }
+        ];
+
+        let ytPlayer = null;
+        let ytReady = false;
+        let currentTrack = 0;
+        let isPlayingMusic = false;
+        let startMusicWhenReady = false;
+
+        const spWidget = document.getElementById('spotify-widget');
+        const spMiniTab = document.getElementById('spotify-mini-tab');
+        const spMinimizeBtn = document.getElementById('sp-minimize');
+        const spToggleListBtn = document.getElementById('sp-toggle-list');
+        const spDrawer = document.getElementById('sp-playlist-drawer');
+        const spCover = document.getElementById('sp-cover');
+        const spTitle = document.getElementById('sp-title');
+        const spArtist = document.getElementById('sp-artist');
+        const spCounter = document.getElementById('sp-counter');
+        const spPrevBtn = document.getElementById('sp-prev');
+        const spPlayBtn = document.getElementById('sp-play');
+        const spNextBtn = document.getElementById('sp-next');
+        const spVolume = document.getElementById('sp-volume');
+        const spVolLabel = document.getElementById('sp-vol-label');
+
+        function renderPlaylistDrawer() {
+            spDrawer.innerHTML = '';
+            playlist.forEach((song, idx) => {
+                const item = document.createElement('div');
+                item.className = 'sp-track-item' + (idx === currentTrack ? ' active' : '');
+                item.innerHTML = `<span>${idx + 1}. ${song.title}</span><span>▶</span>`;
+                item.addEventListener('click', () => {
+                    loadTrack(idx, true);
+                });
+                spDrawer.appendChild(item);
+            });
+        }
+
+        function updatePlayerUI() {
+            const song = playlist[currentTrack];
+            spTitle.textContent = song.title;
+            spArtist.textContent = song.artist;
+            spCounter.textContent = `Canción ${currentTrack + 1} de ${playlist.length}`;
+            spCover.src = `https://i.ytimg.com/vi/${song.id}/mqdefault.jpg`;
+            spPlayBtn.textContent = isPlayingMusic ? '⏸' : '▶';
+            renderPlaylistDrawer();
+        }
+
+        updatePlayerUI();
+
+        window.onYouTubeIframeAPIReady = function() {
+            ytPlayer = new YT.Player('yt-player', {
+                height: '52',
+                width: '52',
+                videoId: playlist[currentTrack].id,
+                playerVars: {
+                    autoplay: 0,
+                    controls: 0,
+                    playsinline: 1,
+                    rel: 0,
+                    modestbranding: 1
+                },
+                events: {
+                    onReady: (event) => {
+                        ytReady = true;
+                        event.target.setVolume(parseInt(spVolume.value, 10));
+                        if (startMusicWhenReady) {
+                            event.target.playVideo();
+                        }
+                    },
+                    onStateChange: (event) => {
+                        if (event.data === YT.PlayerState.PLAYING) {
+                            isPlayingMusic = true;
+                            spPlayBtn.textContent = '⏸';
+                        } else if (event.data === YT.PlayerState.PAUSED) {
+                            isPlayingMusic = false;
+                            spPlayBtn.textContent = '▶';
+                        } else if (event.data === YT.PlayerState.ENDED) {
+                            nextTrack();
+                        }
+                    },
+                    onError: () => {
+                        nextTrack();
+                    }
+                }
+            });
+        };
+
+        function loadTrack(index, autoPlay = true) {
+            currentTrack = (index + playlist.length) % playlist.length;
+            updatePlayerUI();
+            if (ytReady && ytPlayer && ytPlayer.loadVideoById) {
+                ytPlayer.loadVideoById(playlist[currentTrack].id);
+                if (!autoPlay) {
+                    ytPlayer.pauseVideo();
+                }
+            }
+        }
+
+        function nextTrack() {
+            loadTrack(currentTrack + 1, true);
+        }
+
+        function prevTrack() {
+            loadTrack(currentTrack - 1, true);
+        }
+
+        spNextBtn.addEventListener('click', nextTrack);
+        spPrevBtn.addEventListener('click', prevTrack);
+
+        spPlayBtn.addEventListener('click', () => {
+            if (!ytReady || !ytPlayer) return;
+            if (isPlayingMusic) {
+                ytPlayer.pauseVideo();
+            } else {
+                ytPlayer.playVideo();
+            }
+        });
+
+        spVolume.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value, 10);
+            spVolLabel.textContent = `${val}%`;
+            if (ytReady && ytPlayer && ytPlayer.setVolume) {
+                ytPlayer.setVolume(val);
+            }
+        });
+
+        spMinimizeBtn.addEventListener('click', () => {
+            spWidget.classList.add('minimized');
+            spMiniTab.classList.add('visible');
+        });
+
+        spMiniTab.addEventListener('click', () => {
+            spMiniTab.classList.remove('visible');
+            spWidget.classList.remove('minimized');
+        });
+
+        spToggleListBtn.addEventListener('click', () => {
+            spDrawer.classList.toggle('open');
+        });
+
+        /* =========================================================
+           2. CONTROL DEL VIDEO 0926.mp4 Y NAVEGACIÓN ENTRE PANTALLAS
            ========================================================= */
         const surpriseVideo = document.getElementById('surprise-video');
         const playOverlay = document.getElementById('play-overlay');
@@ -407,24 +1472,22 @@
         const skipButton = document.getElementById('skip-button');
         const videoScreen = document.getElementById('video-screen');
         const galaxyScreen = document.getElementById('galaxy-screen');
-        const bgMusic = document.getElementById('bg-music');
+        const memoriesPageScreen = document.getElementById('memories-page-screen');
+        const kittyPeekBtn = document.getElementById('kitty-peek-btn');
 
         let galaxyInitialized = false;
 
-        // Intentar autoplay; si el celular lo permite se oculta el botón inicial
         window.addEventListener('load', () => {
             const playPromise = surpriseVideo.play();
             if (playPromise !== undefined) {
                 playPromise.then(() => {
                     playOverlay.classList.add('hidden');
                 }).catch(() => {
-                    // En iPhone/iPad muestra el botón bonito para iniciar con audio
                     playOverlay.classList.remove('hidden');
                 });
             }
         });
 
-        // Al tocar el botón de bienvenida en celular/iPad
         playOverlay.addEventListener('click', () => {
             playOverlay.classList.add('hidden');
             surpriseVideo.play();
@@ -434,7 +1497,6 @@
             playOverlay.classList.add('hidden');
         });
 
-        // Mostrar el corazón poco a poco en los últimos 10 segundos
         surpriseVideo.addEventListener('timeupdate', () => {
             if (surpriseVideo.duration) {
                 const timeLeft = surpriseVideo.duration - surpriseVideo.currentTime;
@@ -446,12 +1508,10 @@
             }
         });
 
-        // Si el video termina, aseguramos que el corazón siga visible para que le pique
         surpriseVideo.addEventListener('ended', () => {
             heartButton.classList.add('visible');
         });
 
-        // Botón "saltalo si quieres gigi"
         skipButton.addEventListener('click', () => {
             playOverlay.classList.add('hidden');
             if (surpriseVideo.duration) {
@@ -463,13 +1523,18 @@
             surpriseVideo.play().catch(() => {});
         });
 
-        // Al picarle al corazón rojo -> pasa a la galaxia
+        // Al picarle al corazón rojo -> abre la Galaxia e inicia la Playlist
         heartButton.addEventListener('click', () => {
             surpriseVideo.pause();
             videoScreen.classList.remove('active');
             galaxyScreen.classList.add('active');
+            spWidget.classList.add('unlocked');
 
-            bgMusic.play().catch(() => {});
+            if (ytReady && ytPlayer && ytPlayer.playVideo) {
+                ytPlayer.playVideo();
+            } else {
+                startMusicWhenReady = true;
+            }
 
             if (!galaxyInitialized) {
                 initGalaxy();
@@ -477,29 +1542,110 @@
             }
         });
 
+        // Al picarle a la Hello Kitty de la esquina superior derecha -> abre la página de Recuerdos
+        kittyPeekBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            letterModal.classList.remove('open');
+            galaxyScreen.classList.remove('active');
+            memoriesPageScreen.classList.add('active');
+        });
+
+        // Botón para regresar de la página de Recuerdos a la Galaxia
+        function backToGalaxy() {
+            closeMediaModal();
+            memoriesPageScreen.classList.remove('active');
+            galaxyScreen.classList.add('active');
+        }
+
         /* =========================================================
-           2. CARTAS CON SU HISTORIA PERSONAL
+           3. LÓGICA DE LA PÁGINA "NUESTROS RECUERDOS"
+           ========================================================= */
+        function showMemSection(sectionId, element) {
+            document.querySelectorAll('.mem-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.mem-nav-link').forEach(link => link.classList.remove('active'));
+
+            document.getElementById(sectionId).classList.add('active');
+            element.classList.add('active');
+            memoriesPageScreen.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function openMediaModal(type, src) {
+            const lightbox = document.getElementById('lightbox');
+            const body = document.getElementById('lightbox-body');
+            if (type === 'image') {
+                body.innerHTML = `<img src="${src}" alt="Recuerdo" />`;
+            } else {
+                body.innerHTML = `<video src="${src}" controls autoplay playsinline></video>`;
+            }
+            lightbox.classList.add('open');
+        }
+
+        function closeMediaModal() {
+            const lightbox = document.getElementById('lightbox');
+            const body = document.getElementById('lightbox-body');
+            body.innerHTML = '';
+            lightbox.classList.remove('open');
+        }
+
+        const razones = [
+            "Tu sonrisa", "Tus ojos", "Tu risa", "Tu corazón",
+            "Tu ternura", "Tu felicidad", "Tus abrazos", "Tu voz",
+            "Tu amor", "Tu bondad", "Tu toque", "Tu calidez",
+            "Tu paciencia", "Tu lealtad", "Tu energía", "Tu sentido del humor",
+            "Tu belleza", "Tu estilo", "Tu honestidad", "Tu optimismo",
+            "Tu dulzura", "Tu fuerza", "Tu pasión", "Tu valentía",
+            "Tu lado divertido", "Tu apoyo incondicional", "Tus locuras conmigo", "Tu mirada tierna",
+            "Tus besos", "Tu forma de escucharme", "Tu forma de cuidarme", "Tu inteligencia",
+            "Tus pequeños detalles", "Tu autenticidad", "Tu creatividad", "Tu compañía",
+            "Cómo me haces sentir en paz", "Cómo iluminas mis días", "Cómo me miras", "Cómo me abrazas fuerte",
+            "Cómo cantamos juntos", "Cómo nos reímos de todo", "Cómo tomas mi mano", "Cómo me entiendes sin hablar",
+            "Cómo me motivas a ser mejor", "Cómo haces especial cualquier lugar", "Cómo disfrutas un helado conmigo", "Cómo me llenas la cara de besos",
+            "Cómo sonríes frente a la cámara", "Cómo te ves con lentes", "Tu cabello hermoso", "Tus ocurrencias",
+            "Tu forma de amar", "Tu sinceridad", "Tu empatía", "Tu confianza en mí",
+            "Tu forma de alegrarme cuando estoy triste", "Tus mensajes de buenos días", "Tus mensajes de buenas noches", "Nuestras pláticas hasta tarde",
+            "Nuestras fotos frente al espejo", "Nuestras aventuras en el mirador", "Nuestros paseos por la naturaleza", "Tu valentía para probar cosas nuevas",
+            "Cómo me haces sentir amado", "Cómo cuidas lo nuestro", "Cómo luchas por nosotros", "Cómo me perdonas y comprendes",
+            "Tu sensibilidad", "Tu nobleza", "Tu dedicación", "Tu carisma",
+            "Tus gestos tiernos", "Tu voz cuando cantas", "Tu risa contagiosa", "Tu paz interior",
+            "El brillo de tus ojos", "La suavidad de tus manos", "El calor de tus abrazos", "La magia de tus besos",
+            "Porque eres mi mejor amiga", "Porque eres mi lugar seguro", "Porque eres mi persona favorita", "Porque eres mi mayor orgullo",
+            "Porque contigo el tiempo vuela", "Porque viajaría miles de millas por ti", "Porque haces que todo valga la pena", "Porque cada día te amo más",
+            "Por nuestro pasado juntos", "Por nuestro presente hermoso", "Por nuestro futuro soñado", "Por cada recuerdo creado",
+            "Por ser mi paz en el caos", "Por ser mi alegría diaria", "Por ser mi inspiración", "Por ser única en el mundo",
+            "Por existir en mi vida", "Por elegirme cada día", "Por ser mi todo", "Porque simplemente eres tú 💖"
+        ];
+
+        const reasonsContainer = document.getElementById('reasons-container');
+        razones.forEach((texto, index) => {
+            const div = document.createElement('div');
+            div.className = 'reason-item';
+            div.textContent = `Razón ${index + 1}: ${texto}`;
+            reasonsContainer.appendChild(div);
+        });
+
+        /* =========================================================
+           4. CARTAS CON SU HISTORIA PERSONAL EN LA GALAXIA
            ========================================================= */
         const letters = [
             {
                 title: "Mi Botoncito hermosa,",
                 text: "Tanto que me decías viejo por tener 20 y mira nada más... ¡oficialmente ya eres una viejita tú también! Bienvenida al club de los 20, mi anciana decrépita favorita.\n\nCelebro tu vida, celebro cada risa y celebro el privilegio tan grande de poder llamarte mi mujer. Te amo con toda mi alma, hoy y siempre.",
-                sign: "Feliz cumpleaños, mi Gigi ❤️"
+                sign: "Feliz cumpleaños, Gigi ❤️"
             },
             {
                 title: "7 años de mejores amigos a mi todo,",
                 text: "Quién iba a pensar cuando nos conocimos en redes sociales que pasaríamos 7 años siendo mejores amigos, compartiendo desveladas, risas y horas jugando juntos, hasta que un día mi corazón simplemente ya no pudo verte solo como una amiga.\n\nSin avisar te convertiste en mi paz, en mi hogar y en el centro de todos mis días.",
-                sign: "Tu dúo para toda la vida 🎮❤️"
+                sign: "Tu dúo para toda la vida"
             },
             {
                 title: "De Chihuahua hasta Jiutepec,",
                 text: "Vivimos a distancia y aun así el destino jamás pudo separarnos. Cada kilómetro entre Chihuahua y Morelos se queda corto comparado con lo que siento por ti.\n\nQué felicidad tan inmensa fue tenerte aquí en Chihuahua y haber ido hasta Jiutepec para estar contigo. No importa en qué parte del mapa estemos, mi lugar favorito siempre eres tú.",
-                sign: "Siempre juntos contra la distancia ✈️"
+                sign: "Siempre juntos contra la distancia amor mio."
             },
             {
                 title: "Mi Gigi de corazón,",
                 text: "Fuimos dos cometas cruzándose por azar que decidieron seguir el mismo camino. Gracias por comentarme aquel día, gracias por estos años a mi lado y por hacerme el hombre más afortunado del universo.\n\nNo necesito otro cielo si en este me toca orbitarte a ti, mi princesa.",
-                sign: "Te amo infinitamente, Nahim ❤️"
+                sign: "Te amo infinitamente, Tu lobo ❤️"
             }
         ];
 
@@ -524,7 +1670,7 @@
         });
 
         /* =========================================================
-           3. TEXTURAS LIGERAS PARA FRASES Y PERSONAJES
+           5. TEXTURAS PARA FRASES Y PERSONAJES DE LA GALAXIA
            ========================================================= */
         function createTextTexture(text, glowColor = '#ff2a85') {
             const canvas = document.createElement('canvas');
@@ -651,18 +1797,15 @@
         }
 
         /* =========================================================
-           4. GALAXIA 3D ADAPTADA A CELULAR, IPAD Y PC
+           6. GALAXIA 3D CON POCAS PARTÍCULAS (LIMPIA Y DESPEJADA)
            ========================================================= */
         function getResponsiveCameraTarget() {
             const aspect = window.innerWidth / window.innerHeight;
             if (aspect < 0.65) {
-                // Celular en vertical: más lejos para que se vea toda la galaxia completa
                 return new THREE.Vector3(0, 13, 39);
             } else if (aspect < 1.0) {
-                // iPad en vertical
                 return new THREE.Vector3(0, 10, 31);
             } else {
-                // iPad en horizontal o PC
                 return new THREE.Vector3(0, 8, 25);
             }
         }
@@ -691,8 +1834,7 @@
             const rotatingObjectsGroup = new THREE.Group();
             scene.add(rotatingObjectsGroup);
 
-            // A) ESPIRAL ESPACIADA Y ULTRA FLUIDA (4,200 partículas en GPU)
-            const count = 4200;
+            const count = 900;
             const positions = new Float32Array(count * 3);
             const colors = new Float32Array(count * 3);
             const scales = new Float32Array(count);
@@ -703,12 +1845,12 @@
             const outsideColor = new THREE.Color('#7b1fa2');
 
             const branches = 4;
-            const maxRadius = 35;
-            const spin = 1.25;
+            const maxRadius = 34;
+            const spin = 1.2;
 
             for (let i = 0; i < count; i++) {
                 const i3 = i * 3;
-                const radius = 2.2 + Math.pow(Math.random(), 1.2) * maxRadius;
+                const radius = 3.0 + Math.pow(Math.random(), 1.1) * maxRadius;
                 const spinAngle = radius * spin;
                 const branchAngle = ((i % branches) / branches) * Math.PI * 2;
 
@@ -716,9 +1858,9 @@
                 positions[i3 + 1] = 0;
                 positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * radius;
 
-                const spread = 0.42 * radius;
+                const spread = 0.35 * radius;
                 randomness[i3] = (Math.random() - 0.5) * spread;
-                randomness[i3 + 1] = (Math.random() - 0.5) * (spread * 0.35);
+                randomness[i3 + 1] = (Math.random() - 0.5) * (spread * 0.3);
                 randomness[i3 + 2] = (Math.random() - 0.5) * spread;
 
                 const mixedColor = insideColor.clone();
@@ -731,7 +1873,7 @@
                 colors[i3] = mixedColor.r;
                 colors[i3 + 1] = mixedColor.g;
                 colors[i3 + 2] = mixedColor.b;
-                scales[i] = 0.55 + Math.random() * 1.2;
+                scales[i] = 0.4 + Math.random() * 0.8;
             }
 
             const galaxyGeo = new THREE.BufferGeometry();
@@ -747,7 +1889,7 @@
                 transparent: true,
                 uniforms: {
                     uTime: { value: 0 },
-                    uSize: { value: 6.8 * renderer.getPixelRatio() }
+                    uSize: { value: 4.0 * renderer.getPixelRatio() }
                 },
                 vertexShader: document.getElementById('vertexShader').textContent,
                 fragmentShader: document.getElementById('fragmentShader').textContent
@@ -755,8 +1897,7 @@
 
             scene.add(new THREE.Points(galaxyGeo, galaxyShaderMat));
 
-            // B) CORAZÓN CENTRAL LIGERO
-            const heartCount = 650;
+            const heartCount = 180;
             const heartPos = new Float32Array(heartCount * 3);
             const heartColors = new Float32Array(heartCount * 3);
             const heartScales = new Float32Array(heartCount);
@@ -769,14 +1910,14 @@
                 const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
                 const scale = 0.21;
 
-                heartPos[i * 3] = x * scale + (Math.random() - 0.5) * 0.35;
-                heartPos[i * 3 + 1] = y * scale + 1.6 + (Math.random() - 0.5) * 0.35;
-                heartPos[i * 3 + 2] = (Math.random() - 0.5) * 0.45;
+                heartPos[i * 3] = x * scale + (Math.random() - 0.5) * 0.12;
+                heartPos[i * 3 + 1] = y * scale + 1.6 + (Math.random() - 0.5) * 0.12;
+                heartPos[i * 3 + 2] = (Math.random() - 0.5) * 0.15;
 
                 heartColors[i * 3] = hColor.r;
                 heartColors[i * 3 + 1] = hColor.g;
                 heartColors[i * 3 + 2] = hColor.b;
-                heartScales[i] = 1.15;
+                heartScales[i] = 0.95;
             }
 
             const heartGeo = new THREE.BufferGeometry();
@@ -792,7 +1933,7 @@
                 transparent: true,
                 uniforms: {
                     uTime: { value: 0 },
-                    uSize: { value: 8.2 * renderer.getPixelRatio() }
+                    uSize: { value: 5.0 * renderer.getPixelRatio() }
                 },
                 vertexShader: document.getElementById('vertexShader').textContent,
                 fragmentShader: document.getElementById('fragmentShader').textContent
@@ -801,10 +1942,8 @@
             const centerHeart = new THREE.Points(heartGeo, heartMat);
             scene.add(centerHeart);
 
-            // C) FRASES Y PERSONAJES TÁCTILES (Con tamaño cómodo para dedos en móvil y iPad)
             const clickableSprites = [];
 
-            // Esfera invisible en el corazón central para que también abra cartas si Gigi lo toca
             const centerHitBox = new THREE.Sprite(new THREE.SpriteMaterial({ opacity: 0, transparent: true, depthWrite: false }));
             centerHitBox.position.set(0, 1.6, 0);
             centerHitBox.scale.set(6, 6, 1);
@@ -834,7 +1973,7 @@
                     item.y,
                     Math.sin(item.angle) * item.radius
                 );
-                sprite.scale.set(9.0, 2.2, 1); /* Más grandes para leerse y tocarse fácil en celular */
+                sprite.scale.set(9.0, 2.2, 1);
                 sprite.userData = { letterIndex: idx };
                 rotatingObjectsGroup.add(sprite);
                 clickableSprites.push(sprite);
@@ -864,7 +2003,6 @@
                 clickableSprites.push(sprite);
             });
 
-            // Detector táctil optimizado para dedos en celular y iPad
             const raycaster = new THREE.Raycaster();
             const mouse = new THREE.Vector2();
             let downPos = { x: 0, y: 0, time: 0 };
@@ -878,8 +2016,12 @@
             window.addEventListener('pointerup', (e) => {
                 if (!galaxyScreen.classList.contains('active')) return;
                 if (letterModal.classList.contains('open')) return;
+                if (
+                    e.target.closest('#spotify-widget') ||
+                    e.target.closest('#spotify-mini-tab') ||
+                    e.target.closest('#kitty-peek-btn')
+                ) return;
 
-                // Tolerancia de 18px para toques con el dedo en pantalla táctil
                 const moveDist = Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y);
                 const tapDuration = performance.now() - downPos.time;
                 if (moveDist > 18 || tapDuration > 450) return;
@@ -897,7 +2039,6 @@
                 }
             });
 
-            // Animación fluida
             const clock = new THREE.Clock();
             let introProgress = 0;
             let targetCamPos = getResponsiveCameraTarget();
@@ -924,7 +2065,6 @@
 
             animate();
 
-            // Si gira el celular o el iPad, reajusta pantalla y distancia de cámara
             window.addEventListener('resize', () => {
                 camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix();
