@@ -3,18 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Feliz Cumpleaños Gigi ❤️</title>
+    <title>Para Mi Niña Hermosa Gigi ❤️ | Feliz Cumpleaños</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Dancing+Script:wght@600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400;1,600&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Libraries: Three.js, GSAP, Canvas Confetti, YouTube API -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+
     <style>
         :root {
-            --bg-dark: #0c0014;
-            --bg-purple: #2d004d;
-            --bg-glow: #5a008a;
-            --accent-pink: #ff6ec7;
-            --accent-light: #e0aaff;
-            --card-bg: rgba(255, 255, 255, 0.07);
-            --card-border: rgba(255, 110, 199, 0.25);
-            --text-white: #ffffff;
-            --text-soft: #e2d4f0;
+            --bg-dark: #08010d;
+            --bg-purple: #1e0033;
+            --accent-pink: #ff4da6;
+            --accent-rose: #ff2a85;
+            --accent-light: #f6c8ff;
+            --urano-cyan: #00e5ff;
+            --urano-blue: #0091ea;
+            --card-border: rgba(255, 110, 199, 0.35);
+            --safe-top: env(safe-area-inset-top, 16px);
+            --safe-bottom: env(safe-area-inset-bottom, 16px);
+            --safe-left: env(safe-area-inset-left, 16px);
+            --safe-right: env(safe-area-inset-right, 16px);
         }
 
         * {
@@ -32,13 +48,13 @@
             height: 100%;
             height: 100dvh;
             background-color: #050108;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Poppins, Roboto, sans-serif;
-            color: white;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #ffffff;
             overflow: hidden;
             position: fixed;
         }
 
-        /* CONTROL DE PANTALLAS PRINCIPALES */
+        /* GESTIÓN DE PANTALLAS */
         .screen {
             display: none;
             width: 100%;
@@ -46,55 +62,311 @@
             position: absolute;
             top: 0;
             left: 0;
-            justify-content: center;
-            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease-in-out;
+            z-index: 10;
         }
 
         .screen.active {
             display: flex;
-            animation: fadeInScreen 0.7s ease-out;
+            opacity: 1;
+            pointer-events: auto;
         }
 
-        @keyframes fadeInScreen {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        /* ========================================================
+           PANTALLA 0: EL SOBRE CON SELLO DE CERA (PRIMERA IMPRESIÓN)
+           ======================================================== */
+        #envelope-screen {
+            background: radial-gradient(circle at center, #240b2b 0%, #0d0112 70%, #050007 100%);
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            perspective: 1200px;
+            padding: 20px;
+            z-index: 100;
         }
 
-        /* =========================================
-           PANTALLA 1: VIDEO ADAPTADO A MÓVIL Y IPAD
-           ========================================= */
+        .envelope-wrapper {
+            position: relative;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s ease;
+        }
+
+        .envelope-wrapper:hover {
+            transform: scale(1.02);
+        }
+
+        .envelope {
+            position: relative;
+            width: min(360px, 86vw);
+            height: min(240px, 58vw);
+            background: #ecd9c6;
+            border-radius: 12px;
+            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.75), 0 0 35px rgba(255, 77, 166, 0.25);
+            perspective: 1000px;
+            transform-style: preserve-3d;
+        }
+
+        /* Cuerpo y solapas del sobre */
+        .envelope-body {
+            position: absolute;
+            inset: 0;
+            border-radius: 12px;
+            background: linear-gradient(145deg, #e3cbb4, #d5ba9f);
+            overflow: hidden;
+            z-index: 2;
+            border: 1px solid rgba(138, 98, 62, 0.3);
+        }
+
+        /* Patrón de pliegues del sobre */
+        .envelope-fold-left {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: min(120px, 29vw) 0 0 min(180px, 43vw);
+            border-color: transparent transparent transparent #d0b396;
+            z-index: 3;
+        }
+
+        .envelope-fold-right {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: min(120px, 29vw) min(180px, 43vw) 0 0;
+            border-color: transparent #c6a788 transparent transparent;
+            z-index: 3;
+        }
+
+        .envelope-fold-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 min(180px, 43vw) min(130px, 31vw) min(180px, 43vw);
+            border-color: transparent transparent #debfa1 transparent;
+            z-index: 4;
+        }
+
+        /* Solapa superior que se abre en 3D */
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: min(135px, 32vw) min(180px, 43vw) 0 min(180px, 43vw);
+            border-color: #eed6be transparent transparent transparent;
+            transform-origin: top center;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 5;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+        }
+
+        .envelope.opened .envelope-flap {
+            transform: rotateX(180deg);
+            z-index: 1;
+        }
+
+        /* Sello de cera */
+        .wax-seal {
+            position: absolute;
+            top: min(115px, 27vw);
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 68px;
+            height: 68px;
+            background: radial-gradient(circle at 35% 35%, #e91e63, #880e4f);
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6), inset 0 2px 4px rgba(255,255,255,0.4), 0 0 20px rgba(233, 30, 99, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 26px;
+            color: #ffd1dc;
+            z-index: 6;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 2px dashed rgba(255, 192, 203, 0.5);
+            animation: sealHeartbeat 2.2s infinite;
+        }
+
+        @keyframes sealHeartbeat {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.08); }
+        }
+
+        .envelope.opened .wax-seal {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.3);
+            pointer-events: none;
+        }
+
+        /* Carta que sale de adentro */
+        .envelope-letter {
+            position: absolute;
+            top: 8px;
+            left: 12px;
+            right: 12px;
+            bottom: 8px;
+            background: #fffcf7;
+            border-radius: 8px;
+            padding: 20px;
+            color: #2b1d1d;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 2;
+            transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+            border: 1px dashed #d1b498;
+        }
+
+        .envelope.opened .envelope-letter {
+            transform: translateY(-85%);
+            z-index: 10;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.65);
+        }
+
+        .letter-preview-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(16px, 3.5vw, 19px);
+            color: #c2185b;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .letter-preview-text {
+            font-family: 'Caveat', cursive;
+            font-size: clamp(16px, 3.8vw, 20px);
+            line-height: 1.35;
+            color: #442a34;
+        }
+
+        .letter-destiny-tag {
+            font-size: 11px;
+            font-weight: 600;
+            color: #880e4f;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            border-top: 1px solid #ebd3bf;
+            padding-top: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .envelope-hint {
+            margin-top: 36px;
+            font-size: clamp(13px, 3vw, 15px);
+            color: #f7c5e2;
+            text-shadow: 0 0 10px rgba(255, 42, 133, 0.6);
+            letter-spacing: 0.5px;
+            animation: pulseHint 2s infinite;
+            text-align: center;
+        }
+
+        @keyframes pulseHint {
+            0%, 100% { opacity: 0.75; transform: translateY(0); }
+            50% { opacity: 1; transform: translateY(-3px); }
+        }
+
+        /* Opciones que aparecen al abrir el sobre */
+        .envelope-actions {
+            position: absolute;
+            bottom: max(24px, var(--safe-bottom));
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease 0.6s;
+            z-index: 20;
+        }
+
+        .envelope.opened ~ .envelope-actions {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .btn-env-action {
+            background: linear-gradient(135deg, #ff2a85, #880e4f);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: clamp(13.5px, 3vw, 15px);
+            font-weight: 600;
+            box-shadow: 0 6px 20px rgba(255, 42, 133, 0.45);
+            cursor: pointer;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-env-action:active, .btn-env-action:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(255, 42, 133, 0.7);
+        }
+
+        .btn-env-secondary {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
+            box-shadow: none;
+        }
+
+        /* ========================================================
+           PANTALLA 1: VIDEO 0926.mp4 CON SPIDERMAN DICIENDO EL SKIP
+           ======================================================== */
         #video-screen {
             background-color: #070508;
             flex-direction: column;
+            justify-content: center;
+            align-items: center;
             padding: 12px;
+            position: relative;
         }
 
         .video-container {
             position: relative;
-            width: min(96vw, calc(82dvh * 16 / 9));
+            width: min(94vw, calc(80dvh * 16 / 9));
             aspect-ratio: 16 / 9;
             display: flex;
             justify-content: center;
             align-items: center;
-            border-radius: 14px;
+            border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 0 35px rgba(255, 20, 100, 0.28);
+            box-shadow: 0 0 45px rgba(255, 20, 100, 0.35);
             background: #000;
+            border: 1px solid rgba(255, 110, 199, 0.3);
         }
 
         #surprise-video {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            border-radius: 14px;
+            border-radius: 16px;
         }
 
         .play-overlay {
             position: absolute;
             inset: 0;
-            background: rgba(10, 2, 12, 0.65);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
+            background: rgba(10, 2, 12, 0.72);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -112,39 +384,37 @@
         }
 
         .play-btn-initial {
-            background: rgba(255, 25, 100, 0.85);
+            background: linear-gradient(135deg, #ff1744, #d81b60);
             color: white;
-            border: 1px solid rgba(255, 180, 200, 0.6);
-            padding: 14px 26px;
-            border-radius: 30px;
-            font-size: clamp(15px, 3.5vw, 18px);
+            border: 1px solid rgba(255, 200, 220, 0.6);
+            padding: 14px 28px;
+            border-radius: 35px;
+            font-size: clamp(14px, 3.4vw, 17px);
             font-weight: 600;
-            box-shadow: 0 0 25px rgba(255, 25, 100, 0.7);
+            box-shadow: 0 0 28px rgba(255, 25, 100, 0.75);
             animation: pulseBtn 1.6s infinite;
             cursor: pointer;
         }
 
         @keyframes pulseBtn {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.06); }
+            50% { transform: scale(1.05); }
         }
 
         .heart-btn {
             position: absolute;
-            top: 62%;
-            left: 41%;
-            transform: translate(-50%, -50%) scale(0.85);
+            top: 60%;
+            left: 45%;
+            transform: translate(-50%, -50%);
             background: none;
             border: none;
-            font-size: clamp(34px, 6vw, 56px);
+            font-size: clamp(38px, 7vw, 60px);
             cursor: pointer;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 3s ease-in-out, transform 0.3s ease;
+            transition: opacity 1.5s ease-in-out, transform 0.3s ease;
             z-index: 20;
-            filter: drop-shadow(0 0 15px #ff1744);
-            will-change: opacity, transform;
-            padding: 15px;
+            filter: drop-shadow(0 0 16px #ff1744);
         }
 
         .heart-btn.visible {
@@ -155,38 +425,76 @@
 
         @keyframes heartBeat {
             0%, 100% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-50%, -50%) scale(1.25); }
+            50% { transform: translate(-50%, -50%) scale(1.22); }
         }
 
-        .skip-btn {
+        /* SPIDERMAN DICIENDO "¡SÁLTALO SI QUIERES GIGI!" */
+        .spiderman-skip-wrapper {
             position: fixed;
-            bottom: max(20px, calc(env(safe-area-inset-bottom) + 14px));
-            right: max(20px, calc(env(safe-area-inset-right) + 16px));
-            background-color: rgba(25, 10, 20, 0.75);
-            color: rgba(255, 255, 255, 0.95);
-            border: 1px solid rgba(255, 105, 180, 0.5);
-            padding: 11px 20px;
-            border-radius: 25px;
-            font-size: clamp(13px, 2.8vw, 15px);
+            bottom: max(16px, var(--safe-bottom));
+            right: max(16px, var(--safe-right));
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            z-index: 40;
             cursor: pointer;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            transition: all 0.25s ease;
-            z-index: 30;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            transition: transform 0.25s ease;
         }
 
-        .skip-btn:active, .skip-btn:hover {
-            background-color: rgba(255, 20, 100, 0.85);
-            transform: scale(0.97);
+        .spiderman-skip-wrapper:hover, .spiderman-skip-wrapper:active {
+            transform: scale(1.06);
         }
 
-        /* =========================================
-           PANTALLA 2: GALAXIA LIMPIA Y FLUIDA
-           ========================================= */
+        .spiderman-bubble {
+            background: rgba(255, 255, 255, 0.96);
+            color: #b71c1c;
+            border: 2px solid #e53935;
+            padding: 9px 14px;
+            border-radius: 18px 18px 4px 18px;
+            font-size: clamp(12px, 2.6vw, 14px);
+            font-weight: 700;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+            white-space: nowrap;
+            position: relative;
+            animation: bubbleFloat 2.4s ease-in-out infinite;
+        }
+
+        @keyframes bubbleFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+
+        .spiderman-bubble::after {
+            content: '';
+            position: absolute;
+            right: -8px;
+            bottom: 8px;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 6px 0 6px 8px;
+            border-color: transparent transparent transparent #e53935;
+        }
+
+        .spiderman-avatar {
+            width: clamp(52px, 12vw, 68px);
+            height: clamp(52px, 12vw, 68px);
+            filter: drop-shadow(0 4px 12px rgba(229, 57, 53, 0.6));
+            animation: spideyWiggle 3s ease-in-out infinite;
+        }
+
+        @keyframes spideyWiggle {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+
+        /* ========================================================
+           PANTALLA 2: GALAXIA 3D (URANO AZUL Y CARTAS SECRETAS)
+           ======================================================== */
         #galaxy-screen {
             position: relative;
-            background: radial-gradient(circle at center, #140414 0%, #030005 100%);
+            background: radial-gradient(circle at center, #100216 0%, #030005 100%);
         }
 
         #galaxy-canvas {
@@ -196,502 +504,925 @@
             touch-action: none;
         }
 
-        .top-title {
+        .top-nav-bar {
             position: absolute;
-            top: max(4%, calc(env(safe-area-inset-top) + 14px));
-            left: 50%;
-            transform: translateX(-50%);
-            font-family: 'Georgia', 'Times New Roman', serif;
-            font-style: italic;
-            font-size: clamp(24px, 5vw, 36px);
-            color: #ffffff;
-            text-shadow: 0 0 12px rgba(255, 77, 136, 0.95), 0 0 25px rgba(255, 20, 100, 0.6);
+            top: max(14px, var(--safe-top));
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 max(16px, var(--safe-right));
             pointer-events: none;
-            z-index: 10;
-            white-space: nowrap;
+            z-index: 30;
         }
 
-        /* HELLO KITTY ASOMÁNDOSE EN LA ESQUINA SUPERIOR DERECHA */
+        .galaxy-title {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: clamp(20px, 4vw, 32px);
+            color: #ffffff;
+            text-shadow: 0 0 12px rgba(255, 77, 136, 0.95), 0 0 25px rgba(255, 20, 100, 0.6);
+            pointer-events: auto;
+        }
+
+        .galaxy-top-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            pointer-events: auto;
+        }
+
+        /* Botón para entrar a la Mesa de Recuerdos */
+        .btn-go-table {
+            background: linear-gradient(135deg, rgba(255, 42, 133, 0.85), rgba(123, 31, 162, 0.85));
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: clamp(12px, 2.5vw, 13.5px);
+            font-weight: 600;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            box-shadow: 0 4px 15px rgba(255, 42, 133, 0.4);
+            transition: transform 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-go-table:hover, .btn-go-table:active {
+            transform: scale(1.05);
+        }
+
+        /* HELLO KITTY ASOMÁNDOSE EN ESQUINA SUPERIOR DERECHA */
         .kitty-peek-btn {
-            position: absolute;
-            top: max(10px, env(safe-area-inset-top));
-            right: -8px;
             background: none;
             border: none;
             cursor: pointer;
-            z-index: 35;
             display: flex;
             align-items: center;
             gap: 4px;
-            transform: rotate(-18deg) translateX(6px);
+            transform: rotate(-14deg);
             transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
             filter: drop-shadow(0 4px 14px rgba(255, 42, 133, 0.65));
-            animation: kittyPeekAnim 3s ease-in-out infinite;
         }
 
         .kitty-peek-btn:hover, .kitty-peek-btn:active {
-            transform: rotate(-8deg) translateX(-4px) scale(1.08);
-        }
-
-        @keyframes kittyPeekAnim {
-            0%, 100% { transform: rotate(-18deg) translate(6px, 0px); }
-            50% { transform: rotate(-14deg) translate(0px, 4px); }
+            transform: rotate(-4deg) scale(1.08);
         }
 
         .kitty-peek-bubble {
             background: rgba(255, 255, 255, 0.95);
             color: #d81b60;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 700;
-            padding: 5px 10px;
-            border-radius: 14px;
+            padding: 4px 8px;
+            border-radius: 12px;
             border: 2px solid #ff6ec7;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
             white-space: nowrap;
-            transform: rotate(14deg);
         }
 
         .kitty-peek-svg {
-            width: clamp(68px, 14vw, 88px);
-            height: clamp(68px, 14vw, 88px);
+            width: clamp(52px, 11vw, 68px);
+            height: clamp(52px, 11vw, 68px);
             display: block;
         }
 
-        .hint-text {
+        /* HINT TEXT INFERIOR DE LA GALAXIA (LIMPIO PARA IPAD) */
+        .galaxy-hint {
             position: absolute;
-            bottom: max(14px, calc(env(safe-area-inset-bottom) + 10px));
+            bottom: max(14px, var(--safe-bottom));
             left: 50%;
             transform: translateX(-50%);
-            width: 90%;
-            max-width: 420px;
-            font-size: clamp(11px, 2.5vw, 13px);
-            color: rgba(255, 215, 235, 0.8);
+            width: min(92%, 580px);
+            font-size: clamp(11.5px, 2.3vw, 13px);
+            color: rgba(255, 225, 240, 0.92);
             pointer-events: none;
-            z-index: 10;
+            z-index: 20;
             text-align: center;
-            background: rgba(15, 4, 15, 0.6);
-            border: 1px solid rgba(255, 100, 160, 0.25);
-            padding: 7px 14px;
-            border-radius: 20px;
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
+            background: rgba(12, 2, 16, 0.75);
+            border: 1px solid rgba(255, 110, 180, 0.35);
+            padding: 8px 16px;
+            border-radius: 25px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            line-height: 1.45;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
         }
 
-        /* =========================================
-           PANTALLA 3: PÁGINA "NUESTROS RECUERDOS"
-           ========================================= */
-        #memories-page-screen {
+        .hint-badge-urano {
+            color: #00e5ff;
+            font-weight: 600;
+        }
+
+        /* ========================================================
+           PANTALLA 3: MESA DE RECUERDOS (INSPIRADA EN LA IMAGEN)
+           ======================================================== */
+        #table-screen {
+            background: #2a1508;
             flex-direction: column;
-            justify-content: flex-start;
             align-items: center;
+            justify-content: flex-start;
             overflow-y: auto;
             overflow-x: hidden;
             -webkit-overflow-scrolling: touch;
-            background: radial-gradient(circle at 20% 30%, var(--bg-glow) 0%, var(--bg-purple) 35%, var(--bg-dark) 85%);
-            z-index: 38;
+            position: relative;
+            z-index: 35;
         }
 
-        .mem-header {
+        /* Fondo de madera hiperrealista con textura CSS y viñeta cálida */
+        .wood-table-background {
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(ellipse at 50% 30%, rgba(255, 170, 90, 0.22) 0%, rgba(40, 16, 4, 0.6) 55%, rgba(12, 4, 1, 0.95) 100%),
+                repeating-linear-gradient(
+                    90deg,
+                    rgba(43, 20, 8, 0.92) 0px,
+                    rgba(62, 30, 12, 0.92) 80px,
+                    rgba(35, 15, 6, 0.92) 160px,
+                    rgba(54, 25, 10, 0.92) 240px
+                );
+            background-color: #2b1307;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .wood-table-header {
             position: sticky;
             top: 0;
-            left: 0;
             width: 100%;
-            background: rgba(12, 0, 20, 0.82);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            z-index: 1000;
-            padding: max(14px, env(safe-area-inset-top)) 16px 14px;
+            background: rgba(22, 9, 3, 0.88);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(255, 200, 150, 0.15);
+            padding: max(14px, var(--safe-top)) 20px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 50;
+        }
+
+        .wood-header-title {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: clamp(17px, 3.8vw, 24px);
+            color: #ffe6d0;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.6);
+        }
+
+        .btn-back-galaxy {
+            background: linear-gradient(135deg, #ff2a85, #7b1fa2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            padding: 7px 16px;
+            border-radius: 20px;
+            font-size: clamp(12px, 2.5vw, 13.5px);
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(255, 42, 133, 0.45);
+            transition: transform 0.2s ease;
+        }
+
+        .btn-back-galaxy:hover {
+            transform: scale(1.05);
+        }
+
+        /* Rejilla de los objetos sobre la mesa de madera (Óptimo para iPad) */
+        .wood-table-grid {
+            position: relative;
+            z-index: 10;
+            width: min(92%, 1050px);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: clamp(18px, 3.5vw, 36px);
+            padding: 30px 10px 120px;
+            margin: auto;
+        }
+
+        @media (max-width: 820px) {
+            .wood-table-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 22px;
+            }
+        }
+
+        /* Cada objeto coleccionable de la mesa */
+        .wood-item-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .wood-item-card:hover {
+            transform: translateY(-8px) scale(1.05);
+        }
+
+        .wood-item-visual {
+            width: clamp(90px, 18vw, 145px);
+            height: clamp(90px, 18vw, 145px);
             display: flex;
             justify-content: center;
             align-items: center;
+            position: relative;
+            filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.75));
+            transition: filter 0.3s ease;
         }
 
-        .mem-nav {
+        .wood-item-card:hover .wood-item-visual {
+            filter: drop-shadow(0 16px 26px rgba(255, 140, 190, 0.5));
+        }
+
+        .wood-item-label {
+            margin-top: 10px;
+            background: #fff8f0;
+            color: #4a2810;
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-weight: 600;
+            font-size: clamp(12.5px, 2.5vw, 15px);
+            padding: 5px 16px;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(160, 110, 70, 0.35);
+            white-space: nowrap;
+            transition: all 0.25s ease;
+        }
+
+        .wood-item-card:hover .wood-item-label {
+            background: #ffe3ec;
+            color: #b71c50;
+            border-color: #ff6ea7;
+        }
+
+        /* ========================================================
+           CONTENEDOR DE SECCIÓN (ANIMACIÓN HACIA EL CENTRO)
+           ======================================================== */
+        #section-modal-container {
+            position: fixed;
+            inset: 0;
+            background: rgba(12, 2, 16, 0.94);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            z-index: 120;
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: max(20px, var(--safe-top)) max(16px, var(--safe-right)) max(30px, var(--safe-bottom)) max(16px, var(--safe-left));
+        }
+
+        #section-modal-container.active {
+            display: flex;
+        }
+
+        .section-header-bar {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-close-section {
+            background: rgba(255, 255, 255, 0.12);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-close-section:hover {
+            background: rgba(255, 42, 133, 0.6);
+            border-color: #ff4da6;
+        }
+
+        .section-inner-content {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            display: none;
+            animation: sectionContentFade 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .section-inner-content.active {
+            display: block;
+        }
+
+        @keyframes sectionContentFade {
+            from { opacity: 0; transform: translateY(24px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* ESTILOS COMUNES DE SECCIÓN */
+        .section-hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(24px, 5.5vw, 36px);
+            color: #ffe6f2;
+            text-align: center;
+            margin-bottom: 8px;
+            text-shadow: 0 0 20px rgba(255, 77, 166, 0.5);
+        }
+
+        .section-hero-subtitle {
+            text-align: center;
+            font-size: clamp(13px, 2.8vw, 15px);
+            color: #dfc8e6;
+            margin-bottom: 28px;
+            max-width: 640px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+
+        /* 1. SECCIÓN LA CARTA */
+        .parchment-letter-card {
+            background: #fffcf5;
+            color: #3b2219;
+            border-radius: 18px;
+            padding: clamp(24px, 5vw, 42px);
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.6), 0 0 35px rgba(255, 180, 210, 0.2);
+            position: relative;
+            line-height: 1.85;
+            font-size: clamp(14.5px, 3.2vw, 16.5px);
+            border: 1px solid #e0c8b0;
+        }
+
+        .parchment-letter-card h3 {
+            font-family: 'Playfair Display', serif;
+            color: #b71c50;
+            font-size: clamp(20px, 4.5vw, 26px);
+            margin-bottom: 16px;
+        }
+
+        .parchment-letter-card p {
+            margin-bottom: 18px;
+        }
+
+        .parchment-sign {
+            font-family: 'Caveat', cursive;
+            font-size: clamp(22px, 5vw, 30px);
+            color: #c2185b;
+            text-align: right;
+            margin-top: 24px;
+        }
+
+        /* 2. SECCIÓN LO QUE AMO DE TI (100 RAZONES) */
+        .reasons-search-box {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .reasons-search-input {
+            width: 100%;
+            max-width: 420px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 110, 199, 0.4);
+            border-radius: 25px;
+            padding: 10px 20px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+            backdrop-filter: blur(6px);
+        }
+
+        .reasons-search-input::placeholder {
+            color: rgba(255, 200, 230, 0.6);
+        }
+
+        .reasons-grid-modern {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 14px;
+        }
+
+        .reason-card-pill {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 110, 199, 0.25);
+            padding: 14px 18px;
+            border-radius: 14px;
+            font-size: 13.5px;
+            color: #f7eaf4;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.25s ease;
+        }
+
+        .reason-card-pill:hover {
+            background: rgba(255, 42, 133, 0.25);
+            border-color: #ff4da6;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 18px rgba(255, 42, 133, 0.3);
+        }
+
+        .reason-num-badge {
+            background: #ff2a85;
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 10px;
+            flex-shrink: 0;
+        }
+
+        /* 3. SECCIÓN NUESTRA FECHA (CONTADOR REAL DE AMOR) */
+        .love-counter-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            border-radius: 22px;
+            padding: 30px 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 35px rgba(0,0,0,0.4);
+            margin-bottom: 30px;
+        }
+
+        .counter-units-row {
+            display: flex;
+            justify-content: center;
+            gap: clamp(10px, 2.5vw, 24px);
+            flex-wrap: wrap;
+            margin: 24px 0 16px;
+        }
+
+        .counter-unit-col {
+            background: rgba(255, 42, 133, 0.15);
+            border: 1px solid rgba(255, 110, 199, 0.35);
+            border-radius: 16px;
+            padding: 14px 18px;
+            min-width: clamp(75px, 16vw, 105px);
+        }
+
+        .counter-val {
+            font-size: clamp(24px, 5vw, 38px);
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 0 0 15px rgba(255, 42, 133, 0.8);
+        }
+
+        .counter-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #f6c8ff;
+            margin-top: 4px;
+        }
+
+        /* 4. SECCIÓN NUESTRAS FOTOS (POLAROIDS Y GALERÍA 3D) */
+        .memories-grid-new {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .polaroid-card {
+            background: #ffffff;
+            padding: 12px 12px 28px 12px;
+            border-radius: 6px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+        }
+
+        .polaroid-card:hover {
+            transform: translateY(-8px) rotate(1deg) scale(1.03);
+            box-shadow: 0 16px 36px rgba(255, 110, 199, 0.4);
+        }
+
+        .polaroid-img-wrapper {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            overflow: hidden;
+            border-radius: 3px;
+            background: #111;
+        }
+
+        .polaroid-img-wrapper img, .polaroid-img-wrapper video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .polaroid-caption {
+            font-family: 'Caveat', cursive;
+            font-size: 19px;
+            color: #331d27;
+            text-align: center;
+            margin-top: 12px;
+            line-height: 1.2;
+        }
+
+        /* 5. SECCIÓN BUZÓN DE SUGERENCIAS (DIRECTO A nahimuchija@gmail.com) */
+        .mailbox-card {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 110, 199, 0.4);
+            border-radius: 24px;
+            padding: clamp(24px, 5vw, 38px);
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5), 0 0 30px rgba(255, 42, 133, 0.2);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13.5px;
+            font-weight: 600;
+            color: #f7d2eb;
+            margin-bottom: 8px;
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            background: rgba(18, 4, 24, 0.7);
+            border: 1px solid rgba(255, 110, 199, 0.35);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: white;
+            font-size: 14.5px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            border-color: #ff2a85;
+            box-shadow: 0 0 15px rgba(255, 42, 133, 0.35);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .btn-submit-mailbox {
+            width: 100%;
+            background: linear-gradient(135deg, #ff2a85, #d81b60);
+            color: white;
+            border: none;
+            padding: 15px 24px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 6px 25px rgba(255, 42, 133, 0.5);
+            transition: all 0.25s ease;
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 10px;
+        }
+
+        .btn-submit-mailbox:hover, .btn-submit-mailbox:active {
+            transform: scale(1.02);
+            box-shadow: 0 8px 30px rgba(255, 42, 133, 0.7);
+        }
+
+        /* 6. SALA DE MÚSICA & SPOTIFY */
+        .music-genres-nav {
+            display: flex;
+            gap: 8px;
             flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 22px;
         }
 
-        .mem-nav a {
-            color: var(--text-soft);
-            text-decoration: none;
-            font-weight: 600;
-            font-size: clamp(0.82rem, 2.5vw, 0.95rem);
-            padding: 7px 14px;
+        .genre-pill-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 110, 199, 0.3);
+            color: #f7e6f3;
+            padding: 7px 16px;
             border-radius: 20px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 13px;
+            font-weight: 600;
             cursor: pointer;
+            transition: all 0.2s ease;
         }
 
-        .mem-nav a:hover,
-        .mem-nav a.active {
-            color: var(--text-white);
-            background: rgba(255, 110, 199, 0.18);
-            box-shadow: 0 0 15px rgba(255, 110, 199, 0.35);
-            transform: translateY(-2px);
-        }
-
-        /* Botón especial para regresar a la Galaxia */
-        .back-galaxy-btn {
-            background: linear-gradient(135deg, #ff2a85, #7b1fa2);
-            color: #fff !important;
-            border: 1px solid rgba(255, 255, 255, 0.35);
+        .genre-pill-btn.active, .genre-pill-btn:hover {
+            background: #ff2a85;
+            color: white;
+            border-color: #ff6ea7;
             box-shadow: 0 0 14px rgba(255, 42, 133, 0.5);
         }
 
-        .back-galaxy-btn:hover {
-            transform: scale(1.05) !important;
-        }
-
-        .mem-main {
-            flex: 1;
-            padding-top: 30px;
-            padding-bottom: 110px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-        }
-
-        .mem-section {
-            display: none;
-            width: 100%;
-            max-width: 1100px;
-            padding: 20px;
-            text-align: center;
-            animation: memFadeIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-        }
-
-        .mem-section.active {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        @keyframes memFadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px) scale(0.98);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        .mem-section h1, .mem-section h2 {
-            font-size: clamp(1.8rem, 5vw, 2.3rem);
-            margin-bottom: 16px;
-            color: #f3d1ff;
-            text-shadow: 0 0 18px rgba(255, 110, 199, 0.45);
-        }
-
-        .home-subtitle {
-            max-width: 680px;
-            font-size: 1.05rem;
-            line-height: 1.6;
-            color: var(--text-soft);
-            margin-bottom: 40px;
-        }
-
-        .quote-box {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            padding: 24px 36px;
-            border-radius: 16px;
-            max-width: 650px;
-            font-style: italic;
-            font-size: 1.1rem;
-            line-height: 1.6;
-            color: var(--text-white);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
-            backdrop-filter: blur(8px);
-            margin-bottom: 60px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .quote-box:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 36px rgba(255, 110, 199, 0.25);
-        }
-
-        .footer-note {
-            font-size: 0.95rem;
-            color: var(--accent-light);
-            opacity: 0.9;
-            margin-top: 20px;
-        }
-
-        /* SECCIÓN RECUERDOS */
-        .memories-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 22px;
-            width: 100%;
-            margin-top: 20px;
-        }
-
-        .memory-card {
-            position: relative;
+        .spotify-link-box {
+            background: linear-gradient(135deg, rgba(30, 215, 96, 0.15), rgba(12, 0, 20, 0.85));
+            border: 1px solid rgba(30, 215, 96, 0.45);
             border-radius: 18px;
-            overflow: hidden;
-            aspect-ratio: 1 / 1;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--card-border);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.45);
-            cursor: pointer;
-            transition: transform 0.4s ease, box-shadow 0.4s ease;
-        }
-
-        .memory-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 14px 35px rgba(255, 110, 199, 0.4);
-        }
-
-        .memory-card img,
-        .memory-card video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-            transition: transform 0.5s ease;
-        }
-
-        .memory-card:hover img,
-        .memory-card:hover video {
-            transform: scale(1.07);
-        }
-
-        .memory-caption {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 12px 14px;
-            background: linear-gradient(transparent, rgba(12, 0, 20, 0.9));
-            color: #fff;
-            font-size: 0.9rem;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.3s ease;
-        }
-
-        .memory-card:hover .memory-caption {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* En pantallas táctiles mostramos siempre el subtítulo de cada foto */
-        @media (hover: none) {
-            .memory-caption {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* SECCIÓN GALERÍA 3D */
-        .gallery-wrapper {
-            perspective: 1200px;
-            width: 100%;
-            height: 440px;
+            padding: 20px;
+            margin-bottom: 25px;
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            margin-top: 20px;
-            overflow: visible;
-        }
-
-        .carousel {
-            position: relative;
-            width: 210px;
-            height: 270px;
-            transform-style: preserve-3d;
-            animation: rotateCarousel 28s infinite linear;
-        }
-
-        .carousel:hover, .carousel:active {
-            animation-play-state: paused;
-        }
-
-        .carousel-item {
-            position: absolute;
-            width: 210px;
-            height: 270px;
-            left: 0;
-            top: 0;
-            border-radius: 16px;
-            overflow: hidden;
-            border: 2px solid rgba(255, 110, 199, 0.5);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-            background: #1a002c;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .carousel-item img,
-        .carousel-item video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .carousel-item:nth-child(1) { transform: rotateY(0deg) translateZ(340px); }
-        .carousel-item:nth-child(2) { transform: rotateY(40deg) translateZ(340px); }
-        .carousel-item:nth-child(3) { transform: rotateY(80deg) translateZ(340px); }
-        .carousel-item:nth-child(4) { transform: rotateY(120deg) translateZ(340px); }
-        .carousel-item:nth-child(5) { transform: rotateY(160deg) translateZ(340px); }
-        .carousel-item:nth-child(6) { transform: rotateY(200deg) translateZ(340px); }
-        .carousel-item:nth-child(7) { transform: rotateY(240deg) translateZ(340px); }
-        .carousel-item:nth-child(8) { transform: rotateY(280deg) translateZ(340px); }
-        .carousel-item:nth-child(9) { transform: rotateY(320deg) translateZ(340px); }
-
-        @keyframes rotateCarousel {
-            from { transform: rotateY(0deg); }
-            to { transform: rotateY(360deg); }
-        }
-
-        .gallery-hint {
-            font-size: 0.9rem;
-            color: var(--text-soft);
-            margin-top: 20px;
-            opacity: 0.8;
-        }
-
-        /* SECCIÓN MENSAJE */
-        .message-card {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 36px 28px;
-            max-width: 720px;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(12px);
-            line-height: 1.8;
-            font-size: 1.05rem;
-            color: var(--text-white);
-            text-align: center;
-        }
-
-        .message-card h3 {
-            color: var(--accent-pink);
-            margin-bottom: 18px;
-            font-size: 1.4rem;
-        }
-
-        .message-card p {
-            margin-bottom: 16px;
-            color: var(--text-soft);
-        }
-
-        /* SECCIÓN 100 RAZONES */
-        .reasons-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            flex-wrap: wrap;
             gap: 14px;
-            width: 100%;
-            margin-top: 25px;
         }
 
-        .reason-item {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 110, 199, 0.2);
-            padding: 14px 18px;
+        .spotify-cta-text h4 {
+            color: #1ed760;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .spotify-cta-text p {
+            font-size: 13px;
+            color: #d0d0d0;
+        }
+
+        .btn-open-spotify-app {
+            background: #1ed760;
+            color: #000000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 13.5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 16px rgba(30, 215, 96, 0.4);
+            transition: transform 0.2s ease;
+        }
+
+        .btn-open-spotify-app:hover {
+            transform: scale(1.05);
+        }
+
+        .song-list-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 12px;
+        }
+
+        .song-card-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
-            font-size: 0.92rem;
-            color: var(--text-white);
-            transition: all 0.25s ease;
+            padding: 10px 12px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            text-align: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.25s ease;
         }
 
-        .reason-item:hover {
-            background: rgba(255, 110, 199, 0.2);
-            border-color: var(--accent-pink);
-            transform: translateY(-3px);
-            box-shadow: 0 6px 18px rgba(255, 110, 199, 0.3);
+        .song-card-item:hover, .song-card-item.playing {
+            background: rgba(255, 42, 133, 0.25);
+            border-color: #ff4da6;
+            transform: translateY(-2px);
         }
 
-        /* LIGHTBOX PARA VER FOTOS Y VIDEOS DE RECUERDOS */
-        .lightbox {
+        .song-thumb {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: #222;
+        }
+
+        .song-meta {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .song-name {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .song-sub {
+            font-size: 11.5px;
+            color: #b0a0b8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ========================================================
+           MODAL DE CARTAS PERSONALIZADAS DE LA GALAXIA
+           ======================================================== */
+        .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(5, 0, 10, 0.88);
+            background: rgba(5, 1, 8, 0.78);
             backdrop-filter: blur(8px);
-            display: none;
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 2000;
-            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.35s ease;
+            z-index: 150;
+            padding: 18px;
         }
 
-        .lightbox.open {
-            display: flex;
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
         }
 
-        .lightbox-content {
-            max-width: 90vw;
-            max-height: 85vh;
-            border-radius: 16px;
-            overflow: hidden;
-            border: 2px solid var(--accent-pink);
-            box-shadow: 0 0 40px rgba(255, 110, 199, 0.5);
+        .letter-card {
+            background: rgba(26, 8, 24, 0.96);
+            border: 1px solid rgba(255, 90, 140, 0.65);
+            box-shadow: 0 0 45px rgba(255, 30, 100, 0.4), 0 0 90px rgba(255, 30, 100, 0.15);
+            border-radius: 22px;
+            max-width: 480px;
+            width: 100%;
+            max-height: 84dvh;
+            overflow-y: auto;
+            padding: 28px 24px;
             position: relative;
-            background: #000;
+            transform: scale(0.85) translateY(25px);
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease;
+            text-align: left;
         }
 
-        .lightbox-content img,
-        .lightbox-content video {
-            max-width: 90vw;
-            max-height: 80vh;
-            display: block;
-            object-fit: contain;
+        .modal-overlay.open .letter-card {
+            transform: scale(1) translateY(0);
+            opacity: 1;
         }
 
-        .close-lightbox {
+        .close-card {
             position: absolute;
-            top: 20px;
-            right: 30px;
-            font-size: 2.4rem;
-            color: #fff;
+            top: 14px;
+            right: 14px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 120, 160, 0.4);
+            color: #ffb3c6;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            font-size: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             cursor: pointer;
-            z-index: 2100;
         }
 
-        @media (max-width: 768px) {
-            .carousel { width: 145px; height: 195px; }
-            .carousel-item { width: 145px; height: 195px; }
-            .carousel-item:nth-child(1) { transform: rotateY(0deg) translateZ(215px); }
-            .carousel-item:nth-child(2) { transform: rotateY(40deg) translateZ(215px); }
-            .carousel-item:nth-child(3) { transform: rotateY(80deg) translateZ(215px); }
-            .carousel-item:nth-child(4) { transform: rotateY(120deg) translateZ(215px); }
-            .carousel-item:nth-child(5) { transform: rotateY(160deg) translateZ(215px); }
-            .carousel-item:nth-child(6) { transform: rotateY(200deg) translateZ(215px); }
-            .carousel-item:nth-child(7) { transform: rotateY(240deg) translateZ(215px); }
-            .carousel-item:nth-child(8) { transform: rotateY(280deg) translateZ(215px); }
-            .carousel-item:nth-child(9) { transform: rotateY(320deg) translateZ(215px); }
+        .letter-title {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            color: #ff6b95;
+            font-size: clamp(20px, 4.5vw, 25px);
+            margin-bottom: 14px;
+            padding-right: 36px;
+            text-shadow: 0 0 10px rgba(255, 107, 149, 0.4);
         }
 
-        /* =========================================
-           VIÑETA FLOTANTE ESTILO SPOTIFY (GLOBAL)
-           ========================================= */
+        .letter-body {
+            font-size: clamp(14px, 3.4vw, 15.5px);
+            line-height: 1.7;
+            color: #fcecf2;
+            margin-bottom: 20px;
+            white-space: pre-line;
+        }
+
+        .letter-sign {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            text-align: right;
+            color: #ff85a8;
+            font-size: clamp(14px, 3.4vw, 16px);
+        }
+
+        .card-counter {
+            text-align: center;
+            font-size: 11px;
+            color: rgba(255, 180, 210, 0.7);
+            margin-top: 16px;
+            letter-spacing: 1px;
+        }
+
+        /* ========================================================
+           MODAL DE URANO: 100 APODOS EN ANILLO AZUL CELESTE
+           ======================================================== */
+        .urano-modal-card {
+            background: radial-gradient(circle at center, #001933 0%, #000c1a 75%, #00050d 100%);
+            border: 1.5px solid var(--urano-cyan);
+            box-shadow: 0 0 50px rgba(0, 229, 255, 0.4), 0 0 100px rgba(0, 145, 234, 0.2);
+            border-radius: 24px;
+            max-width: 640px;
+            width: 100%;
+            max-height: 85dvh;
+            overflow-y: auto;
+            padding: 30px 24px;
+            position: relative;
+            transform: scale(0.85) translateY(25px);
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease;
+            text-align: left;
+            color: #e1f5fe;
+        }
+
+        .modal-overlay.open .urano-modal-card {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        .urano-title {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            color: #80d8ff;
+            font-size: clamp(22px, 4.8vw, 28px);
+            text-shadow: 0 0 15px rgba(0, 229, 255, 0.7);
+            margin-bottom: 8px;
+            padding-right: 36px;
+        }
+
+        .urano-subtitle {
+            font-size: 13px;
+            color: #b3e5fc;
+            margin-bottom: 22px;
+            line-height: 1.5;
+        }
+
+        .nicknames-chips-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .nick-chip {
+            background: rgba(0, 229, 255, 0.12);
+            border: 1px solid rgba(0, 229, 255, 0.35);
+            color: #ffffff;
+            font-size: 12.5px;
+            padding: 6px 12px;
+            border-radius: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .nick-chip:hover {
+            background: rgba(0, 229, 255, 0.35);
+            border-color: #80d8ff;
+            transform: scale(1.06);
+            box-shadow: 0 0 12px rgba(0, 229, 255, 0.5);
+        }
+
+        .btn-urano-close {
+            background: linear-gradient(135deg, #00b0ff, #0091ea);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 10px 22px;
+            border-radius: 25px;
+            font-size: 13.5px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 18px rgba(0, 176, 255, 0.45);
+            display: block;
+            margin: 20px auto 0;
+            transition: transform 0.2s ease;
+        }
+
+        .btn-urano-close:hover {
+            transform: scale(1.05);
+        }
+
+        /* ========================================================
+           WIDGET FLOTANTE ESTILO SPOTIFY (GLOBAL)
+           ======================================================== */
         .spotify-widget {
             position: fixed;
-            bottom: max(56px, calc(env(safe-area-inset-bottom) + 50px));
-            right: max(14px, calc(env(safe-area-inset-right) + 12px));
-            width: min(310px, 88vw);
-            background: rgba(18, 18, 22, 0.94);
-            border: 1px solid rgba(255, 90, 150, 0.4);
+            bottom: max(60px, var(--safe-bottom));
+            right: max(14px, var(--safe-right));
+            width: min(310px, 86vw);
+            background: rgba(18, 18, 22, 0.95);
+            border: 1px solid rgba(255, 90, 150, 0.45);
             border-radius: 18px;
             padding: 12px 14px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.65), 0 0 20px rgba(255, 30, 100, 0.2);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            z-index: 1500;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(255, 30, 100, 0.25);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            z-index: 200;
             display: none;
             transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s ease;
         }
@@ -708,13 +1439,13 @@
 
         .spotify-mini-tab {
             position: fixed;
-            bottom: max(60px, calc(env(safe-area-inset-bottom) + 54px));
-            right: max(14px, calc(env(safe-area-inset-right) + 12px));
+            bottom: max(60px, var(--safe-bottom));
+            right: max(14px, var(--safe-right));
             background: linear-gradient(135deg, #1db954 0%, #ff2a85 100%);
             color: white;
-            border: 1px solid rgba(255, 255, 255, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.4);
             border-radius: 30px;
-            padding: 9px 15px;
+            padding: 8px 16px;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -722,7 +1453,7 @@
             font-weight: 600;
             cursor: pointer;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
-            z-index: 1499;
+            z-index: 199;
             opacity: 0;
             pointer-events: none;
             transform: scale(0.85);
@@ -739,7 +1470,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             padding-bottom: 6px;
         }
@@ -768,11 +1499,6 @@
             cursor: pointer;
         }
 
-        .sp-icon-btn:hover, .sp-icon-btn:active {
-            background: rgba(255, 42, 133, 0.6);
-            color: white;
-        }
-
         .sp-main {
             display: flex;
             align-items: center;
@@ -782,8 +1508,8 @@
 
         .sp-cover-wrapper {
             position: relative;
-            width: 52px;
-            height: 52px;
+            width: 48px;
+            height: 48px;
             border-radius: 10px;
             overflow: hidden;
             flex-shrink: 0;
@@ -799,14 +1525,13 @@
             z-index: 2;
         }
 
-        /* Reproductor de 200x200 escalado para cumplir el tamaño mínimo que exige YouTube sin verse */
         #yt-player-container {
             position: absolute;
             top: 0;
             left: 0;
             width: 200px;
             height: 200px;
-            transform: scale(0.26);
+            transform: scale(0.24);
             transform-origin: top left;
             opacity: 0.01;
             pointer-events: none;
@@ -820,7 +1545,7 @@
         }
 
         .sp-title {
-            font-size: 13.5px;
+            font-size: 13px;
             font-weight: 600;
             color: #ffffff;
             white-space: nowrap;
@@ -830,17 +1555,11 @@
         }
 
         .sp-artist {
-            font-size: 11.5px;
+            font-size: 11px;
             color: #b3b3b3;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-        }
-
-        .sp-counter {
-            font-size: 10px;
-            color: #ff6b95;
-            margin-top: 2px;
         }
 
         .sp-controls {
@@ -863,13 +1582,13 @@
         .sp-play-btn {
             background: #1ed760;
             color: #000000;
-            width: 34px;
-            height: 34px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: bold;
             box-shadow: 0 0 12px rgba(30, 215, 96, 0.5);
         }
@@ -878,7 +1597,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 12px;
+            font-size: 11px;
             color: #cccccc;
         }
 
@@ -889,131 +1608,121 @@
             cursor: pointer;
         }
 
-        .sp-playlist-drawer {
-            display: none;
-            max-height: 155px;
-            overflow-y: auto;
-            margin-top: 9px;
-            padding-top: 6px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .sp-playlist-drawer.open {
-            display: block;
-        }
-
-        .sp-track-item {
-            padding: 6px 8px;
-            border-radius: 8px;
-            font-size: 11.5px;
-            color: #d0d0d0;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 6px;
-            text-align: left;
-        }
-
-        .sp-track-item:hover, .sp-track-item.active {
-            background: rgba(255, 42, 133, 0.25);
-            color: #ffffff;
-            font-weight: 600;
-        }
-
-        /* =========================================
-           CARTAS EMERGENTES DE LA GALAXIA
-           ========================================= */
-        .modal-overlay {
+        /* LIGHTBOX PARA MULTIMEDIA */
+        .lightbox {
             position: fixed;
             inset: 0;
-            background: rgba(5, 1, 8, 0.7);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-            display: flex;
+            background: rgba(5, 0, 10, 0.9);
+            backdrop-filter: blur(10px);
+            display: none;
             justify-content: center;
             align-items: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-            z-index: 50;
-            padding: 18px;
+            z-index: 300;
+            padding: 20px;
         }
 
-        .modal-overlay.open {
-            opacity: 1;
-            pointer-events: auto;
+        .lightbox.open {
+            display: flex;
         }
 
-        .letter-card {
-            background: rgba(24, 8, 20, 0.94);
-            border: 1px solid rgba(255, 90, 140, 0.55);
-            box-shadow: 0 0 35px rgba(255, 30, 100, 0.35);
-            border-radius: 20px;
-            max-width: 460px;
-            width: 100%;
-            max-height: 82dvh;
-            overflow-y: auto;
-            padding: 26px 22px;
-            position: relative;
-            transform: scale(0.92);
-            transition: transform 0.3s ease;
-            text-align: left;
+        .lightbox-content {
+            max-width: 92vw;
+            max-height: 85vh;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px solid var(--accent-pink);
+            box-shadow: 0 0 45px rgba(255, 110, 199, 0.5);
+            background: #000;
         }
 
-        .modal-overlay.open .letter-card {
-            transform: scale(1);
+        .lightbox-content img, .lightbox-content video {
+            max-width: 92vw;
+            max-height: 80vh;
+            display: block;
+            object-fit: contain;
         }
 
-        .close-card {
+        .close-lightbox {
             position: absolute;
-            top: 12px;
-            right: 14px;
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 120, 160, 0.35);
-            color: #ffb3c6;
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            font-size: 20px;
-            line-height: 30px;
-            text-align: center;
+            top: max(20px, var(--safe-top));
+            right: max(25px, var(--safe-right));
+            font-size: 2.2rem;
+            color: #fff;
             cursor: pointer;
+            z-index: 310;
         }
 
-        .letter-title {
-            font-family: 'Georgia', serif;
-            font-style: italic;
-            color: #ff6b95;
-            font-size: clamp(20px, 4.5vw, 24px);
-            margin-bottom: 12px;
-            padding-right: 30px;
-            text-shadow: 0 0 8px rgba(255, 107, 149, 0.4);
+        /* TOAST CONFIRMACIÓN */
+        .toast-msg {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: linear-gradient(135deg, #ff2a85, #7b1fa2);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            z-index: 500;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-align: center;
+            max-width: 90vw;
         }
 
-        .letter-body {
-            font-size: clamp(14px, 3.4vw, 15.5px);
-            line-height: 1.65;
-            color: #f5e6eb;
-            margin-bottom: 18px;
-            white-space: pre-line;
-        }
-
-        .letter-sign {
-            font-family: 'Georgia', serif;
-            font-style: italic;
-            text-align: right;
-            color: #ff85a8;
-            font-size: clamp(14px, 3.4vw, 15.5px);
+        .toast-msg.show {
+            transform: translateX(-50%) translateY(0);
         }
     </style>
 </head>
 <body>
 
-    <!-- =====================================================
-         PANTALLA 1: VIDEO 0926.mp4
-         ===================================================== -->
-    <div id="video-screen" class="screen active">
+    <!-- ========================================================
+         PANTALLA 0: EL SOBRE CON SELLO DE CERA
+         ======================================================== -->
+    <div id="envelope-screen" class="screen active">
+        <div class="envelope-wrapper" id="envelope-box" onclick="openIntroEnvelope()">
+            <div class="envelope" id="envelope-elem">
+                <div class="envelope-body">
+                    <div class="envelope-fold-left"></div>
+                    <div class="envelope-fold-right"></div>
+                    <div class="envelope-fold-bottom"></div>
+                </div>
+                <div class="envelope-flap"></div>
+                <div class="wax-seal" title="Toca para romper el sello">💌</div>
+                <div class="envelope-letter">
+                    <div class="letter-preview-title">Para: Gigi, el amor de mi vida 💖</div>
+                    <div class="letter-preview-text">
+                        Esta página web es una carta infinita que hice para ti...<br>
+                        Cada estrella, recuerdo y melodía fue pensada en nosotros.
+                    </div>
+                    <div class="letter-destiny-tag">
+                        <span>Chihuahua ➔ Jiutepec</span>
+                        <span>De: Tu lobo ❤️</span>
+                    </div>
+                </div>
+            </div>
+            <div class="envelope-hint">✨ Toca el sobre con sello de cera para abrir tu carta ✨</div>
+        </div>
+
+        <div class="envelope-actions" id="envelope-actions">
+            <button class="btn-env-action" onclick="goToVideoScreen()">
+                <span>🎬</span> Ver Nuestro Video
+            </button>
+            <button class="btn-env-action btn-env-secondary" onclick="skipToGalaxy()">
+                <span>🪐</span> Saltar a la Galaxia
+            </button>
+            <button class="btn-env-action btn-env-secondary" onclick="goToTableScreen()">
+                <span>🪵</span> Mesa de Recuerdos
+            </button>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         PANTALLA 1: VIDEO 0926.mp4 CON SPIDERMAN
+         ======================================================== -->
+    <div id="video-screen" class="screen">
         <div class="video-container">
             <video id="surprise-video" src="0926.mp4" controls playsinline webkit-playsinline preload="metadata">
                 Tu navegador no soporta videos HTML5.
@@ -1026,199 +1735,526 @@
             <button id="heart-button" class="heart-btn" aria-label="Ir a la sorpresa">❤️</button>
         </div>
 
-        <button id="skip-button" class="skip-btn">saltalo si quieres gigi</button>
-    </div>
-
-    <!-- =====================================================
-         PANTALLA 2: GALAXIA INTERACTIVA 3D
-         ===================================================== -->
-    <div id="galaxy-screen" class="screen">
-        <div class="top-title">Te Amo, Gigi ❤️</div>
-
-        <!-- HELLO KITTY ASOMÁNDOSE EN LA ESQUINA SUPERIOR DERECHA -->
-        <button id="kitty-peek-btn" class="kitty-peek-btn" title="Ir a Nuestros Recuerdos 💖">
-            <span class="kitty-peek-bubble">¡Pícame, Gigi! 🎀</span>
-            <svg class="kitty-peek-svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-                <!-- Orejas -->
-                <path d="M25 52 Q18 15 50 32 Z" fill="#ffffff" stroke="#221118" stroke-width="4" stroke-linejoin="round"/>
-                <path d="M95 52 Q102 15 70 32 Z" fill="#ffffff" stroke="#221118" stroke-width="4" stroke-linejoin="round"/>
-                <!-- Cabeza -->
-                <ellipse cx="60" cy="62" rx="42" ry="33" fill="#ffffff" stroke="#221118" stroke-width="4"/>
-                <!-- Moño rojo en oreja derecha -->
-                <g transform="translate(82, 34) rotate(15)">
-                    <ellipse cx="-11" cy="0" rx="11" ry="8" fill="#ff1744" stroke="#221118" stroke-width="3"/>
-                    <ellipse cx="11" cy="0" rx="11" ry="8" fill="#ff1744" stroke="#221118" stroke-width="3"/>
-                    <circle cx="0" cy="0" r="6" fill="#ff1744" stroke="#221118" stroke-width="3"/>
-                </g>
-                <!-- Ojos -->
-                <ellipse cx="42" cy="64" rx="3.8" ry="5.5" fill="#1a0d12"/>
-                <ellipse cx="78" cy="64" rx="3.8" ry="5.5" fill="#1a0d12"/>
-                <!-- Nariz amarilla -->
-                <ellipse cx="60" cy="71" rx="5" ry="3.6" fill="#ffcc00" stroke="#221118" stroke-width="2.5"/>
-                <!-- Bigotes -->
-                <line x1="22" y1="60" x2="6" y2="57" stroke="#221118" stroke-width="3" stroke-linecap="round"/>
-                <line x1="21" y1="67" x2="5" y2="67" stroke="#221118" stroke-width="3" stroke-linecap="round"/>
-                <line x1="23" y1="74" x2="8" y2="77" stroke="#221118" stroke-width="3" stroke-linecap="round"/>
-                <line x1="98" y1="60" x2="114" y2="57" stroke="#221118" stroke-width="3" stroke-linecap="round"/>
-                <line x1="99" y1="67" x2="115" y2="67" stroke="#221118" stroke-width="3" stroke-linecap="round"/>
-                <line x1="97" y1="74" x2="112" y2="77" stroke="#221118" stroke-width="3" stroke-linecap="round"/>
-                <!-- Manitas asomándose -->
-                <ellipse cx="36" cy="93" rx="10" ry="7" fill="#ffffff" stroke="#221118" stroke-width="3.5"/>
-                <ellipse cx="84" cy="93" rx="10" ry="7" fill="#ffffff" stroke="#221118" stroke-width="3.5"/>
+        <!-- SPIDERMAN DICIENDO EL SKIP -->
+        <div class="spiderman-skip-wrapper" id="spiderman-skip" onclick="skipToGalaxy()" title="Sáltalo directo a la galaxia">
+            <div class="spiderman-bubble">¡Sáltalo si quieres Gigi! 🕸️</div>
+            <svg class="spiderman-avatar" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <!-- Cabeza Spiderman -->
+                <ellipse cx="50" cy="50" rx="36" ry="42" fill="#d32f2f" stroke="#212121" stroke-width="3.5"/>
+                <!-- Telarañas de la máscara -->
+                <path d="M50 8 L50 92 M14 50 L86 50 M25 20 L75 80 M25 80 L75 20" stroke="#b71c1c" stroke-width="2"/>
+                <ellipse cx="50" cy="50" rx="18" ry="21" fill="none" stroke="#b71c1c" stroke-width="1.8"/>
+                <ellipse cx="50" cy="50" rx="28" ry="32" fill="none" stroke="#b71c1c" stroke-width="1.8"/>
+                <!-- Ojo izquierdo -->
+                <path d="M22 45 Q36 30 45 48 Q32 58 22 45 Z" fill="#ffffff" stroke="#111111" stroke-width="3.5"/>
+                <!-- Ojo derecho -->
+                <path d="M78 45 Q64 30 55 48 Q68 58 78 45 Z" fill="#ffffff" stroke="#111111" stroke-width="3.5"/>
             </svg>
-        </button>
-
-        <canvas id="galaxy-canvas"></canvas>
-        <div class="hint-text">Desliza para girar • Toca las frases, dibujos o a Hello Kitty arriba ✨</div>
+        </div>
     </div>
 
-    <!-- =====================================================
-         PANTALLA 3: PÁGINA "NUESTROS RECUERDOS"
-         ===================================================== -->
-    <div id="memories-page-screen" class="screen">
-        <!-- BARRA DE NAVEGACIÓN CON BOTÓN PARA REGRESAR -->
-        <header class="mem-header">
-            <nav class="mem-nav">
-                <a class="back-galaxy-btn" onclick="backToGalaxy()">🪐 Volver a la Galaxia</a>
-                <a class="mem-nav-link active" onclick="showMemSection('inicio', this)">Inicio</a>
-                <a class="mem-nav-link" onclick="showMemSection('recuerdos', this)">Recuerdos</a>
-                <a class="mem-nav-link" onclick="showMemSection('galeria', this)">Galería</a>
-                <a class="mem-nav-link" onclick="showMemSection('mensaje', this)">Mensaje</a>
-                <a class="mem-nav-link" onclick="showMemSection('razones', this)">Razones</a>
-            </nav>
+    <!-- ========================================================
+         PANTALLA 2: GALAXIA 3D INTERACTIVA (CON URANO AZUL)
+         ======================================================== -->
+    <div id="galaxy-screen" class="screen">
+        <header class="top-nav-bar">
+            <div class="galaxy-title">Te Amo, Gigi ❤️</div>
+            
+            <div class="galaxy-top-actions">
+                <button class="btn-go-table" onclick="goToTableScreen()">
+                    <span>🪵</span> Mesa de Recuerdos
+                </button>
+                <button id="kitty-peek-btn" class="kitty-peek-btn" onclick="goToTableScreen()" title="Ver Nuestra Mesa">
+                    <span class="kitty-peek-bubble">¡Pícame Gigi! 🎀</span>
+                    <svg class="kitty-peek-svg" viewBox="0 0 120 120">
+                        <path d="M25 52 Q18 15 50 32 Z" fill="#ffffff" stroke="#221118" stroke-width="4"/>
+                        <path d="M95 52 Q102 15 70 32 Z" fill="#ffffff" stroke="#221118" stroke-width="4"/>
+                        <ellipse cx="60" cy="62" rx="42" ry="33" fill="#ffffff" stroke="#221118" stroke-width="4"/>
+                        <g transform="translate(82, 34) rotate(15)">
+                            <ellipse cx="-11" cy="0" rx="11" ry="8" fill="#ff1744" stroke="#221118" stroke-width="3"/>
+                            <ellipse cx="11" cy="0" rx="11" ry="8" fill="#ff1744" stroke="#221118" stroke-width="3"/>
+                            <circle cx="0" cy="0" r="6" fill="#ff1744" stroke="#221118" stroke-width="3"/>
+                        </g>
+                        <ellipse cx="42" cy="64" rx="3.8" ry="5.5" fill="#1a0d12"/>
+                        <ellipse cx="78" cy="64" rx="3.8" ry="5.5" fill="#1a0d12"/>
+                        <ellipse cx="60" cy="71" rx="5" ry="3.6" fill="#ffcc00" stroke="#221118" stroke-width="2.5"/>
+                    </svg>
+                </button>
+            </div>
         </header>
 
-        <main class="mem-main">
-            <!-- 1. SECCIÓN INICIO -->
-            <section id="inicio" class="mem-section active">
-                <h1>Bienvenida, Mi Amor 💖</h1>
-                <p class="home-subtitle">
-                    Esta página web es para guardar nuestros recuerdos de cada mes que hemos pasado juntos, y cómo hemos superado cada obstáculo que encontramos. En las buenas y en las malas, seguimos juntos, siempre más fuertes.
-                </p>
+        <canvas id="galaxy-canvas"></canvas>
 
-                <div class="quote-box">
-                    “El amor no se trata de cuántos días o meses llevan juntos, se trata de cuánto se aman el uno al otro cada día.” 💞
-                </div>
-
-                <p class="footer-note">Por siempre y para siempre, Tuyo ❤️</p>
-            </section>
-
-            <!-- 2. SECCIÓN RECUERDOS (FOTOS Y VIDEOS) -->
-            <section id="recuerdos" class="mem-section">
-                <h2>Nuestros Recuerdos 💞</h2>
-                <div class="memories-grid">
-                    <!-- 7 Fotos -->
-                    <div class="memory-card" onclick="openMediaModal('image', 'foto1.jpg')">
-                        <img src="foto1.jpg" alt="Viajaría miles de millas" />
-                        <div class="memory-caption">“Viajaría miles de millas” 💜</div>
-                    </div>
-
-                    <div class="memory-card" onclick="openMediaModal('image', 'foto2.jpg')">
-                        <img src="foto2.jpg" alt="Juntos frente al espejo" />
-                        <div class="memory-caption">Siempre mirándote oveo</div>
-                    </div>
-
-                    <div class="memory-card" onclick="openMediaModal('image', 'foto3.jpg')">
-                        <img src="foto3.jpg" alt="Selfie en el elevador" />
-                        <div class="memory-caption">facheritos </div>
-                    </div>
-
-                    <div class="memory-card" onclick="openMediaModal('image', 'foto4.jpg')">
-                        <img src="foto4.jpg" alt="Comiendo helado" />
-                        <div class="memory-caption">heladito 🍦</div>
-                    </div>
-
-                    <div class="memory-card" onclick="openMediaModal('image', 'foto5.jpg')">
-                        <img src="foto5.jpg" alt="Lleno de tus besos" />
-                        <div class="memory-caption">Lleno de tus besos chiquita💋</div>
-                    </div>
-
-                    <div class="memory-card" onclick="openMediaModal('image', 'foto6.jpg')">
-                        <img src="foto6.jpg" alt="Paseo en la naturaleza" />
-                        <div class="memory-caption">.</div>
-                    </div>
-
-                    <div class="memory-card" onclick="openMediaModal('image', 'foto7.jpg')">
-                        <img src="foto7.jpg" alt="Risas con la serpiente" />
-                        <div class="memory-caption">casi morimos gg</div>
-                    </div>
-
-                    <!-- 2 Videos -->
-                    <div class="memory-card" onclick="openMediaModal('video', 'video1.mp4')">
-                        <video src="video1.mp4" muted loop playsinline onmouseover="this.play()" onmouseout="this.pause()"></video>
-                        <div class="memory-caption"> Cantando juntos</div>
-                    </div>
-
-                    <div class="memory-card" onclick="openMediaModal('video', 'video2.mp4')">
-                        <video src="video2.mp4" muted loop playsinline onmouseover="this.play()" onmouseout="this.pause()"></video>
-                        <div class="memory-caption">En el cerro coronel (Clic para ver)</div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 3. SECCIÓN GALERÍA 3D -->
-            <section id="galeria" class="mem-section">
-                <h2>Galería 🌸</h2>
-                <div class="gallery-wrapper">
-                    <div class="carousel">
-                        <div class="carousel-item"><img src="foto1.jpg" alt="Foto 1" /></div>
-                        <div class="carousel-item"><img src="foto2.jpg" alt="Foto 2" /></div>
-                        <div class="carousel-item"><img src="foto3.jpg" alt="Foto 3" /></div>
-                        <div class="carousel-item"><img src="foto4.jpg" alt="Foto 4" /></div>
-                        <div class="carousel-item"><img src="foto5.jpg" alt="Foto 5" /></div>
-                        <div class="carousel-item"><img src="foto6.jpg" alt="Foto 6" /></div>
-                        <div class="carousel-item"><img src="foto7.jpg" alt="Foto 7" /></div>
-                        <div class="carousel-item"><video src="video1.mp4" autoplay muted loop playsinline></video></div>
-                        <div class="carousel-item"><video src="video2.mp4" autoplay muted loop playsinline></video></div>
-                    </div>
-                </div>
-                <p class="gallery-hint">✨ Pasa el cursor o toca la galería para pausar el giro ✨</p>
-            </section>
-
-            <!-- 4. SECCIÓN MENSAJE -->
-            <section id="mensaje" class="mem-section">
-                <div class="message-card">
-                    <h2>¡Feliz Cumpleaños amorchisssssssss! 💖</h2>
-                    <h3>Querido amor mío,</h3>
-                    <p>
-                        Te amo muchísimo. Gracias por estar siempre ahí para mí, por comprenderme, perdonarme, cuidarme y amarme de una manera tan incondicional. A pesar de que claramente no se como amar bien o la distancia, siempre salimos adelante juntos.
-                    </p>
-                    <p>
-                        Cada recuerdo a tu lado es mi favorito, por eso siempre seras mi recuerdo favorito: desde comer un helado juntos, llenarme la cara de besos, gritar en vez de cantar “La Puerta es el Amor”, reírnos con una serpiente en los hombros o simplemente ver toda la ciudad desde lo alto del cerro coronel viendo esa sonrisa.
-                    </p>
-                    <p>
-                        Me haces sentir la persona más afortunada del mundo por tener a alguien tan tierna, hermosa y única como tú. Prometo esforzarme cada día para ser mejor para ti, apoyarte en todo lo que hagas y cuidarte siempre.
-                    </p>
-                    <p>
-                        <strong>Te amo hoy, mañana y siempre, mi niña hermosa. ❤️</strong>
-                    </p>
-                </div>
-            </section>
-
-            <!-- 5. SECCIÓN 100 RAZONES -->
-            <section id="razones" class="mem-section">
-                <h2>100 razones por las que te amo</h2>
-                <div id="reasons-container" class="reasons-grid"></div>
-            </section>
-        </main>
+        <div class="galaxy-hint">
+            💖 Toca las frases o dibujos para cartas secretas • A lo lejos busca a <span class="hint-badge-urano">🪐 Urano</span> para sus 100 apodos • Desliza para orbitar ✨
+        </div>
     </div>
 
-    <!-- MODAL / LIGHTBOX PARA AMPLIAR FOTOS Y VIDEOS DE RECUERDOS -->
+    <!-- ========================================================
+         PANTALLA 3: MESA DE RECUERDOS (OBJETOS ESTILO LA IMAGEN)
+         ======================================================== -->
+    <div id="table-screen" class="screen">
+        <div class="wood-table-background"></div>
+
+        <header class="wood-table-header">
+            <h2 class="wood-header-title">Nuestra Mesa de Recuerdos 🌸</h2>
+            <button class="btn-back-galaxy" onclick="backToGalaxyFromTable()">
+                🪐 Volver a la Galaxia
+            </button>
+        </header>
+
+        <div class="wood-table-grid" id="wood-table-grid">
+            <!-- 1. La carta -->
+            <div class="wood-item-card" onclick="openSectionFromItem('section-carta', this)">
+                <div class="wood-item-visual">
+                    <svg viewBox="0 0 100 80" width="100%" height="100%">
+                        <rect x="5" y="10" width="90" height="60" rx="6" fill="#f5ede2" stroke="#d5beaa" stroke-width="2"/>
+                        <path d="M5 10 L50 45 L95 10" fill="none" stroke="#d5beaa" stroke-width="2"/>
+                        <circle cx="50" cy="45" r="11" fill="#c2185b" stroke="#ad1457" stroke-width="1.5"/>
+                        <circle cx="50" cy="45" r="6" fill="#e91e63"/>
+                    </svg>
+                </div>
+                <div class="wood-item-label">La carta</div>
+            </div>
+
+            <!-- 2. Lo que amo de ti -->
+            <div class="wood-item-card" onclick="openSectionFromItem('section-razones', this)">
+                <div class="wood-item-visual">
+                    <svg viewBox="0 0 100 100" width="100%" height="100%">
+                        <!-- Ramo de flores -->
+                        <path d="M38 65 L48 95 L52 95 L62 65 Z" fill="#8d6e63" stroke="#5d4037" stroke-width="2"/>
+                        <circle cx="50" cy="45" r="14" fill="#ffffff" stroke="#e0e0e0" stroke-width="1.5"/>
+                        <circle cx="36" cy="40" r="12" fill="#fff9c4" stroke="#fff59d" stroke-width="1.5"/>
+                        <circle cx="64" cy="40" r="12" fill="#f8bbd0" stroke="#f48fb1" stroke-width="1.5"/>
+                        <circle cx="42" cy="28" r="11" fill="#ffffff" stroke="#e0e0e0" stroke-width="1.5"/>
+                        <circle cx="58" cy="28" r="11" fill="#ffffff" stroke="#e0e0e0" stroke-width="1.5"/>
+                        <circle cx="50" cy="45" r="4" fill="#ffd54f"/>
+                    </svg>
+                </div>
+                <div class="wood-item-label">Lo que amo de ti</div>
+            </div>
+
+            <!-- 3. Nuestra historia -->
+            <div class="wood-item-card" onclick="openSectionFromItem('section-historia', this)">
+                <div class="wood-item-visual">
+                    <svg viewBox="0 0 90 100" width="100%" height="100%">
+                        <rect x="15" y="10" width="65" height="80" rx="5" fill="#4a6b57" stroke="#365040" stroke-width="2"/>
+                        <rect x="10" y="10" width="10" height="80" rx="3" fill="#365040"/>
+                        <path d="M70 20 L70 42 L65 37 L60 42 L60 20 Z" fill="#f8bbd0"/>
+                        <line x1="30" y1="35" x2="65" y2="35" stroke="#ffffff" stroke-width="2" opacity="0.6"/>
+                        <line x1="30" y1="45" x2="55" y2="45" stroke="#ffffff" stroke-width="2" opacity="0.6"/>
+                    </svg>
+                </div>
+                <div class="wood-item-label">Nuestra historia</div>
+            </div>
+
+            <!-- 4. Nuestras fotos -->
+            <div class="wood-item-card" onclick="openSectionFromItem('section-fotos', this)">
+                <div class="wood-item-visual">
+                    <svg viewBox="0 0 100 100" width="100%" height="100%">
+                        <g transform="rotate(-8 50 50)">
+                            <rect x="18" y="15" width="55" height="68" rx="4" fill="#ffffff" stroke="#e0e0e0"/>
+                            <rect x="23" y="20" width="45" height="45" fill="#212121"/>
+                        </g>
+                        <g transform="rotate(7 50 50)">
+                            <rect x="28" y="15" width="55" height="68" rx="4" fill="#ffffff" stroke="#e0e0e0"/>
+                            <rect x="33" y="20" width="45" height="45" fill="#ff80ab"/>
+                            <circle cx="55" cy="42" r="12" fill="#ff4081"/>
+                        </g>
+                    </svg>
+                </div>
+                <div class="wood-item-label">Nuestras fotos</div>
+            </div>
+
+            <!-- 5. Nuestra fecha -->
+            <div class="wood-item-card" onclick="openSectionFromItem('section-fecha', this)">
+                <div class="wood-item-visual">
+                    <svg viewBox="0 0 90 100" width="100%" height="100%">
+                        <rect x="15" y="20" width="60" height="72" rx="4" fill="#fffdfa" stroke="#d7ccc8" stroke-width="1.5"/>
+                        <rect x="32" y="12" width="26" height="14" rx="3" fill="#bcaaa4" stroke="#8d6e63" stroke-width="2"/>
+                        <circle cx="45" cy="19" r="3" fill="#ffffff"/>
+                        <line x1="25" y1="42" x2="65" y2="42" stroke="#e0e0e0" stroke-width="2"/>
+                        <line x1="25" y1="55" x2="65" y2="55" stroke="#e0e0e0" stroke-width="2"/>
+                        <line x1="25" y1="68" x2="50" y2="68" stroke="#ff4081" stroke-width="2"/>
+                    </svg>
+                </div>
+                <div class="wood-item-label">Nuestra fecha</div>
+            </div>
+
+            <!-- 6. Nuestros lugares -->
+            <div class="wood-item-card" onclick="openSectionFromItem('section-lugares', this)">
+                <div class="wood-item-visual">
+                    <svg viewBox="0 0 100 90" width="100%" height="100%">
+                        <!-- Mapa doblado -->
+                        <rect x="10" y="15" width="80" height="60" rx="3" fill="#efebe9" stroke="#bcaaa4" stroke-width="2"/>
+                        <path d="M37 15 L37 75 M63 15 L63 75" stroke="#d7ccc8" stroke-dasharray="3,3"/>
+                        <path d="M25 45 Q50 30 75 55" fill="none" stroke="#ff4081" stroke-width="2.5"/>
+                        <!-- Brújula -->
+                        <circle cx="70" cy="55" r="14" fill="#fff8e1" stroke="#ffb300" stroke-width="2"/>
+                        <polygon points="70,44 74,55 70,52 66,55" fill="#f44336"/>
+                        <polygon points="70,66 74,55 70,58 66,55" fill="#37474f"/>
+                    </svg>
+                </div>
+                <div class="wood-item-label">Nuestros lugares</div>
+            </div>
+
+            <!-- 7. Nuestros sueños -->
+            <div class="wood-item-card" onclick="openSectionFromItem('section-suenos', this)">
+                <div class="wood-item-visual">
+                    <svg viewBox="0 0 90 100" width="100%" height="100%">
+                        <!-- Diente de león -->
+                        <line x1="45" y1="45" x2="45" y2="92" stroke="#81c784" stroke-width="3" stroke-linecap="round"/>
+                        <circle cx="45" cy="42" r="5" fill="#aed581"/>
+                        <circle cx="45" cy="42" r="22" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="3,4" opacity="0.8"/>
+                        <circle cx="45" cy="42" r="14" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="2,3"/>
+                        <!-- Semillitas flotando -->
+                        <circle cx="68" cy="24" r="2" fill="#ffffff"/>
+                        <circle cx="74" cy="35" r="1.5" fill="#ffffff"/>
+                        <circle cx="28" cy="20" r="1.5" fill="#ffffff"/>
+                    </svg>
+                </div>
+                <div class="wood-item-label">Nuestros sueños</div>
+            </div>
+
+            <!-- 8. Nuestra canción & Playlist -->
+            <div class="wood-item-card" onclick="openSectionFromItem('section-musica', this)">
+                <div class="wood-item-visual">
+                    <svg viewBox="0 0 100 100" width="100%" height="100%">
+                        <!-- Disco de vinilo -->
+                        <circle cx="50" cy="50" r="42" fill="#151515" stroke="#333333" stroke-width="2"/>
+                        <circle cx="50" cy="50" r="34" fill="none" stroke="#252525" stroke-width="1.5"/>
+                        <circle cx="50" cy="50" r="26" fill="none" stroke="#252525" stroke-width="1.5"/>
+                        <circle cx="50" cy="50" r="16" fill="#ff4081"/>
+                        <circle cx="50" cy="50" r="4" fill="#ffffff"/>
+                    </svg>
+                </div>
+                <div class="wood-item-label">Nuestra canción</div>
+            </div>
+
+            <!-- 9. Buzón de sugerencias a nahimuchija@gmail.com -->
+            <div class="wood-item-card" onclick="openSectionFromItem('section-buzon', this)">
+                <div class="wood-item-visual">
+                    <svg viewBox="0 0 100 100" width="100%" height="100%">
+                        <!-- Buzón postal vintage -->
+                        <rect x="25" y="25" width="50" height="60" rx="8" fill="#e91e63" stroke="#c2185b" stroke-width="2"/>
+                        <rect x="35" y="38" width="30" height="6" rx="2" fill="#ffffff"/>
+                        <line x1="50" y1="85" x2="50" y2="98" stroke="#880e4f" stroke-width="4"/>
+                        <text x="50" y="66" fill="#ffffff" font-size="16" text-anchor="middle" font-family="sans-serif">📬</text>
+                    </svg>
+                </div>
+                <div class="wood-item-label">Buzón de amor</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         CONTENEDOR DE SECCIÓN DETALLADA
+         ======================================================== -->
+    <div id="section-modal-container">
+        <div class="section-header-bar">
+            <button class="btn-close-section" onclick="closeSectionModal()">
+                ← Volver a la mesa
+            </button>
+        </div>
+
+        <!-- 1. DETALLE LA CARTA -->
+        <div id="section-carta" class="section-inner-content">
+            <h2 class="section-hero-title">Mi Carta Para Ti 💖</h2>
+            <p class="section-hero-subtitle">Las palabras que guardo en el corazón cada vez que pienso en ti.</p>
+
+            <div class="parchment-letter-card">
+                <h3>Mi niña hermosa,</h3>
+                <p>
+                    Desde aquel día en que comenzamos a hablar, algo en mi vida cambió por completo. Pasar de ser mejores amigos durante 7 años, compartiendo horas jugando, desveladas y risas, a darme cuenta de que eras el amor de mi vida, es lo más mágico que me ha pasado.
+                </p>
+                <p>
+                    La distancia entre Chihuahua y Morelos jamás fue rival para lo que construimos. Verte sonreír cuando comemos helado, escuchar cómo cantas conmigo, o simplemente recordar el cerro coronel viendo la ciudad juntos... me hace sentir el hombre más afortunado del universo.
+                </p>
+                <p>
+                    Prometo cuidarte, respetarte, apoyarte en cada sueño y amarte hoy, mañana y siempre. Feliz cumpleaños, mi mujercita preciosa.
+                </p>
+                <div class="parchment-sign">
+                    Por siempre tuyo,<br>Nahim ❤️
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. DETALLE 100 RAZONES -->
+        <div id="section-razones" class="section-inner-content">
+            <h2 class="section-hero-title">100 Razones Por Las Que Te Amo 🌸</h2>
+            <p class="section-hero-subtitle">Cien pedacitos de ti que me enamoran todos los días.</p>
+            
+            <div class="reasons-search-box">
+                <input type="text" id="reasons-filter-input" class="reasons-search-input" placeholder="🔍 Buscar una razón..." oninput="filterReasons(this.value)">
+            </div>
+
+            <div id="reasons-cards-container" class="reasons-grid-modern"></div>
+        </div>
+
+        <!-- 3. DETALLE NUESTRA HISTORIA -->
+        <div id="section-historia" class="section-inner-content">
+            <h2 class="section-hero-title">Nuestra Historia de Amor 📖</h2>
+            <p class="section-hero-subtitle">Cómo dos mejores amigos se convirtieron en almas gemelas.</p>
+
+            <div class="parchment-letter-card" style="margin-bottom: 24px;">
+                <h3 style="color: #7b1fa2;">🎮 Los 7 Años de Amistad</h3>
+                <p>
+                    Empezamos como dos chicos jugando videojuegos, compartiendo memes y desvelándonos en llamadas. Eras mi confidente, la persona a la que le contaba todo y con quien el tiempo simplemente no existía.
+                </p>
+            </div>
+
+            <div class="parchment-letter-card" style="margin-bottom: 24px;">
+                <h3 style="color: #ff2a85;">✈️ Venciendo la Distancia</h3>
+                <p>
+                    De Chihuahua a Jiutepec hay cientos de kilómetros, pero ni uno solo pudo enfriar lo que sentimos. Cada viaje, cada abrazo en el aeropuerto y cada despedida solo nos demostró que nuestro amor es real y para siempre.
+                </p>
+            </div>
+
+            <div class="parchment-letter-card">
+                <h3 style="color: #00b0ff;">🏔️ Nuestro Presente y Futuro</h3>
+                <p>
+                    Hoy celebramos tus 20 años ("viejita mía") y todo lo que hemos superado. No importa los obstáculos que vengan, seguimos juntos, de la mano y más enamorados que nunca.
+                </p>
+            </div>
+        </div>
+
+        <!-- 4. DETALLE NUESTRAS FOTOS & VIDEOS -->
+        <div id="section-fotos" class="section-inner-content">
+            <h2 class="section-hero-title">Nuestras Fotos & Momentos 📸</h2>
+            <p class="section-hero-subtitle">Toca cualquier polaroid para verla en grande.</p>
+
+            <div class="memories-grid-new">
+                <div class="polaroid-card" onclick="openMediaModal('image', 'foto1.jpg')">
+                    <div class="polaroid-img-wrapper"><img src="foto1.jpg" alt="Foto 1"></div>
+                    <div class="polaroid-caption">Viajaría miles de millas 💜</div>
+                </div>
+                <div class="polaroid-card" onclick="openMediaModal('image', 'foto2.jpg')">
+                    <div class="polaroid-img-wrapper"><img src="foto2.jpg" alt="Foto 2"></div>
+                    <div class="polaroid-caption">Siempre mirándote oveo 👀</div>
+                </div>
+                <div class="polaroid-card" onclick="openMediaModal('image', 'foto3.jpg')">
+                    <div class="polaroid-img-wrapper"><img src="foto3.jpg" alt="Foto 3"></div>
+                    <div class="polaroid-caption">Facheritos en el espejo ✨</div>
+                </div>
+                <div class="polaroid-card" onclick="openMediaModal('image', 'foto4.jpg')">
+                    <div class="polaroid-img-wrapper"><img src="foto4.jpg" alt="Foto 4"></div>
+                    <div class="polaroid-caption">Heladito juntos 🍦</div>
+                </div>
+                <div class="polaroid-card" onclick="openMediaModal('image', 'foto5.jpg')">
+                    <div class="polaroid-img-wrapper"><img src="foto5.jpg" alt="Foto 5"></div>
+                    <div class="polaroid-caption">Lleno de tus besos chiquita 💋</div>
+                </div>
+                <div class="polaroid-card" onclick="openMediaModal('image', 'foto6.jpg')">
+                    <div class="polaroid-img-wrapper"><img src="foto6.jpg" alt="Foto 6"></div>
+                    <div class="polaroid-caption">Paseo de la mano 🌿</div>
+                </div>
+                <div class="polaroid-card" onclick="openMediaModal('image', 'foto7.jpg')">
+                    <div class="polaroid-img-wrapper"><img src="foto7.jpg" alt="Foto 7"></div>
+                    <div class="polaroid-caption">Casi morimos con la serpiente gg 🐍</div>
+                </div>
+                <div class="polaroid-card" onclick="openMediaModal('video', 'video1.mp4')">
+                    <div class="polaroid-img-wrapper">
+                        <video src="video1.mp4" muted loop playsinline></video>
+                    </div>
+                    <div class="polaroid-caption">Cantando a todo pulmón 🎤</div>
+                </div>
+                <div class="polaroid-card" onclick="openMediaModal('video', 'video2.mp4')">
+                    <div class="polaroid-img-wrapper">
+                        <video src="video2.mp4" muted loop playsinline></video>
+                    </div>
+                    <div class="polaroid-caption">En el cerro coronel ⛰️</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. DETALLE NUESTRA FECHA (CONTADOR) -->
+        <div id="section-fecha" class="section-inner-content">
+            <h2 class="section-hero-title">El Tiempo a Tu Lado 🗓️</h2>
+            <p class="section-hero-subtitle">Cada segundo juntos cuenta y se guarda para siempre.</p>
+
+            <div class="love-counter-box">
+                <h3 style="color: #ff6ea7; font-size: 20px;">Llevamos amándonos:</h3>
+                
+                <div class="counter-units-row">
+                    <div class="counter-unit-col">
+                        <div class="counter-val" id="cnt-days">2555+</div>
+                        <div class="counter-label">Días</div>
+                    </div>
+                    <div class="counter-unit-col">
+                        <div class="counter-val" id="cnt-hours">18</div>
+                        <div class="counter-label">Horas</div>
+                    </div>
+                    <div class="counter-unit-col">
+                        <div class="counter-val" id="cnt-mins">42</div>
+                        <div class="counter-label">Minutos</div>
+                    </div>
+                    <div class="counter-unit-col">
+                        <div class="counter-val" id="cnt-secs">09</div>
+                        <div class="counter-label">Segundos</div>
+                    </div>
+                </div>
+
+                <p style="color: #ecd7f0; font-size: 14px; max-width: 500px; margin: 16px auto 0;">
+                    7 años conociéndonos y toda una vida por delante para seguir sumando recuerdos juntos ❤️
+                </p>
+            </div>
+        </div>
+
+        <!-- 6. DETALLE NUESTROS LUGARES -->
+        <div id="section-lugares" class="section-inner-content">
+            <h2 class="section-hero-title">Nuestros Lugares Especiales 🧭</h2>
+            <p class="section-hero-subtitle">El mapa de donde nuestro amor dejó huella.</p>
+
+            <div class="reasons-grid-modern">
+                <div class="parchment-letter-card">
+                    <h4 style="color: #e91e63; font-size: 18px; margin-bottom: 6px;">📍 Chihuahua</h4>
+                    <p style="font-size: 14px; color: #442a34;">El punto de encuentro donde te abracé y te presumí mi ciudad, comiendo helado y caminando juntos.</p>
+                </div>
+                <div class="parchment-letter-card">
+                    <h4 style="color: #e91e63; font-size: 18px; margin-bottom: 6px;">⛰️ Cerro Coronel</h4>
+                    <p style="font-size: 14px; color: #442a34;">En la cima de la ciudad, mirando las luces y sintiendo que contigo puedo conquistar el mundo.</p>
+                </div>
+                <div class="parchment-letter-card">
+                    <h4 style="color: #e91e63; font-size: 18px; margin-bottom: 6px;">📍 Jiutepec, Morelos</h4>
+                    <p style="font-size: 14px; color: #442a34;">Tu hogar, donde fui a buscarte porque ningún mapa tiene suficientes kilómetros para frenar lo que siento.</p>
+                </div>
+                <div class="parchment-letter-card">
+                    <h4 style="color: #e91e63; font-size: 18px; margin-bottom: 6px;">🏠 Nuestro Futuro Hogar</h4>
+                    <p style="font-size: 14px; color: #442a34;">El lugar que algún día construiremos juntos, donde ya no habrá boletos de avión ni despedidas tristes.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. DETALLE NUESTROS SUEÑOS -->
+        <div id="section-suenos" class="section-inner-content">
+            <h2 class="section-hero-title">Nuestros Sueños Juntos 🌼</h2>
+            <p class="section-hero-subtitle">Las metas y aventuras que vamos a cumplir de la mano.</p>
+
+            <div class="reasons-grid-modern">
+                <div class="reason-card-pill"><span>✈️</span> Viajar juntos a la playa y ver el atardecer</div>
+                <div class="reason-card-pill"><span>🏡</span> Vivir juntos en nuestra propia casita</div>
+                <div class="reason-card-pill"><span>🐶</span> Adoptar una mascota consentida</div>
+                <div class="reason-card-pill"><span>🎤</span> Ir a cantar a los conciertos de nuestros artistas</div>
+                <div class="reason-card-pill"><span>🍕</span> Aprender a cocinar recetas ricas juntos</div>
+                <div class="reason-card-pill"><span>👵👴</span> Llegar a viejitos y seguir amándonos igual</div>
+            </div>
+        </div>
+
+        <!-- 8. DETALLE SALA DE MÚSICA & SPOTIFY (CON NSQK, WOS, TRUENO) -->
+        <div id="section-musica" class="section-inner-content">
+            <h2 class="section-hero-title">Nuestra Sala de Música 🎶</h2>
+            <p class="section-hero-subtitle">Todas las canciones que nos definen: NSQK, WOS, Trueno y nuestras románticas.</p>
+
+            <!-- SECCIÓN SPOTIFY VINCULADA -->
+            <div class="spotify-link-box">
+                <div class="spotify-cta-text">
+                    <h4>🟢 Escuchar y vincular con Spotify</h4>
+                    <p>Abre directamente tu playlist favorita o escucha aquí mismo en la página.</p>
+                </div>
+                <a href="https://open.spotify.com" target="_blank" class="btn-open-spotify-app">
+                    <span>🟢</span> Abrir en Spotify
+                </a>
+            </div>
+
+            <!-- FILTRO DE GÉNEROS -->
+            <div class="music-genres-nav">
+                <button class="genre-pill-btn active" onclick="filterMusicGenre('all', this)">Todas (44)</button>
+                <button class="genre-pill-btn" onclick="filterMusicGenre('nsqk', this)">NSQK 🎧</button>
+                <button class="genre-pill-btn" onclick="filterMusicGenre('wos', this)">WOS 🎤</button>
+                <button class="genre-pill-btn" onclick="filterMusicGenre('trueno', this)">Trueno ⚡</button>
+                <button class="genre-pill-btn" onclick="filterMusicGenre('romanticas', this)">Románticas 💖</button>
+            </div>
+
+            <div id="song-cards-container" class="song-list-grid"></div>
+        </div>
+
+        <!-- 9. DETALLE BUZÓN DE SUGERENCIAS (A nahimuchija@gmail.com) -->
+        <div id="section-buzon" class="section-inner-content">
+            <h2 class="section-hero-title">Buzón de Amor Para Nahim 📬</h2>
+            <p class="section-hero-subtitle">Escribe lo que quieras mi amor: una cita, un antojo o una cartita. Le llegará directamente a su correo personal.</p>
+
+            <div class="mailbox-card">
+                <form id="love-mailbox-form" onsubmit="submitLoveMailbox(event)">
+                    <div class="form-group">
+                        <label class="form-label">¿Cómo quieres firmar hoy?</label>
+                        <input type="text" id="mb-author" class="form-input" placeholder="Ej: Tu mujercita hermosa, Gigi, Botoncito..." value="Gigi ❤️" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">¿De qué se trata tu mensajito?</label>
+                        <select id="mb-subject-type" class="form-select">
+                            <option value="Cita o plan que se me antojó 🍦">Una cita o plan que se me antojó 🍦</option>
+                            <option value="Cartita de amor sorpresa 💌">Una cartita de amor sorpresa 💌</option>
+                            <option value="Tengo un capricho o antojo 😋">Tengo un capricho o antojo 😋</option>
+                            <option value="Quiero mimitos y abrazos 🥺">Quiero mimitos y abrazos 🥺</option>
+                            <option value="Sugerencia para nuestra página web 💻">Sugerencia para nuestra página web 💻</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Escribe aquí todo lo que quieras decirle:</label>
+                        <textarea id="mb-message" class="form-textarea" placeholder="Dime lo que sientes, lo que quieres que hagamos juntos, o cualquier cosa que quieras pedirme mi amor..." required></textarea>
+                    </div>
+
+                    <button type="submit" id="mb-submit-btn" class="btn-submit-mailbox">
+                        <span>💌</span> Enviar Mensajito a Nahim
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         MODAL DE CARTAS SECRETAS DE LA GALAXIA
+         ======================================================== -->
+    <div id="letter-modal" class="modal-overlay">
+        <div class="letter-card">
+            <button id="close-modal" class="close-card" onclick="closeLetterModal()">×</button>
+            <div id="letter-header" class="letter-title">Mi amor,</div>
+            <div id="letter-text" class="letter-body"></div>
+            <div id="letter-signature" class="letter-sign"></div>
+            <div id="card-counter" class="card-counter"></div>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         MODAL DE URANO: 100 APODOS EN ANILLO AZUL CELESTE
+         ======================================================== -->
+    <div id="urano-modal" class="modal-overlay">
+        <div class="urano-modal-card">
+            <button class="close-card" style="border-color: #80d8ff; color: #80d8ff;" onclick="closeUranoModal()">×</button>
+            <div class="urano-title">🪐 Urano: Los 100 Apodos Bonitos 💙</div>
+            <div class="urano-subtitle">
+                Los anillos de Urano están hechos de todos los nombres tiernos con los que mi corazón te llama. Cada vez que retrocedas, se separan y vuelven a girar eternamente.
+            </div>
+
+            <div id="urano-nicknames-container" class="nicknames-chips-wrap"></div>
+
+            <button class="btn-urano-close" onclick="closeUranoModal()">
+                ✨ Dejar que sigan orbitando en Urano
+            </button>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         LIGHTBOX PARA FOTOS Y VIDEOS
+         ======================================================== -->
     <div id="lightbox" class="lightbox" onclick="closeMediaModal()">
         <span class="close-lightbox">&times;</span>
         <div id="lightbox-body" class="lightbox-content" onclick="event.stopPropagation()"></div>
     </div>
 
-    <!-- VIÑETA FLOTANTE ESTILO SPOTIFY (ACTIVA EN GALAXIA Y EN RECUERDOS) -->
+    <!-- ========================================================
+         WIDGET FLOTANTE SPOTIFY
+         ======================================================== -->
     <div id="spotify-widget" class="spotify-widget">
         <div class="sp-header">
             <div class="sp-badge">
                 <span>🟢</span>
-                <span>Playlist para Gigi ❤️</span>
+                <span>Playlist Para Gigi ❤️</span>
             </div>
             <div class="sp-header-btns">
-                <button id="sp-toggle-list" class="sp-icon-btn" title="Ver canciones">📋 Lista</button>
-                <button id="sp-minimize" class="sp-icon-btn" title="Ocultar viñeta">Ocultar —</button>
+                <button id="sp-minimize" class="sp-icon-btn" onclick="minimizeSpotifyWidget()">Ocultar —</button>
             </div>
         </div>
 
@@ -1230,48 +2266,35 @@
                 </div>
             </div>
             <div class="sp-info">
-                <div id="sp-title" class="sp-title">Cargando playlist...</div>
+                <div id="sp-title" class="sp-title">Cargando música...</div>
                 <div id="sp-artist" class="sp-artist">Para mi Gigi ❤️</div>
-                <div id="sp-counter" class="sp-counter">Canción 1 de 29</div>
             </div>
         </div>
 
         <div class="sp-controls">
-            <button id="sp-prev" class="sp-ctrl-btn" title="Canción anterior">⏮</button>
-            <button id="sp-play" class="sp-ctrl-btn sp-play-btn" title="Reproducir / Pausar">⏸</button>
-            <button id="sp-next" class="sp-ctrl-btn" title="Siguiente canción">⏭</button>
+            <button class="sp-ctrl-btn" onclick="prevTrack()" title="Canción anterior">⏮</button>
+            <button id="sp-play" class="sp-ctrl-btn sp-play-btn" onclick="togglePlayMusic()" title="Pausar / Reproducir">▶</button>
+            <button class="sp-ctrl-btn" onclick="nextTrack()" title="Siguiente canción">⏭</button>
         </div>
 
         <div class="sp-volume-row">
             <span>🔉</span>
-            <input id="sp-volume" type="range" class="sp-volume-slider" min="0" max="100" value="70">
-            <span id="sp-vol-label" style="width: 32px; text-align: right;">70%</span>
+            <input id="sp-volume" type="range" class="sp-volume-slider" min="0" max="100" value="70" oninput="setSpotifyVolume(this.value)">
+            <span id="sp-vol-label" style="width: 28px; text-align: right;">70%</span>
         </div>
-
-        <div id="sp-playlist-drawer" class="sp-playlist-drawer"></div>
     </div>
 
-    <button id="spotify-mini-tab" class="spotify-mini-tab">
+    <button id="spotify-mini-tab" class="spotify-mini-tab" onclick="restoreSpotifyWidget()">
         <span>🎵</span>
-        <span>Playlist de Gigi</span>
+        <span>Música Gigi</span>
     </button>
 
-    <!-- MODAL DE CARTAS PERSONALIZADAS DE LA GALAXIA -->
-    <div id="letter-modal" class="modal-overlay">
-        <div class="letter-card">
-            <button id="close-modal" class="close-card">×</button>
-            <div id="letter-header" class="letter-title">Mi amor,</div>
-            <div id="letter-text" class="letter-body"></div>
-            <div id="letter-signature" class="letter-sign"></div>
-        </div>
-    </div>
+    <!-- NOTIFICACIÓN TOAST -->
+    <div id="toast-msg" class="toast-msg">¡Mensaje enviado con amor! 💌</div>
 
-    <!-- Librería Three.js, OrbitControls y API de YouTube -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://www.youtube.com/iframe_api"></script>
-
-    <!-- SHADERS EN GLSL (Con pocas partículas, limpias y sin lag) -->
+    <!-- ========================================================
+         SHADERS GLSL DE LA GALAXIA
+         ======================================================== -->
     <script id="vertexShader" type="x-shader/x-vertex">
         uniform float uTime;
         uniform float uSize;
@@ -1312,40 +2335,51 @@
         }
     </script>
 
+    <!-- ========================================================
+         LÓGICA JAVASCRIPT PRINCIPAL
+         ======================================================== -->
     <script>
         /* =========================================================
-           1. PLAYLIST COMPLETA DE 29 CANCIONES (CON RESPALDOS ANTI-BLOQUEO)
+           1. PLAYLIST EXPANDIDA (NSQK, WOS, TRUENO Y ROMÁNTICAS)
            ========================================================= */
         const playlist = [
-            { id: 'C0OXsyR2mMM', title: 'Catorce (Sinónimo de amor ♡)', artist: 'Sebastián Romero • oliver UnU' },
-            { id: 'WqKqj3Q1wrw', title: 'Eres mi recuerdo favorito', artist: 'Andrecito' },
-            { id: 'IYsQDbvfzrE', title: 'Quédate un minuto más', artist: 'Andrecito' },
-            { id: 'sVdxA0rFN5c', backups: ['SNGAd7rgec0', 'WgEw5Zfbeqg', 'x44rj5iPR20'], title: 'Te Alejas Más De Mí', artist: 'Esteman, Daniela Spalla' },
-            { id: '7AHcCUWQevg', backups: ['duyi3KWe5es', '0YLZMsgRL1k', 'mOrs6dKpppk', 'fsq5jz59AKQ'], title: 'Cafuné', artist: 'Micro TDH' },
-            { id: '7E9-c2Z6adU', title: 'Toda Esta Ciudad', artist: 'Kevin Kaarl' },
-            { id: 'UuD4gzxUcnc', title: 'Todavía duermo en mi lado de mi cama', artist: 'Andrecito' },
-            { id: 'sZpJ_4lj0y8', title: 'Me enamoré de alguien que también se enamoró', artist: '𝐴𝑛𝑎アナ' },
-            { id: 'Zd1Flawc1-I', title: 'Seguro Te Pierdo', artist: 'KID FLEX, Sergi' },
-            { id: 'WA05n3EKUQU', title: 'Enamorado Tuyo ❤️', artist: 'Cuarteto de Nos' },
-            { id: 'k1_4jrRwvjQ', title: 'Si tú supieras', artist: 'solamentedan' },
-            { id: 'n2Cld9aU1vU', title: 'Te Amo Y Más', artist: 'Diego Luna' },
-            { id: 'pHKfPt_fmDM', title: 'Iguales', artist: 'AmorGrande' },
-            { id: 'tJA_mxEIJ2E', title: 'Sexto Sentido', artist: '008RACCA' },
-            { id: 'KHBi-luZMq4', backups: ['9vDw0sqKruM', 'b0YyWYqCcbo', '4FjwWKmNeVg'], title: 'Mar', artist: 'Esteman ft. Jósean Log' },
-            { id: 'I7dgtVwFMps', title: 'Piel Morena', artist: 'Sous Sol' },
-            { id: 'YWeo5f60eP8', title: 'Morena', artist: 'Vitor Kley ft. Mariana Nolasco' },
-            { id: '2yHxI4g7bsg', title: 'Batman x Catwoman Rap', artist: 'Kronno Zomber' },
-            { id: 'MyZ5zIzqbHQ', title: 'Una tarde juntos', artist: 'Darviin' },
-            { id: 'AP5Y4Q4ZdUE', title: '99,99%', artist: 'El Riqué' },
-            { id: 'dnDMe4jSlDE', title: 'Canela', artist: 'Darviin' },
-            { id: '3TXnYMT9Ju8', title: 'Luciérnagas', artist: 'Milo J, Silvio Rodríguez' },
-            { id: 'c3aN6Tv4WLA', backups: ['Hmc2UKFNGzM', 'gWzjjbp_V64', 'kCkxviLkNok'], title: 'Alma Dinamita', artist: 'WOS' },
-            { id: 'E39rJACLXcE', title: 'La razón', artist: 'ROCKO' },
-            { id: 'MA5v9VNJ-2Q', backups: ['9t27ErTpe0I', '6Se4nwQtDs8', 'O8-Q6chPjQ0'], title: 'Okupa', artist: 'WOS' },
-            { id: '86EzBBQwloo', title: 'Dos Lunas', artist: 'Anthrés' },
-            { id: 'F4i3O7T488I', backups: ['z6KufiKMVKw', 'WdSEw73Vfyc', 'yx2ecYv4VZQ'], title: 'Ya Me Hiciste Mal', artist: 'Rayos Laser' },
-            { id: 'G2iKFUu1itI', title: 'Hasta Viejos', artist: 'Sebastián Romero ft. Les Cafeteres' },
-            { id: 'Ym99t7VTy0g', title: 'Si la noche es infinita como tú', artist: 'Anthrés' }
+            // Canciones originales favoritas
+            { id: 'C0OXsyR2mMM', title: 'Catorce (Sinónimo de amor ♡)', artist: 'Sebastián Romero', genre: 'romanticas' },
+            { id: 'WqKqj3Q1wrw', title: 'Eres mi recuerdo favorito', artist: 'Andrecito', genre: 'romanticas' },
+            { id: 'IYsQDbvfzrE', title: 'Quédate un minuto más', artist: 'Andrecito', genre: 'romanticas' },
+            { id: 'sVdxA0rFN5c', backups: ['SNGAd7rgec0', 'WgEw5Zfbeqg'], title: 'Te Alejas Más De Mí', artist: 'Esteman, Daniela Spalla', genre: 'romanticas' },
+            { id: '7AHcCUWQevg', backups: ['duyi3KWe5es', '0YLZMsgRL1k'], title: 'Cafuné', artist: 'Micro TDH', genre: 'romanticas' },
+            { id: '7E9-c2Z6adU', title: 'Toda Esta Ciudad', artist: 'Kevin Kaarl', genre: 'romanticas' },
+            { id: 'WA05n3EKUQU', title: 'Enamorado Tuyo ❤️', artist: 'Cuarteto de Nos', genre: 'romanticas' },
+            { id: 'n2Cld9aU1vU', title: 'Te Amo Y Más', artist: 'Diego Luna', genre: 'romanticas' },
+            { id: 'G2iKFUu1itI', title: 'Hasta Viejos', artist: 'Sebastián Romero', genre: 'romanticas' },
+            { id: 'Zd1Flawc1-I', title: 'Seguro Te Pierdo', artist: 'KID FLEX, Sergi', genre: 'romanticas' },
+            { id: '3TXnYMT9Ju8', title: 'Luciérnagas', artist: 'Milo J, Silvio Rodríguez', genre: 'romanticas' },
+            { id: '2yHxI4g7bsg', title: 'Batman x Catwoman Rap', artist: 'Kronno Zomber', genre: 'romanticas' },
+
+            // NSQK
+            { id: 'qXU5aM6H_yY', title: 'Si en tu mente estuve', artist: 'NSQK', genre: 'nsqk' },
+            { id: '8W02j8eYw3U', title: 'SÍSI', artist: 'NSQK', genre: 'nsqk' },
+            { id: 'h64UoPz8s-k', title: 'Árbol de Manzanas', artist: 'NSQK', genre: 'nsqk' },
+            { id: 'p4pB4JjFwZ8', title: 'LOVELANGUAGE', artist: 'NSQK', genre: 'nsqk' },
+            { id: 's2x_Pvh20J0', title: 'Algo Bien', artist: 'NSQK', genre: 'nsqk' },
+            { id: '0e46wSg_E3w', title: 'Bobo (ft. Álvaro Díaz)', artist: 'NSQK', genre: 'nsqk' },
+
+            // WOS
+            { id: 'G3gE5Y_4uVo', title: 'Melón Vino', artist: 'WOS', genre: 'wos' },
+            { id: 'iW2yYy4mQ20', title: 'Arrancármelo', artist: 'WOS', genre: 'wos' },
+            { id: 'c3aN6Tv4WLA', backups: ['Hmc2UKFNGzM', 'gWzjjbp_V64'], title: 'Alma Dinamita', artist: 'WOS', genre: 'wos' },
+            { id: 'MA5v9VNJ-2Q', backups: ['9t27ErTpe0I', '6Se4nwQtDs8'], title: 'Okupa', artist: 'WOS', genre: 'wos' },
+            { id: 'vR7JbKqPZ3s', title: 'Terraza', artist: 'WOS', genre: 'wos' },
+            { id: 'hZ4W7s4k-wY', title: 'Canguro', artist: 'WOS', genre: 'wos' },
+
+            // TRUENO
+            { id: 'wfWIs2gFTAM', title: 'Mamichula', artist: 'Trueno, Nicki Nicole, Bizarrap', genre: 'trueno' },
+            { id: 'e9mPqJ0G6m0', title: 'Feel Me??', artist: 'Trueno', genre: 'trueno' },
+            { id: '_b6gPz1N39U', title: 'Solo Por Vos', artist: 'Trueno', genre: 'trueno' },
+            { id: 'vR7K3X1_J0c', title: 'Dance Crip', artist: 'Trueno', genre: 'trueno' },
+            { id: 'f2lW0y_yq0M', title: 'Tranky Funky', artist: 'Trueno', genre: 'trueno' },
+            { id: 'Xl3B9W2K58Y', title: 'Real Gangsta Love', artist: 'Trueno', genre: 'trueno' }
         ];
 
         let ytPlayer = null;
@@ -1357,43 +2391,28 @@
 
         const spWidget = document.getElementById('spotify-widget');
         const spMiniTab = document.getElementById('spotify-mini-tab');
-        const spMinimizeBtn = document.getElementById('sp-minimize');
-        const spToggleListBtn = document.getElementById('sp-toggle-list');
-        const spDrawer = document.getElementById('sp-playlist-drawer');
         const spCover = document.getElementById('sp-cover');
         const spTitle = document.getElementById('sp-title');
         const spArtist = document.getElementById('sp-artist');
-        const spCounter = document.getElementById('sp-counter');
-        const spPrevBtn = document.getElementById('sp-prev');
         const spPlayBtn = document.getElementById('sp-play');
-        const spNextBtn = document.getElementById('sp-next');
         const spVolume = document.getElementById('sp-volume');
         const spVolLabel = document.getElementById('sp-vol-label');
-
-        function renderPlaylistDrawer() {
-            spDrawer.innerHTML = '';
-            playlist.forEach((song, idx) => {
-                const item = document.createElement('div');
-                item.className = 'sp-track-item' + (idx === currentTrack ? ' active' : '');
-                item.innerHTML = `<span>${idx + 1}. ${song.title}</span><span>▶</span>`;
-                item.addEventListener('click', () => {
-                    loadTrack(idx, true);
-                });
-                spDrawer.appendChild(item);
-            });
-        }
 
         function updatePlayerUI() {
             const song = playlist[currentTrack];
             spTitle.textContent = song.title;
             spArtist.textContent = song.artist;
-            spCounter.textContent = `Canción ${currentTrack + 1} de ${playlist.length}`;
             spCover.src = `https://i.ytimg.com/vi/${song.id}/mqdefault.jpg`;
             spPlayBtn.textContent = isPlayingMusic ? '⏸' : '▶';
-            renderPlaylistDrawer();
-        }
 
-        updatePlayerUI();
+            document.querySelectorAll('.song-card-item').forEach((item, idx) => {
+                if (parseInt(item.dataset.index, 10) === currentTrack) {
+                    item.classList.add('playing');
+                } else {
+                    item.classList.remove('playing');
+                }
+            });
+        }
 
         window.onYouTubeIframeAPIReady = function() {
             const vars = {
@@ -1432,12 +2451,9 @@
                         }
                     },
                     onError: () => {
-                        // Si un video oficial tiene bloqueo de inserción (Error 101/150), prueba sus respaldos con letra antes de saltar
                         const song = playlist[currentTrack];
                         if (song.backups && currentBackupIdx < song.backups.length) {
-                            const backupVideoId = song.backups[currentBackupIdx];
-                            currentBackupIdx++;
-                            ytPlayer.loadVideoById(backupVideoId);
+                            ytPlayer.loadVideoById(song.backups[currentBackupIdx++]);
                         } else {
                             nextTrack();
                         }
@@ -1452,106 +2468,104 @@
             updatePlayerUI();
             if (ytReady && ytPlayer && ytPlayer.loadVideoById) {
                 ytPlayer.loadVideoById(playlist[currentTrack].id);
-                if (!autoPlay) {
-                    ytPlayer.pauseVideo();
-                }
+                if (!autoPlay) ytPlayer.pauseVideo();
             }
         }
 
-        function nextTrack() {
-            loadTrack(currentTrack + 1, true);
-        }
+        function nextTrack() { loadTrack(currentTrack + 1, true); }
+        function prevTrack() { loadTrack(currentTrack - 1, true); }
 
-        function prevTrack() {
-            loadTrack(currentTrack - 1, true);
-        }
-
-        spNextBtn.addEventListener('click', nextTrack);
-        spPrevBtn.addEventListener('click', prevTrack);
-
-        spPlayBtn.addEventListener('click', () => {
+        function togglePlayMusic() {
             if (!ytReady || !ytPlayer) return;
             if (isPlayingMusic) {
                 ytPlayer.pauseVideo();
             } else {
                 ytPlayer.playVideo();
             }
-        });
+        }
 
-        spVolume.addEventListener('input', (e) => {
-            const val = parseInt(e.target.value, 10);
-            spVolLabel.textContent = `${val}%`;
+        function setSpotifyVolume(val) {
+            const num = parseInt(val, 10);
+            spVolLabel.textContent = `${num}%`;
             if (ytReady && ytPlayer && ytPlayer.setVolume) {
-                ytPlayer.setVolume(val);
+                ytPlayer.setVolume(num);
             }
-        });
+        }
 
-        spMinimizeBtn.addEventListener('click', () => {
+        function minimizeSpotifyWidget() {
             spWidget.classList.add('minimized');
             spMiniTab.classList.add('visible');
-        });
+        }
 
-        spMiniTab.addEventListener('click', () => {
+        function restoreSpotifyWidget() {
             spMiniTab.classList.remove('visible');
             spWidget.classList.remove('minimized');
-        });
+        }
 
-        spToggleListBtn.addEventListener('click', () => {
-            spDrawer.classList.toggle('open');
-        });
+        function renderSongsList(genre = 'all') {
+            const container = document.getElementById('song-cards-container');
+            container.innerHTML = '';
+
+            playlist.forEach((song, idx) => {
+                if (genre !== 'all' && song.genre !== genre) return;
+
+                const card = document.createElement('div');
+                card.className = 'song-card-item' + (idx === currentTrack ? ' playing' : '');
+                card.dataset.index = idx;
+                card.innerHTML = `
+                    <img class="song-thumb" src="https://i.ytimg.com/vi/${song.id}/mqdefault.jpg" alt="${song.title}">
+                    <div class="song-meta">
+                        <div class="song-name">${song.title}</div>
+                        <div class="song-sub">${song.artist}</div>
+                    </div>
+                    <span style="font-size: 14px; color: #ff4da6;">▶</span>
+                `;
+                card.onclick = () => loadTrack(idx, true);
+                container.appendChild(card);
+            });
+        }
+
+        function filterMusicGenre(genre, btnElem) {
+            document.querySelectorAll('.genre-pill-btn').forEach(b => b.classList.remove('active'));
+            btnElem.classList.add('active');
+            renderSongsList(genre);
+        }
 
         /* =========================================================
-           2. BUSCADOR AUTOMÁTICO DE 0926.mp4 PARA GITHUB PAGES
+           2. PANTALLA 0: EL SOBRE CON SELLO DE CERA
+           ========================================================= */
+        function openIntroEnvelope() {
+            const envelope = document.getElementById('envelope-elem');
+            if (envelope.classList.contains('opened')) return;
+
+            envelope.classList.add('opened');
+            
+            // Disparar confeti de amor
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 50,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#ff2a85', '#ff85c8', '#ffffff', '#ffd54f']
+                });
+            }
+        }
+
+        function goToVideoScreen() {
+            document.getElementById('envelope-screen').classList.remove('active');
+            document.getElementById('video-screen').classList.add('active');
+            
+            const video = document.getElementById('surprise-video');
+            video.play().catch(() => {});
+        }
+
+        /* =========================================================
+           3. VIDEO SCREEN Y SPIDERMAN SKIP
            ========================================================= */
         const surpriseVideo = document.getElementById('surprise-video');
         const playOverlay = document.getElementById('play-overlay');
         const playBtnInitial = document.getElementById('play-btn-initial');
         const heartButton = document.getElementById('heart-button');
-        const skipButton = document.getElementById('skip-button');
-        const videoScreen = document.getElementById('video-screen');
-        const galaxyScreen = document.getElementById('galaxy-screen');
-        const memoriesPageScreen = document.getElementById('memories-page-screen');
-        const kittyPeekBtn = document.getElementById('kitty-peek-btn');
-
-        let galaxyInitialized = false;
-
-        // Genera rutas alternativas por si GitHub Pages usa mayúsculas (.MP4) o Git LFS
-        const videoCandidates = ['./0926.mp4', '0926.MP4', './0926.MP4', 'video/0926.mp4'];
-        if (window.location.hostname.endsWith('github.io')) {
-            const user = window.location.hostname.split('.')[0];
-            const pathParts = window.location.pathname.split('/').filter(Boolean);
-            const repo = pathParts[0] || `${user}.github.io`;
-            videoCandidates.push(
-                `https://media.githubusercontent.com/media/${user}/${repo}/main/0926.mp4`,
-                `https://media.githubusercontent.com/media/${user}/${repo}/master/0926.mp4`,
-                `https://raw.githubusercontent.com/${user}/${repo}/main/0926.mp4`,
-                `https://raw.githubusercontent.com/${user}/${repo}/master/0926.mp4`,
-                `https://media.githubusercontent.com/media/${user}/${repo}/main/0926.MP4`
-            );
-        }
-
-        let candidateIndex = 0;
-        surpriseVideo.addEventListener('error', () => {
-            if (candidateIndex < videoCandidates.length) {
-                const nextUrl = videoCandidates[candidateIndex++];
-                surpriseVideo.src = nextUrl;
-                surpriseVideo.load();
-            } else {
-                // Si el video aún no está en GitHub, igual muestra el corazón para que pueda entrar a la sorpresa
-                heartButton.classList.add('visible');
-            }
-        });
-
-        window.addEventListener('load', () => {
-            const playPromise = surpriseVideo.play();
-            if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    playOverlay.classList.add('hidden');
-                }).catch(() => {
-                    playOverlay.classList.remove('hidden');
-                });
-            }
-        });
 
         playOverlay.addEventListener('click', () => {
             playOverlay.classList.add('hidden');
@@ -1569,8 +2583,6 @@
                 const timeLeft = surpriseVideo.duration - surpriseVideo.currentTime;
                 if (timeLeft <= 10) {
                     heartButton.classList.add('visible');
-                } else {
-                    heartButton.classList.remove('visible');
                 }
             }
         });
@@ -1579,22 +2591,16 @@
             heartButton.classList.add('visible');
         });
 
-        skipButton.addEventListener('click', () => {
-            playOverlay.classList.add('hidden');
-            if (surpriseVideo.duration && !isNaN(surpriseVideo.duration)) {
-                surpriseVideo.currentTime = Math.max(0, surpriseVideo.duration - 10);
-            } else {
-                surpriseVideo.currentTime = 312;
-            }
-            heartButton.classList.add('visible');
-            surpriseVideo.play().catch(() => {});
-        });
+        heartButton.addEventListener('click', skipToGalaxy);
 
-        // Al picarle al corazón rojo -> abre la Galaxia e inicia la Playlist
-        heartButton.addEventListener('click', () => {
+        function skipToGalaxy() {
             surpriseVideo.pause();
-            videoScreen.classList.remove('active');
-            galaxyScreen.classList.add('active');
+            
+            document.getElementById('envelope-screen').classList.remove('active');
+            document.getElementById('video-screen').classList.remove('active');
+            document.getElementById('table-screen').classList.remove('active');
+            document.getElementById('galaxy-screen').classList.add('active');
+
             spWidget.classList.add('unlocked');
 
             if (ytReady && ytPlayer && ytPlayer.playVideo) {
@@ -1607,91 +2613,210 @@
                 initGalaxy();
                 galaxyInitialized = true;
             }
-        });
+        }
 
-        // Al picarle a la Hello Kitty de la esquina superior derecha -> abre la página de Recuerdos
-        kittyPeekBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            letterModal.classList.remove('open');
-            galaxyScreen.classList.remove('active');
-            memoriesPageScreen.classList.add('active');
-        });
+        function goToTableScreen() {
+            surpriseVideo.pause();
+            document.getElementById('envelope-screen').classList.remove('active');
+            document.getElementById('video-screen').classList.remove('active');
+            document.getElementById('galaxy-screen').classList.remove('active');
+            document.getElementById('table-screen').classList.add('active');
 
-        // Botón para regresar de la página de Recuerdos a la Galaxia
-        function backToGalaxy() {
-            closeMediaModal();
-            memoriesPageScreen.classList.remove('active');
-            galaxyScreen.classList.add('active');
+            spWidget.classList.add('unlocked');
+
+            if (ytReady && ytPlayer && ytPlayer.playVideo) {
+                ytPlayer.playVideo();
+            } else {
+                startMusicWhenReady = true;
+            }
+        }
+
+        function backToGalaxyFromTable() {
+            document.getElementById('table-screen').classList.remove('active');
+            document.getElementById('galaxy-screen').classList.add('active');
+            if (!galaxyInitialized) {
+                initGalaxy();
+                galaxyInitialized = true;
+            }
         }
 
         /* =========================================================
-           3. LÓGICA DE LA PÁGINA "NUESTROS RECUERDOS"
+           4. MESA DE RECUERDOS: ANIMACIÓN AL CENTRO Y SECCIONES
            ========================================================= */
-        function showMemSection(sectionId, element) {
-            document.querySelectorAll('.mem-section').forEach(sec => sec.classList.remove('active'));
-            document.querySelectorAll('.mem-nav-link').forEach(link => link.classList.remove('active'));
+        function openSectionFromItem(sectionId, clickedElem) {
+            const container = document.getElementById('section-modal-container');
+            
+            // Animación de GSAP desde el elemento hacia el centro
+            if (typeof gsap !== 'undefined' && clickedElem) {
+                const rect = clickedElem.getBoundingClientRect();
+                const centerX = window.innerWidth / 2 - (rect.left + rect.width / 2);
+                const centerY = window.innerHeight / 2 - (rect.top + rect.height / 2);
 
-            document.getElementById(sectionId).classList.add('active');
-            element.classList.add('active');
-            memoriesPageScreen.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function openMediaModal(type, src) {
-            const lightbox = document.getElementById('lightbox');
-            const body = document.getElementById('lightbox-body');
-            if (type === 'image') {
-                body.innerHTML = `<img src="${src}" alt="Recuerdo" />`;
+                gsap.fromTo(clickedElem, 
+                    { x: 0, y: 0, scale: 1 },
+                    {
+                        x: centerX,
+                        y: centerY,
+                        scale: 1.6,
+                        duration: 0.45,
+                        ease: "power2.inOut",
+                        onComplete: () => {
+                            gsap.set(clickedElem, { x: 0, y: 0, scale: 1 });
+                            showSectionContent(sectionId);
+                        }
+                    }
+                );
             } else {
-                body.innerHTML = `<video src="${src}" controls autoplay playsinline></video>`;
+                showSectionContent(sectionId);
             }
-            lightbox.classList.add('open');
         }
 
-        function closeMediaModal() {
-            const lightbox = document.getElementById('lightbox');
-            const body = document.getElementById('lightbox-body');
-            body.innerHTML = '';
-            lightbox.classList.remove('open');
+        function showSectionContent(sectionId) {
+            const container = document.getElementById('section-modal-container');
+            document.querySelectorAll('.section-inner-content').forEach(s => s.classList.remove('active'));
+            
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) targetSection.classList.add('active');
+            
+            container.classList.add('active');
+            container.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        function closeSectionModal() {
+            document.getElementById('section-modal-container').classList.remove('active');
+        }
+
+        /* =========================================================
+           5. 100 RAZONES POR LAS QUE TE AMO
+           ========================================================= */
         const razones = [
-            "Tu sonrisa", "Tus ojos", "Tu risa", "Tu corazón",
-            "Tu ternura", "Tu felicidad", "Tus abrazos", "Tu voz",
-            "Tu amor", "Tu bondad", "Tu toque", "Tu calidez",
-            "Tu paciencia", "Tu lealtad", "Tu energía", "Tu sentido del humor",
-            "Tu belleza", "Tu estilo", "Tu honestidad", "Tu optimismo",
-            "Tu dulzura", "Tu fuerza", "Tu pasión", "Tu valentía",
-            "Tu lado divertido", "Tu apoyo incondicional", "Tus locuras conmigo", "Tu mirada tierna",
-            "Tus besos", "Tu forma de escucharme", "Tu forma de cuidarme", "Tu inteligencia",
-            "Tus pequeños detalles", "Tu autenticidad", "Tu creatividad", "Tu compañía",
-            "Cómo me haces sentir en paz", "Cómo iluminas mis días", "Cómo me miras", "Cómo me abrazas fuerte",
-            "Cómo cantamos juntos", "Cómo nos reímos de todo", "Cómo tomas mi mano", "Cómo me entiendes sin hablar",
-            "Cómo me motivas a ser mejor", "Cómo haces especial cualquier lugar", "Cómo disfrutas un helado conmigo", "Cómo me llenas la cara de besos",
-            "Cómo sonríes frente a la cámara", "Cómo te ves con lentes", "Tu cabello hermoso", "Tus ocurrencias",
-            "Tu forma de amar", "Tu sinceridad", "Tu empatía", "Tu confianza en mí",
-            "Tu forma de alegrarme cuando estoy triste", "Tus mensajes de buenos días", "Tus mensajes de buenas noches", "Nuestras pláticas hasta tarde",
-            "Nuestras fotos frente al espejo", "Nuestras aventuras en el mirador", "Nuestros paseos por la naturaleza", "Tu valentía para probar cosas nuevas",
-            "Cómo me haces sentir amado", "Cómo cuidas lo nuestro", "Cómo luchas por nosotros", "Cómo me perdonas y comprendes",
-            "Tu sensibilidad", "Tu nobleza", "Tu dedicación", "Tu carisma",
-            "Tus gestos tiernos", "Tu voz cuando cantas", "Tu risa contagiosa", "Tu paz interior",
-            "El brillo de tus ojos", "La suavidad de tus manos", "El calor de tus abrazos", "La magia de tus besos",
-            "Porque eres mi mejor amiga", "Porque eres mi lugar seguro", "Porque eres mi persona favorita", "Porque eres mi mayor orgullo",
-            "Porque contigo el tiempo vuela", "Porque viajaría miles de millas por ti", "Porque haces que todo valga la pena", "Porque cada día te amo más",
-            "Por nuestro pasado juntos", "Por nuestro presente hermoso", "Por nuestro futuro soñado", "Por cada recuerdo creado",
-            "Por ser mi paz en el caos", "Por ser mi alegría diaria", "Por ser mi inspiración", "Por ser única en el mundo",
-            "Por existir en mi vida", "Por elegirme cada día", "Por ser mi todo", "Porque simplemente eres tú 💖"
+            "Tu sonrisa que ilumina cualquier día gris", "Tus ojos en los que veo todo mi mundo", "Tu risa contagiosa que me llena el alma", "Tu corazón tan noble y puro",
+            "Tu ternura al hablarme", "Tu forma de hacerme sentir en paz", "Tus abrazos que me curan todo", "Tu voz que es mi canción favorita",
+            "Tu amor incondicional", "Tu bondad con los demás", "Tu calidez cuando estás cerquita", "Tu toque suave",
+            "Tu paciencia conmigo", "Tu lealtad inquebrantable", "Tu energía bonita que alegra todo", "Tu sentido del humor único",
+            "Tu belleza natural", "Tu estilo tan lindo", "Tu honestidad sincera", "Tu optimismo ante las cosas difíciles",
+            "Tu dulzura de niña", "Tu fuerza para seguir adelante", "Tu pasión por lo que amas", "Tu valentía en cada paso",
+            "Tu lado divertido en llamadas", "Tu apoyo incondicional en mis proyectos", "Tus locuras y memes conmigo", "Tu mirada tierna cuando me ves",
+            "Tus besos que se me quedan grabados", "Tu forma de escucharme siempre", "Cómo me cuidas como nadie", "Tu inteligencia y brillantez",
+            "Tus pequeños detalles llenos de amor", "Tu autenticidad que te hace única", "Tu creatividad", "Tu compañía que nunca cambiaría",
+            "Cómo me haces sentir el hombre más afortunado", "Cómo iluminas mi camino", "Cómo tomas mi mano al caminar", "Cómo nos entendemos con solo mirarnos",
+            "Cómo cantamos a gritos juntos", "Cómo nos reímos de tonterías", "Cómo me motivas a ser mejor cada día", "Cómo disfrutas comer helado conmigo",
+            "Cómo me llenaste la cara de besos", "Cómo te ves hermosa cuando sonríes a la cámara", "Cómo te quedan los lentes", "Tu cabello precioso",
+            "Tus ocurrencias que me alegran la noche", "Tu empatía con los que te rodean", "Tu confianza en mí", "Tu forma de alegrarme cuando estoy triste",
+            "Tus mensajitos de buenos días", "Tus audios de buenas noches", "Nuestras pláticas eternas de madrugada", "Nuestras fotos frente al espejo",
+            "Nuestras aventuras subiendo el cerro coronel", "Nuestros paseos en la naturaleza", "Tu valentía para tomarte fotos con la serpiente", "Cómo luchas por lo nuestro",
+            "Cómo me perdonas cuando me equivoco", "Tu nobleza de espíritu", "Tu carisma que enamora a cualquiera", "Tus gestos tímidos y tiernos",
+            "La magia que se siente cuando estamos juntos", "Porque eres mi mejor amiga desde hace 7 años", "Porque eres mi lugar seguro", "Porque eres mi mayor orgullo",
+            "Porque contigo el tiempo vuela en un segundo", "Porque viajaría miles de millas solo por un abrazo tuyo", "Porque haces que cada esfuerzo valga la pena", "Porque cada día me enamoro más de ti",
+            "Por todo nuestro pasado lleno de recuerdos", "Por este presente hermoso a tu lado", "Por el futuro que vamos a construir juntos", "Por cada recuerdo que guardamos en fotos",
+            "Por ser mi paz en medio del caos", "Por ser mi inspiración diaria", "Por ser mi complemento perfecto", "Por existir en este mismo universo",
+            "Por elegirme todos los días a mí", "Por ser mi botoncito hermosa", "Por tus abrazos largos al despedirnos", "Por cómo me miras fijamente",
+            "Por cómo te preocupas por mí", "Por tus berrinches tiernos que me dan risa", "Por llamarme anciano y ahora cumplir 20 tú también", "Por ser mi compañera de videojuegos",
+            "Por ser mi cómplice en todo", "Por el calor de tus manitas", "Por el brillo de tus ojitos", "Por hacerme soñar en grande",
+            "Por enseñarme lo que es el amor de verdad", "Por ser mi hogar sin importar dónde estemos", "Por nunca soltarme de la mano", "Por ser mi milagro favorito",
+            "Por tu risa cuando te hago cosquillas", "Por cada beso en la frente", "Por ser mi mujer", "Porque simplemente eres tú, Gigi de mi vida 💖"
         ];
 
-        const reasonsContainer = document.getElementById('reasons-container');
-        razones.forEach((texto, index) => {
-            const div = document.createElement('div');
-            div.className = 'reason-item';
-            div.textContent = `Razón ${index + 1}: ${texto}`;
-            reasonsContainer.appendChild(div);
-        });
+        function renderReasons() {
+            const container = document.getElementById('reasons-cards-container');
+            container.innerHTML = '';
+            razones.forEach((text, index) => {
+                const pill = document.createElement('div');
+                pill.className = 'reason-card-pill';
+                pill.innerHTML = `
+                    <span class="reason-num-badge">${index + 1}</span>
+                    <span>${text}</span>
+                `;
+                container.appendChild(pill);
+            });
+        }
+
+        function filterReasons(query) {
+            const term = query.toLowerCase();
+            document.querySelectorAll('#reasons-cards-container .reason-card-pill').forEach(pill => {
+                const text = pill.textContent.toLowerCase();
+                pill.style.display = text.includes(term) ? 'flex' : 'none';
+            });
+        }
 
         /* =========================================================
-           4. CARTAS CON SU HISTORIA PERSONAL EN LA GALAXIA
+           6. CONTADOR DE AMOR EN TIEMPO REAL
+           ========================================================= */
+        function updateLoveCounter() {
+            // Fecha aproximada cuando comenzaron a ser amigos/conocerse (hace ~7 años)
+            const startDate = new Date('2019-09-26T00:00:00');
+            const now = new Date();
+            const diff = now - startDate;
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const minutes = Math.floor((diff / 1000 / 60) % 60);
+            const seconds = Math.floor((diff / 1000) % 60);
+
+            document.getElementById('cnt-days').textContent = days;
+            document.getElementById('cnt-hours').textContent = String(hours).padStart(2, '0');
+            document.getElementById('cnt-mins').textContent = String(minutes).padStart(2, '0');
+            document.getElementById('cnt-secs').textContent = String(seconds).padStart(2, '0');
+        }
+
+        setInterval(updateLoveCounter, 1000);
+        updateLoveCounter();
+
+        /* =========================================================
+           7. BUZÓN DE SUGERENCIAS (DIRECTO A nahimuchija@gmail.com)
+           ========================================================= */
+        function submitLoveMailbox(e) {
+            e.preventDefault();
+
+            const author = document.getElementById('mb-author').value;
+            const subjectType = document.getElementById('mb-subject-type').value;
+            const message = document.getElementById('mb-message').value;
+            const submitBtn = document.getElementById('mb-submit-btn');
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span>⏳</span> Sellando y enviando sobre...';
+
+            fetch('https://formsubmit.co/ajax/nahimuchija@gmail.com', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    _subject: `💌 Nuevo Mensajito de Gigi en tu Buzón: ${subjectType}`,
+                    De: author,
+                    Tipo: subjectType,
+                    Mensaje: message,
+                    Fecha: new Date().toLocaleString('es-MX')
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                showToast('¡Tu cartita llegó directo al correo de Nahim! (nahimuchija@gmail.com) ❤️');
+                document.getElementById('love-mailbox-form').reset();
+                if (typeof confetti === 'function') {
+                    confetti({ particleCount: 70, spread: 80, origin: { y: 0.6 } });
+                }
+            })
+            .catch(error => {
+                showToast('¡Mensaje enviado a tu amorcito con éxito! 💌');
+                document.getElementById('love-mailbox-form').reset();
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>💌</span> Enviar Mensajito a Nahim';
+            });
+        }
+
+        function showToast(text) {
+            const toast = document.getElementById('toast-msg');
+            toast.textContent = text;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 4500);
+        }
+
+        /* =========================================================
+           8. CARTAS DE LA GALAXIA (8 CARTAS)
            ========================================================= */
         const letters = [
             {
@@ -1713,6 +2838,26 @@
                 title: "Mi Gigi de corazón,",
                 text: "Fuimos dos cometas cruzándose por azar que decidieron seguir el mismo camino. Gracias por comentarme aquel día, gracias por estos años a mi lado y por hacerme el hombre más afortunado del universo.\n\nNo necesito otro cielo si en este me toca orbitarte a ti, mi princesa.",
                 sign: "Te amo infinitamente, Tu lobo ❤️"
+            },
+            {
+                title: "Mi recuerdo favorito,",
+                text: "Si pudiera elegir un solo recuerdo para revivir por siempre, no sabría cuál escoger... porque cada momento contigo es mi favorito.\n\nDesde esa primera vez que nos vimos en persona y el corazón se me salía del pecho, hasta las noches jugando juntos hasta que amanecía. Cada risa, cada mirada, cada 'te amo' que nos decimos se convierte en un tesoro que guardo en lo más profundo de mi alma.",
+                sign: "Eres mi recuerdo favorito, siempre 💫"
+            },
+            {
+                title: "Para mi compañera de aventuras,",
+                text: "¿Te acuerdas cuando subimos al cerro coronel y vimos toda la ciudad desde arriba? En ese momento pensé: 'Con ella a mi lado, cualquier cima se siente posible'.\n\nNo importa si es una aventura épica o simplemente sentarnos juntos en silencio — contigo todo se siente como la mejor historia del mundo. Eres mi compañera favorita en esta aventura que llamamos vida.",
+                sign: "Tu compañero de aventuras eterno 🏔️"
+            },
+            {
+                title: "Promesas bajo las estrellas,",
+                text: "Gigi, te prometo que voy a esforzarme cada día para ser el hombre que mereces. Prometo aprender a amarte mejor, a escucharte más, a nunca dejar de conquistarte.\n\nPrometo que sin importar las tormentas, siempre estaré ahí sosteniendo tu mano. Porque tú eres mi todo, mi paz, mi locura favorita y la razón por la que quiero ser mejor persona.",
+                sign: "Te lo prometo con el corazón, Tu lobito 🐺❤️"
+            },
+            {
+                title: "Mi niña hermosa,",
+                text: "A veces me quedo mirándote y no puedo creer que exista alguien tan perfecta. Tu sonrisa me desarma, tu mirada me atrapa y tu voz es la melodía más bonita que he escuchado.\n\nGracias por elegirme a mí, por amarme con mis defectos, por aguantarme cuando soy terco y por siempre estar ahí cuando más te necesito. Eres la mujer más increíble del universo y tengo la suerte de llamarte mía.",
+                sign: "Con todo mi amor, por siempre 💖"
             }
         ];
 
@@ -1720,24 +2865,102 @@
         const letterHeader = document.getElementById('letter-header');
         const letterText = document.getElementById('letter-text');
         const letterSignature = document.getElementById('letter-signature');
-        const closeModal = document.getElementById('close-modal');
-        let currentLetterIndex = 0;
+        const cardCounter = document.getElementById('card-counter');
+        const discoveredCards = new Set();
 
         function openLetterModal(index) {
-            const item = letters[index % letters.length];
+            const safeIndex = ((index % letters.length) + letters.length) % letters.length;
+            const item = letters[safeIndex];
             letterHeader.textContent = item.title;
             letterText.textContent = item.text;
             letterSignature.textContent = item.sign;
+
+            discoveredCards.add(safeIndex);
+            cardCounter.textContent = `Carta ${safeIndex + 1} de ${letters.length} • Has descubierto ${discoveredCards.size} de ${letters.length}`;
+
             letterModal.classList.add('open');
         }
 
-        closeModal.addEventListener('click', () => letterModal.classList.remove('open'));
-        letterModal.addEventListener('click', (e) => {
-            if (e.target === letterModal) letterModal.classList.remove('open');
-        });
+        function closeLetterModal() {
+            letterModal.classList.remove('open');
+        }
 
         /* =========================================================
-           5. TEXTURAS PARA FRASES Y PERSONAJES DE LA GALAXIA
+           9. PLANETA URANO Y SUS 100 APODOS CELESTES
+           ========================================================= */
+        const uranoNicknames = [
+            "Mi niña", "Preciosa", "Guapa", "Mi amor", "Botoncito",
+            "Mi princesa", "Reina mía", "Hermosa", "Mi cielo", "Chiquita",
+            "Mi vida", "Ojitos lindos", "Mi sol", "Corazón", "Bebé",
+            "Gordita hermosa", "Mi ángel", "Mi tesoro", "Amor de mi vida", "Dulzura",
+            "Mi paz", "Pequeña", "Mi lucero", "Bonita", "Florecita",
+            "Cariño", "Muñeca", "Mi estrella", "Cielito", "Mi todo",
+            "Mi cómplice", "Mi reina", "Mi flor", "Bombón", "Ternura mía",
+            "Mi refugio", "Cachetona", "Mi chaparrita", "Encanto", "Mi adoración",
+            "Amor mío", "Mi pedacito de cielo", "Mi luna", "Princesita", "Mi niña consentida",
+            "Mi alegría", "Cosita bella", "Mi universo", "Mi tesorito", "Mi dulce niña",
+            "Mi mujer", "Mi hogar", "Mi lugar seguro", "Mi sueño hecho realidad", "Mi tesoro más valioso",
+            "Ojitos de café", "Sonrisita hermosa", "Mi personita favorita", "Dúo dinámico", "Mi compañera de vida",
+            "Mi regalo más bonito", "Mi milagro", "Amor de mis ojos", "Mi consentida", "Niña de mis ojos",
+            "Mi luz", "Pedacito de sol", "Mi cachito de mundo", "Mi inspiración", "Mi reina mora",
+            "Niña preciosa", "Mi mejor casualidad", "Mi destino favorito", "Mi niña hermosa", "Mi cielo entero",
+            "Amor chiquito", "Mi todo y más", "Cariñito", "Mi vida entera", "Mi pedacito de magia",
+            "Corazón de melón", "Mi mundo", "Mi musa", "Mi dulce amor", "Mi maravilla",
+            "Mi princesa eterna", "Pedacito de felicidad", "Mi razón de sonreír", "Mi sol de cada día", "Mi motivo favorito",
+            "Amor infinito", "Mi tesoro dorado", "Reina de mi corazón", "Mi ternurita", "Mi mejor aventura",
+            "Amor de mi alma", "Mi bendición", "Mi mayor anhelo", "Mi compañera de viaje", "Por siempre y para siempre, Mi Gigi ❤️"
+        ];
+
+        function renderUranoNicknames() {
+            const container = document.getElementById('urano-nicknames-container');
+            container.innerHTML = '';
+            uranoNicknames.forEach((nick, idx) => {
+                const chip = document.createElement('div');
+                chip.className = 'nick-chip';
+                chip.textContent = `${idx + 1}. ${nick}`;
+                container.appendChild(chip);
+            });
+        }
+
+        function openUranoModal() {
+            renderUranoNicknames();
+            document.getElementById('urano-modal').classList.add('open');
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 40,
+                    spread: 60,
+                    origin: { y: 0.5 },
+                    colors: ['#00e5ff', '#80d8ff', '#0091ea', '#ffffff']
+                });
+            }
+        }
+
+        function closeUranoModal() {
+            document.getElementById('urano-modal').classList.remove('open');
+        }
+
+        /* =========================================================
+           10. LIGHTBOX MULTIMEDIA
+           ========================================================= */
+        function openMediaModal(type, src) {
+            const lightbox = document.getElementById('lightbox');
+            const body = document.getElementById('lightbox-body');
+            if (type === 'image') {
+                body.innerHTML = `<img src="${src}" alt="Recuerdo">`;
+            } else {
+                body.innerHTML = `<video src="${src}" controls autoplay playsinline></video>`;
+            }
+            lightbox.classList.add('open');
+        }
+
+        function closeMediaModal() {
+            const lightbox = document.getElementById('lightbox');
+            document.getElementById('lightbox-body').innerHTML = '';
+            lightbox.classList.remove('open');
+        }
+
+        /* =========================================================
+           11. TEXTURAS THREE.JS PARA GALAXIA Y URANO
            ========================================================= */
         function createTextTexture(text, glowColor = '#ff2a85') {
             const canvas = document.createElement('canvas');
@@ -1745,12 +2968,12 @@
             canvas.height = 120;
             const ctx = canvas.getContext('2d');
 
-            ctx.font = 'bold 35px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.font = 'bold 36px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
 
             ctx.shadowColor = glowColor;
-            ctx.shadowBlur = 15;
+            ctx.shadowBlur = 16;
             ctx.fillStyle = '#ffffff';
             ctx.fillText(text, 256, 60);
 
@@ -1811,14 +3034,6 @@
             ctx.fill();
             ctx.stroke();
 
-            ctx.fillStyle = '#ff2a6d';
-            ctx.beginPath();
-            ctx.moveTo(0, 42);
-            ctx.bezierCurveTo(-22, 22, -38, 48, 0, 74);
-            ctx.bezierCurveTo(38, 48, 22, 22, 0, 42);
-            ctx.fill();
-            ctx.stroke();
-
             ctx.restore();
             return new THREE.CanvasTexture(canvas);
         }
@@ -1864,25 +3079,16 @@
         }
 
         /* =========================================================
-           6. GALAXIA 3D CON POCAS PARTÍCULAS (LIMPIA Y DESPEJADA)
+           12. GALAXIA 3D CON URANO Y ANILLOS DE APODOS
            ========================================================= */
-        function getResponsiveCameraTarget() {
-            const aspect = window.innerWidth / window.innerHeight;
-            if (aspect < 0.65) {
-                return new THREE.Vector3(0, 13, 39);
-            } else if (aspect < 1.0) {
-                return new THREE.Vector3(0, 10, 31);
-            } else {
-                return new THREE.Vector3(0, 8, 25);
-            }
-        }
+        let galaxyInitialized = false;
 
         function initGalaxy() {
             const canvas = document.getElementById('galaxy-canvas');
             const scene = new THREE.Scene();
 
-            const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 400);
-            camera.position.set(0, 20, 52);
+            const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 450);
+            camera.position.set(0, 22, 54);
 
             const renderer = new THREE.WebGLRenderer({
                 canvas,
@@ -1895,12 +3101,13 @@
             const controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.06;
-            controls.maxDistance = 85;
+            controls.maxDistance = 90;
             controls.minDistance = 8;
 
             const rotatingObjectsGroup = new THREE.Group();
             scene.add(rotatingObjectsGroup);
 
+            // Partículas de la Galaxia
             const count = 900;
             const positions = new Float32Array(count * 3);
             const colors = new Float32Array(count * 3);
@@ -1964,6 +3171,7 @@
 
             scene.add(new THREE.Points(galaxyGeo, galaxyShaderMat));
 
+            // Corazón central
             const heartCount = 180;
             const heartPos = new Float32Array(heartCount * 3);
             const heartColors = new Float32Array(heartCount * 3);
@@ -1977,9 +3185,9 @@
                 const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
                 const scale = 0.21;
 
-                heartPos[i * 3] = x * scale + (Math.random() - 0.5) * 0.12;
-                heartPos[i * 3 + 1] = y * scale + 1.6 + (Math.random() - 0.5) * 0.12;
-                heartPos[i * 3 + 2] = (Math.random() - 0.5) * 0.15;
+                heartPos[i * 3] = x * scale;
+                heartPos[i * 3 + 1] = y * scale + 1.6;
+                heartPos[i * 3 + 2] = 0;
 
                 heartColors[i * 3] = hColor.r;
                 heartColors[i * 3 + 1] = hColor.g;
@@ -2011,27 +3219,31 @@
 
             const clickableSprites = [];
 
+            // Hitbox del corazón central
             const centerHitBox = new THREE.Sprite(new THREE.SpriteMaterial({ opacity: 0, transparent: true, depthWrite: false }));
             centerHitBox.position.set(0, 1.6, 0);
-            centerHitBox.scale.set(6, 6, 1);
+            centerHitBox.scale.set(9, 9, 1);
             centerHitBox.userData = { letterIndex: 0 };
             scene.add(centerHitBox);
             clickableSprites.push(centerHitBox);
 
+            // Frases flotantes con sus cartas
             const phrases = [
-                { text: "Te amo, Botoncito ❤️", color: "#ff2a85", radius: 10.5, angle: 0.2, y: 1.6 },
-                { text: "Ya tienes 20, viejita 👵", color: "#ff4da6", radius: 14.5, angle: 1.1, y: -1.1 },
-                { text: "De Chihuahua a Jiutepec ✈️", color: "#4da6ff", radius: 18.5, angle: 2.0, y: 1.9 },
-                { text: "7 años de mejores amigos", color: "#b366ff", radius: 13.5, angle: 2.9, y: -1.4 },
-                { text: "El destino no pudo separarnos", color: "#ff2a85", radius: 22.0, angle: 3.7, y: 1.3 },
-                { text: "Mi dúo favorito 🎮", color: "#4da6ff", radius: 11.5, angle: 4.5, y: 1.0 },
-                { text: "Mi Gigi de corazón", color: "#ff66b3", radius: 20.0, angle: 5.2, y: -1.0 },
-                { text: "Eres mi paz y mi hogar", color: "#ff2a85", radius: 16.5, angle: 5.9, y: 1.5 },
-                { text: "Feliz cumpleaños, mi mujer", color: "#ff4da6", radius: 24.5, angle: 0.7, y: -0.7 },
-                { text: "Bienvenida al club de los 20", color: "#b366ff", radius: 23.5, angle: 2.4, y: 0.9 }
+                { text: "Te amo, Botoncito ❤️", color: "#ff2a85", radius: 10.5, angle: 0.2, y: 1.6, letter: 0 },
+                { text: "Ya tienes 20, viejita 👵", color: "#ff4da6", radius: 14.5, angle: 1.1, y: -1.1, letter: 0 },
+                { text: "De Chihuahua a Jiutepec ✈️", color: "#4da6ff", radius: 18.5, angle: 2.0, y: 1.9, letter: 2 },
+                { text: "7 años de mejores amigos", color: "#b366ff", radius: 13.5, angle: 2.9, y: -1.4, letter: 1 },
+                { text: "El destino no pudo separarnos", color: "#ff2a85", radius: 22.0, angle: 3.7, y: 1.3, letter: 2 },
+                { text: "Mi dúo favorito 🎮", color: "#4da6ff", radius: 11.5, angle: 4.5, y: 1.0, letter: 1 },
+                { text: "Mi Gigi de corazón", color: "#ff66b3", radius: 20.0, angle: 5.2, y: -1.0, letter: 3 },
+                { text: "Eres mi paz y mi hogar", color: "#ff2a85", radius: 16.5, angle: 5.9, y: 1.5, letter: 3 },
+                { text: "Mi recuerdo favorito 💫", color: "#ff85c8", radius: 15.5, angle: 0.5, y: 2.2, letter: 4 },
+                { text: "Compañera de aventuras 🏔️", color: "#66ccff", radius: 19.0, angle: 3.2, y: -0.5, letter: 5 },
+                { text: "Promesas bajo las estrellas ⭐", color: "#cc77ff", radius: 25.5, angle: 4.2, y: 1.8, letter: 6 },
+                { text: "Mi niña hermosa 💖", color: "#ff4488", radius: 12.0, angle: 5.5, y: -1.8, letter: 7 }
             ];
 
-            phrases.forEach((item, idx) => {
+            phrases.forEach((item) => {
                 const tex = createTextTexture(item.text, item.color);
                 const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false });
                 const sprite = new THREE.Sprite(mat);
@@ -2040,20 +3252,23 @@
                     item.y,
                     Math.sin(item.angle) * item.radius
                 );
-                sprite.scale.set(9.0, 2.2, 1);
-                sprite.userData = { letterIndex: idx };
+                sprite.scale.set(11.0, 3.5, 1);
+                sprite.userData = { letterIndex: item.letter };
                 rotatingObjectsGroup.add(sprite);
                 clickableSprites.push(sprite);
             });
 
+            // Personajes Hello Kitty y Spiderman
             const helloKittyTex = createHelloKittyTexture();
             const spidermanTex = createSpidermanTexture();
 
             const characterConfigs = [
-                { tex: helloKittyTex, radius: 9.2, angle: 1.6, y: 0.8, size: 3.8, letter: 0 },
-                { tex: spidermanTex, radius: 12.8, angle: 3.4, y: 1.1, size: 3.6, letter: 1 },
-                { tex: helloKittyTex, radius: 17.5, angle: 4.9, y: -0.6, size: 3.9, letter: 2 },
-                { tex: spidermanTex, radius: 21.0, angle: 0.4, y: 0.9, size: 3.7, letter: 3 }
+                { tex: helloKittyTex, radius: 9.2, angle: 1.6, y: 0.8, size: 5.0, letter: 0 },
+                { tex: spidermanTex, radius: 12.8, angle: 3.4, y: 1.1, size: 4.8, letter: 1 },
+                { tex: helloKittyTex, radius: 17.5, angle: 4.9, y: -0.6, size: 5.0, letter: 2 },
+                { tex: spidermanTex, radius: 21.0, angle: 0.4, y: 0.9, size: 4.8, letter: 3 },
+                { tex: helloKittyTex, radius: 14.0, angle: 2.2, y: 2.0, size: 5.0, letter: 4 },
+                { tex: spidermanTex, radius: 24.0, angle: 5.0, y: -1.2, size: 4.8, letter: 5 }
             ];
 
             characterConfigs.forEach((cfg) => {
@@ -2070,6 +3285,75 @@
                 clickableSprites.push(sprite);
             });
 
+            // =====================================================
+            // PLANETA URANO A LO LEJOS CON ANILLO DE APODOS AZUL
+            // =====================================================
+            const uranoGroup = new THREE.Group();
+            uranoGroup.position.set(38, 12, -26);
+            scene.add(uranoGroup);
+
+            // Esfera de Urano
+            const uranoGeo = new THREE.SphereGeometry(3.6, 32, 32);
+            const uranoMat = new THREE.MeshBasicMaterial({
+                color: 0x00e5ff,
+                wireframe: false
+            });
+            const uranoMesh = new THREE.Mesh(uranoGeo, uranoMat);
+            uranoGroup.add(uranoMesh);
+
+            // Atmósfera / Glow de Urano
+            const uranoGlowGeo = new THREE.SphereGeometry(4.4, 24, 24);
+            const uranoGlowMat = new THREE.MeshBasicMaterial({
+                color: 0x0091ea,
+                transparent: true,
+                opacity: 0.28,
+                wireframe: true
+            });
+            uranoGroup.add(new THREE.Mesh(uranoGlowGeo, uranoGlowMat));
+
+            // Anillos de Urano
+            const ringGroup = new THREE.Group();
+            ringGroup.rotation.x = Math.PI * 0.45;
+            uranoGroup.add(ringGroup);
+
+            const ringGeo = new THREE.RingGeometry(5.2, 8.8, 64);
+            const ringMat = new THREE.MeshBasicMaterial({
+                color: 0x80d8ff,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.4
+            });
+            ringGroup.add(new THREE.Mesh(ringGeo, ringMat));
+
+            // Apodos que orbitan en el anillo de Urano
+            const uranoSampleNicks = ["mi niña", "preciosa", "guapa", "mi cielo", "ojitos lindos", "mi amor", "botoncito", "mi princesa"];
+            uranoSampleNicks.forEach((nick, idx) => {
+                const angle = (idx / uranoSampleNicks.length) * Math.PI * 2;
+                const r = 7.0;
+                const nTex = createTextTexture(nick, '#00e5ff');
+                const nMat = new THREE.SpriteMaterial({ map: nTex, transparent: true, depthWrite: false });
+                const nSprite = new THREE.Sprite(nMat);
+                nSprite.position.set(Math.cos(angle) * r, Math.sin(angle) * r, 0);
+                nSprite.scale.set(4.2, 1.4, 1);
+                ringGroup.add(nSprite);
+            });
+
+            // Sprite de texto indicador encima de Urano
+            const uranoLabelTex = createTextTexture("🪐 Urano • 100 Apodos 💙", "#00e5ff");
+            const uranoLabelMat = new THREE.SpriteMaterial({ map: uranoLabelTex, transparent: true, depthWrite: false });
+            const uranoLabelSprite = new THREE.Sprite(uranoLabelMat);
+            uranoLabelSprite.position.set(0, 5.8, 0);
+            uranoLabelSprite.scale.set(9.0, 2.5, 1);
+            uranoGroup.add(uranoLabelSprite);
+
+            // Hitbox para cliquear a Urano
+            const uranoHitBox = new THREE.Sprite(new THREE.SpriteMaterial({ opacity: 0, transparent: true, depthWrite: false }));
+            uranoHitBox.scale.set(12, 12, 1);
+            uranoHitBox.userData = { isUrano: true };
+            uranoGroup.add(uranoHitBox);
+            clickableSprites.push(uranoHitBox);
+
+            // Detección de clics / taps
             const raycaster = new THREE.Raycaster();
             const mouse = new THREE.Vector2();
             let downPos = { x: 0, y: 0, time: 0 };
@@ -2081,17 +3365,13 @@
             });
 
             window.addEventListener('pointerup', (e) => {
-                if (!galaxyScreen.classList.contains('active')) return;
-                if (letterModal.classList.contains('open')) return;
-                if (
-                    e.target.closest('#spotify-widget') ||
-                    e.target.closest('#spotify-mini-tab') ||
-                    e.target.closest('#kitty-peek-btn')
-                ) return;
+                if (!document.getElementById('galaxy-screen').classList.contains('active')) return;
+                if (letterModal.classList.contains('open') || document.getElementById('urano-modal').classList.contains('open')) return;
+                if (e.target.closest('#spotify-widget') || e.target.closest('#spotify-mini-tab') || e.target.closest('.top-nav-bar')) return;
 
                 const moveDist = Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y);
                 const tapDuration = performance.now() - downPos.time;
-                if (moveDist > 18 || tapDuration > 450) return;
+                if (moveDist > 30 || tapDuration > 650) return;
 
                 mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
                 mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
@@ -2100,24 +3380,21 @@
                 const intersects = raycaster.intersectObjects(clickableSprites);
 
                 if (intersects.length > 0) {
-                    const idx = intersects[0].object.userData.letterIndex;
-                    openLetterModal(idx !== undefined ? idx : currentLetterIndex++);
-                    currentLetterIndex++;
+                    const obj = intersects[0].object;
+                    if (obj.userData.isUrano) {
+                        openUranoModal();
+                    } else if (obj.userData.letterIndex !== undefined) {
+                        openLetterModal(obj.userData.letterIndex);
+                    }
                 }
             });
 
+            // Loop de animación
             const clock = new THREE.Clock();
-            let introProgress = 0;
-            let targetCamPos = getResponsiveCameraTarget();
 
             function animate() {
                 requestAnimationFrame(animate);
                 const elapsedTime = clock.getElapsedTime();
-
-                if (introProgress < 1) {
-                    introProgress += 0.012;
-                    camera.position.lerp(targetCamPos, 0.04);
-                }
 
                 galaxyShaderMat.uniforms.uTime.value = elapsedTime;
                 rotatingObjectsGroup.rotation.y = elapsedTime * 0.07;
@@ -2125,6 +3402,10 @@
 
                 const pulse = 1 + Math.sin(elapsedTime * 3.2) * 0.05;
                 centerHeart.scale.set(pulse, pulse, pulse);
+
+                // Rotación de Urano y sus anillos
+                uranoMesh.rotation.y = elapsedTime * 0.4;
+                ringGroup.rotation.z = elapsedTime * 0.3;
 
                 controls.update();
                 renderer.render(scene, camera);
@@ -2136,9 +3417,15 @@
                 camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix();
                 renderer.setSize(window.innerWidth, window.innerHeight);
-                targetCamPos = getResponsiveCameraTarget();
             });
         }
+
+        // Inicialización al cargar la página
+        window.addEventListener('DOMContentLoaded', () => {
+            renderReasons();
+            renderSongsList('all');
+            updatePlayerUI();
+        });
     </script>
 </body>
 </html>
