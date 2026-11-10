@@ -26,6 +26,8 @@
             --accent-light: #f6c8ff;
             --urano-cyan: #00e5ff;
             --urano-blue: #0091ea;
+            --saturno-green: #00e676;
+            --saturno-emerald: #00c853;
             --card-border: rgba(255, 110, 199, 0.35);
             --safe-top: env(safe-area-inset-top, 16px);
             --safe-bottom: env(safe-area-inset-bottom, 16px);
@@ -41,6 +43,7 @@
             -webkit-user-select: none;
             -webkit-touch-callout: none;
             -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
 
         body, html {
@@ -52,6 +55,35 @@
             color: #ffffff;
             overflow: hidden;
             position: fixed;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* BOTÓN DE SILENCIO SFX (WEB AUDIO API) */
+        .sfx-mute-btn {
+            position: fixed;
+            bottom: max(16px, var(--safe-bottom));
+            left: max(16px, var(--safe-left));
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: rgba(20, 6, 28, 0.82);
+            border: 1px solid rgba(255, 110, 199, 0.45);
+            color: #ffe6f2;
+            font-size: 18px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 450;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .sfx-mute-btn:hover, .sfx-mute-btn:active {
+            transform: scale(1.08);
+            border-color: var(--accent-pink);
         }
 
         /* GESTIÓN DE PANTALLAS */
@@ -64,8 +96,9 @@
             left: 0;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.5s ease-in-out;
+            transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1);
             z-index: 10;
+            will-change: opacity;
         }
 
         .screen.active {
@@ -75,7 +108,7 @@
         }
 
         /* ========================================================
-           PANTALLA 0: EL SOBRE CON SELLO DE CERA (PRIMERA IMPRESIÓN)
+           PANTALLA 0: EL SOBRE HERMÉTICO CON SELLO DE CERA (3D)
            ======================================================== */
         #envelope-screen {
             background: radial-gradient(circle at center, #240b2b 0%, #0d0112 70%, #050007 100%);
@@ -93,86 +126,113 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            transition: transform 0.3s ease;
-        }
-
-        .envelope-wrapper:hover {
-            transform: scale(1.02);
+            transform-style: preserve-3d;
+            will-change: transform;
         }
 
         .envelope {
             position: relative;
-            width: min(360px, 86vw);
-            height: min(240px, 58vw);
-            background: #ecd9c6;
+            width: min(370px, 88vw);
+            height: min(248px, 59vw);
+            background: #e3cbb4;
             border-radius: 12px;
-            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.75), 0 0 35px rgba(255, 77, 166, 0.25);
-            perspective: 1000px;
+            box-shadow: 0 24px 55px rgba(0, 0, 0, 0.85), 0 0 40px rgba(255, 77, 166, 0.28);
             transform-style: preserve-3d;
         }
 
-        /* Cuerpo y solapas del sobre */
-        .envelope-body {
+        /* Fondo interior oscuro del sobre */
+        .envelope-back-inside {
             position: absolute;
             inset: 0;
             border-radius: 12px;
-            background: linear-gradient(145deg, #e3cbb4, #d5ba9f);
-            overflow: hidden;
-            z-index: 2;
-            border: 1px solid rgba(138, 98, 62, 0.3);
+            background: linear-gradient(180deg, #b89778 0%, #9c7a5b 100%);
+            z-index: 1;
+            border: 1px solid rgba(138, 98, 62, 0.45);
         }
 
-        /* Patrón de pliegues del sobre */
+        /* CARTA INTERIOR: 100% OCULTA HASTA QUE SE ABRE EL SOBRE */
+        .envelope-letter {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            right: 14px;
+            bottom: 12px;
+            background: #fffcf7;
+            border-radius: 10px;
+            padding: 18px 18px 14px;
+            color: #2b1d1d;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 2;
+            border: 1px dashed #d1b498;
+            /* Totalmente invisible cuando está cerrado */
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translateY(18px) scale(0.92);
+            transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.25s,
+                        opacity 0.35s ease 0.22s,
+                        visibility 0s linear 0.22s,
+                        box-shadow 0.85s ease 0.25s;
+            will-change: transform, opacity;
+        }
+
+        .envelope.opened .envelope-letter {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transform: translateY(-78%) scale(1);
+            z-index: 6;
+            box-shadow: 0 22px 45px rgba(0, 0, 0, 0.72);
+        }
+
+        /* Bolsillo frontal que tapa la carta por delante */
+        .envelope-front-pocket {
+            position: absolute;
+            inset: 0;
+            border-radius: 12px;
+            overflow: hidden;
+            z-index: 7;
+            pointer-events: none;
+        }
+
         .envelope-fold-left {
             position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 0;
-            border-style: solid;
-            border-width: min(120px, 29vw) 0 0 min(180px, 43vw);
-            border-color: transparent transparent transparent #d0b396;
-            z-index: 3;
+            inset: 0;
+            background: linear-gradient(135deg, #d8bc9f 0%, #c6a687 100%);
+            clip-path: polygon(0 0, 52% 52%, 0 100%);
         }
 
         .envelope-fold-right {
             position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 0;
-            height: 0;
-            border-style: solid;
-            border-width: min(120px, 29vw) min(180px, 43vw) 0 0;
-            border-color: transparent #c6a788 transparent transparent;
-            z-index: 3;
+            inset: 0;
+            background: linear-gradient(225deg, #d0b293 0%, #be9d7c 100%);
+            clip-path: polygon(100% 0, 48% 52%, 100% 100%);
         }
 
         .envelope-fold-bottom {
             position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 0;
-            border-style: solid;
-            border-width: 0 min(180px, 43vw) min(130px, 31vw) min(180px, 43vw);
-            border-color: transparent transparent #debfa1 transparent;
-            z-index: 4;
+            inset: 0;
+            background: linear-gradient(0deg, #e5cdb6 0%, #d6b89c 100%);
+            clip-path: polygon(0 100%, 50% 46%, 100% 100%);
+            filter: drop-shadow(0 -3px 6px rgba(0,0,0,0.18));
         }
 
-        /* Solapa superior que se abre en 3D */
+        /* Solapa superior que cierra el sobre herméticamente */
         .envelope-flap {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 0;
-            height: 0;
-            border-style: solid;
-            border-width: min(135px, 32vw) min(180px, 43vw) 0 min(180px, 43vw);
-            border-color: #eed6be transparent transparent transparent;
+            inset: 0;
+            background: linear-gradient(180deg, #f0dac5 0%, #dfc2a6 100%);
+            clip-path: polygon(0 0, 100% 0, 50% 58%);
             transform-origin: top center;
-            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 5;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+            transition: transform 0.75s cubic-bezier(0.4, 0, 0.2, 1), z-index 0s linear 0.35s;
+            z-index: 8;
+            filter: drop-shadow(0 5px 8px rgba(0,0,0,0.28));
+            backface-visibility: visible;
+            border-radius: 12px 12px 0 0;
+            pointer-events: none;
         }
 
         .envelope.opened .envelope-flap {
@@ -183,86 +243,72 @@
         /* Sello de cera */
         .wax-seal {
             position: absolute;
-            top: min(115px, 27vw);
+            top: 55%;
             left: 50%;
-            transform: translate(-50%, -50%);
-            width: 68px;
-            height: 68px;
-            background: radial-gradient(circle at 35% 35%, #e91e63, #880e4f);
+            transform: translate(-50%, -50%) translateZ(20px);
+            width: 70px;
+            height: 70px;
+            background: radial-gradient(circle at 35% 35%, #ff2a85, #880e4f);
             border-radius: 50%;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.6), inset 0 2px 4px rgba(255,255,255,0.4), 0 0 20px rgba(233, 30, 99, 0.5);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.7), inset 0 2px 5px rgba(255,255,255,0.45), 0 0 24px rgba(233, 30, 99, 0.65);
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 26px;
+            font-size: 27px;
             color: #ffd1dc;
-            z-index: 6;
+            z-index: 9;
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            border: 2px dashed rgba(255, 192, 203, 0.5);
+            transition: opacity 0.35s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 2px dashed rgba(255, 215, 0, 0.7);
             animation: sealHeartbeat 2.2s infinite;
         }
 
         @keyframes sealHeartbeat {
             0%, 100% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-50%, -50%) scale(1.08); }
+            50% { transform: translate(-50%, -50%) scale(1.09); }
         }
 
         .envelope.opened .wax-seal {
             opacity: 0;
-            transform: translate(-50%, -50%) scale(0.3);
+            transform: translate(-50%, -50%) scale(1.65);
             pointer-events: none;
         }
 
-        /* Carta que sale de adentro */
-        .envelope-letter {
+        /* Chispas doradas del sello */
+        .seal-spark {
             position: absolute;
-            top: 8px;
-            left: 12px;
-            right: 12px;
-            bottom: 8px;
-            background: #fffcf7;
-            border-radius: 8px;
-            padding: 20px;
-            color: #2b1d1d;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            z-index: 2;
-            transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-            border: 1px dashed #d1b498;
-        }
-
-        .envelope.opened .envelope-letter {
-            transform: translateY(-85%);
-            z-index: 10;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.65);
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #fffde7, #ffd700, #ff9100);
+            box-shadow: 0 0 10px #ffd700;
+            pointer-events: none;
+            z-index: 25;
         }
 
         .letter-preview-title {
             font-family: 'Playfair Display', serif;
-            font-size: clamp(16px, 3.5vw, 19px);
+            font-size: clamp(15px, 3.4vw, 18px);
             color: #c2185b;
             font-weight: 700;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         .letter-preview-text {
             font-family: 'Caveat', cursive;
-            font-size: clamp(16px, 3.8vw, 20px);
-            line-height: 1.35;
+            font-size: clamp(15.5px, 3.6vw, 19px);
+            line-height: 1.3;
             color: #442a34;
         }
 
         .letter-destiny-tag {
-            font-size: 11px;
+            font-size: 10.5px;
             font-weight: 600;
             color: #880e4f;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
+            letter-spacing: 1.2px;
             border-top: 1px solid #ebd3bf;
-            padding-top: 6px;
+            padding-top: 5px;
             display: flex;
             justify-content: space-between;
         }
@@ -282,36 +328,76 @@
             50% { opacity: 1; transform: translateY(-3px); }
         }
 
-        /* Opciones que aparecen al abrir el sobre */
+        /* Opciones guía que aparecen al abrir el sobre */
         .envelope-actions {
             position: absolute;
-            bottom: max(24px, var(--safe-bottom));
+            bottom: max(22px, var(--safe-bottom));
+            left: 50%;
+            transform: translateX(-50%) translateY(25px);
             display: flex;
-            gap: 14px;
+            gap: 12px;
             flex-wrap: wrap;
             justify-content: center;
+            align-items: center;
+            width: min(94%, 560px);
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.5s ease 0.6s;
-            z-index: 20;
+            transition: opacity 0.5s ease 0.45s, transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.45s;
+            z-index: 500;
         }
 
-        .envelope.opened ~ .envelope-actions {
-            opacity: 1;
-            pointer-events: auto;
+        .envelope-actions.visible,
+        #envelope-screen.opened .envelope-actions {
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            transform: translateX(-50%) translateY(0) !important;
+        }
+
+        .letter-actions-inner {
+            display: flex;
+            gap: 8px;
+            margin: 8px 0 6px;
+            width: 100%;
+        }
+
+        .letter-btn-inline {
+            flex: 1;
+            background: linear-gradient(135deg, #e91e63, #c2185b);
+            color: white;
+            border: none;
+            border-radius: 18px;
+            padding: 8px 10px;
+            font-size: clamp(11.5px, 2.5vw, 13px);
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(233, 30, 99, 0.45);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            transition: transform 0.2s ease;
+        }
+
+        .letter-btn-inline:active, .letter-btn-inline:hover {
+            transform: scale(1.04);
+        }
+
+        .letter-btn-galaxy {
+            background: linear-gradient(135deg, #7b1fa2, #4a148c);
+            box-shadow: 0 4px 14px rgba(123, 31, 162, 0.45);
         }
 
         .btn-env-action {
             background: linear-gradient(135deg, #ff2a85, #880e4f);
             color: white;
             border: 1px solid rgba(255, 255, 255, 0.4);
-            padding: 12px 24px;
+            padding: 12px 22px;
             border-radius: 30px;
-            font-size: clamp(13.5px, 3vw, 15px);
+            font-size: clamp(13px, 2.8vw, 14.5px);
             font-weight: 600;
             box-shadow: 0 6px 20px rgba(255, 42, 133, 0.45);
             cursor: pointer;
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            transition: transform 0.22s ease, box-shadow 0.22s ease;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -323,13 +409,14 @@
         }
 
         .btn-env-secondary {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: rgba(255, 255, 255, 0.25);
-            box-shadow: none;
+            background: rgba(255, 255, 255, 0.14);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            backdrop-filter: blur(6px);
         }
 
         /* ========================================================
-           PANTALLA 1: VIDEO 0926.mp4 CON SPIDERMAN DICIENDO EL SKIP
+           PANTALLA 1: VIDEO 0926.mp4 CON SPIDERMAN EN TELARAÑA
            ======================================================== */
         #video-screen {
             background-color: #070508;
@@ -428,40 +515,68 @@
             50% { transform: translate(-50%, -50%) scale(1.22); }
         }
 
-        /* SPIDERMAN DICIENDO "¡SÁLTALO SI QUIERES GIGI!" */
+        /* SPIDERMAN BALANCEÁNDOSE EN TELARAÑA */
         .spiderman-skip-wrapper {
             position: fixed;
-            bottom: max(16px, var(--safe-bottom));
-            right: max(16px, var(--safe-right));
+            bottom: max(20px, var(--safe-bottom));
+            right: max(20px, var(--safe-right));
             display: flex;
-            align-items: flex-end;
-            gap: 8px;
+            align-items: center;
+            gap: 10px;
             z-index: 40;
             cursor: pointer;
-            transition: transform 0.25s ease;
+            transform-origin: calc(100% - 34px) -100vh;
+            animation: spideyPendulumSwing 3.4s ease-in-out infinite;
+            will-change: transform;
         }
 
-        .spiderman-skip-wrapper:hover, .spiderman-skip-wrapper:active {
-            transform: scale(1.06);
+        @keyframes spideyPendulumSwing {
+            0%, 100% { transform: rotate(-3.2deg) translateY(0); }
+            50% { transform: rotate(3.2deg) translateY(-8px); }
+        }
+
+        .spiderman-avatar-box {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .spidey-web-line {
+            position: absolute;
+            bottom: 92%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2.5px;
+            height: 110vh;
+            background: repeating-linear-gradient(
+                to bottom,
+                rgba(255, 255, 255, 0.9) 0px,
+                rgba(255, 255, 255, 0.9) 10px,
+                rgba(210, 235, 255, 0.35) 10px,
+                rgba(210, 235, 255, 0.35) 15px
+            );
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.65);
+            pointer-events: none;
         }
 
         .spiderman-bubble {
-            background: rgba(255, 255, 255, 0.96);
+            background: rgba(255, 255, 255, 0.98);
             color: #b71c1c;
-            border: 2px solid #e53935;
+            border: 2.5px solid #e53935;
             padding: 9px 14px;
             border-radius: 18px 18px 4px 18px;
             font-size: clamp(12px, 2.6vw, 14px);
             font-weight: 700;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.55);
             white-space: nowrap;
             position: relative;
-            animation: bubbleFloat 2.4s ease-in-out infinite;
+            animation: bubbleFloat 2.2s ease-in-out infinite;
         }
 
         @keyframes bubbleFloat {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-4px); }
+            50% { transform: translateY(-5px); }
         }
 
         .spiderman-bubble::after {
@@ -477,20 +592,14 @@
         }
 
         .spiderman-avatar {
-            width: clamp(52px, 12vw, 68px);
-            height: clamp(52px, 12vw, 68px);
-            filter: drop-shadow(0 4px 12px rgba(229, 57, 53, 0.6));
-            animation: spideyWiggle 3s ease-in-out infinite;
-        }
-
-        @keyframes spideyWiggle {
-            0%, 100% { transform: rotate(0deg); }
-            25% { transform: rotate(-5deg); }
-            75% { transform: rotate(5deg); }
+            width: clamp(54px, 12vw, 68px);
+            height: clamp(54px, 12vw, 68px);
+            filter: drop-shadow(0 4px 14px rgba(229, 57, 53, 0.75));
+            transition: transform 0.2s ease;
         }
 
         /* ========================================================
-           PANTALLA 2: GALAXIA 3D (URANO AZUL Y CARTAS SECRETAS)
+           PANTALLA 2: GALAXIA 3D (CON URANO AZUL Y SATURNO VERDE)
            ======================================================== */
         #galaxy-screen {
             position: relative;
@@ -529,18 +638,51 @@
         .galaxy-top-actions {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
             pointer-events: auto;
         }
 
-        /* Botón para entrar a la Mesa de Recuerdos */
+        .btn-planet-shortcut {
+            background: rgba(0, 229, 255, 0.16);
+            color: #e0f7fa;
+            border: 1px solid rgba(0, 229, 255, 0.55);
+            padding: 7px 13px;
+            border-radius: 22px;
+            font-size: clamp(11px, 2.2vw, 12.5px);
+            font-weight: 600;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transition: transform 0.2s ease, background 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-planet-shortcut:hover {
+            transform: scale(1.05);
+            background: rgba(0, 229, 255, 0.32);
+        }
+
+        .btn-planet-saturno {
+            background: rgba(0, 230, 118, 0.16);
+            color: #e8f5e9;
+            border-color: rgba(0, 230, 118, 0.55);
+        }
+
+        .btn-planet-saturno:hover {
+            background: rgba(0, 230, 118, 0.32);
+        }
+
         .btn-go-table {
-            background: linear-gradient(135deg, rgba(255, 42, 133, 0.85), rgba(123, 31, 162, 0.85));
+            background: linear-gradient(135deg, rgba(255, 42, 133, 0.88), rgba(123, 31, 162, 0.88));
             color: white;
             border: 1px solid rgba(255, 255, 255, 0.4);
-            padding: 8px 16px;
+            padding: 8px 15px;
             border-radius: 25px;
-            font-size: clamp(12px, 2.5vw, 13.5px);
+            font-size: clamp(11.5px, 2.4vw, 13px);
             font-weight: 600;
             cursor: pointer;
             backdrop-filter: blur(8px);
@@ -552,11 +694,10 @@
             gap: 6px;
         }
 
-        .btn-go-table:hover, .btn-go-table:active {
+        .btn-go-table:hover {
             transform: scale(1.05);
         }
 
-        /* HELLO KITTY ASOMÁNDOSE EN ESQUINA SUPERIOR DERECHA */
         .kitty-peek-btn {
             background: none;
             border: none;
@@ -564,13 +705,13 @@
             display: flex;
             align-items: center;
             gap: 4px;
-            transform: rotate(-14deg);
+            transform: rotate(-12deg);
             transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
             filter: drop-shadow(0 4px 14px rgba(255, 42, 133, 0.65));
         }
 
-        .kitty-peek-btn:hover, .kitty-peek-btn:active {
-            transform: rotate(-4deg) scale(1.08);
+        .kitty-peek-btn:hover {
+            transform: rotate(-3deg) scale(1.08);
         }
 
         .kitty-peek-bubble {
@@ -586,24 +727,95 @@
         }
 
         .kitty-peek-svg {
-            width: clamp(52px, 11vw, 68px);
-            height: clamp(52px, 11vw, 68px);
+            width: clamp(46px, 10vw, 62px);
+            height: clamp(46px, 10vw, 62px);
             display: block;
         }
 
-        /* HINT TEXT INFERIOR DE LA GALAXIA (LIMPIO PARA IPAD) */
+        /* HUD FLOTANTE CUANDO ESTÁS EN ÓRBITA DE URANO O SATURNO */
+        .planet-orbit-hud {
+            position: absolute;
+            top: max(76px, calc(var(--safe-top) + 60px));
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: rgba(8, 16, 28, 0.88);
+            border: 1.5px solid #00e5ff;
+            border-radius: 26px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            z-index: 45;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7), 0 0 25px rgba(0, 229, 255, 0.3);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            max-width: 92vw;
+            text-align: center;
+        }
+
+        .planet-orbit-hud.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .planet-orbit-hud.saturno-theme {
+            border-color: #00e676;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7), 0 0 25px rgba(0, 230, 118, 0.3);
+        }
+
+        .hud-planet-text {
+            font-size: clamp(12px, 2.5vw, 13.5px);
+            color: #e0f7fa;
+            font-weight: 500;
+        }
+
+        .hud-btn-action {
+            background: linear-gradient(135deg, #00e5ff, #0091ea);
+            color: #001524;
+            border: none;
+            padding: 7px 15px;
+            border-radius: 18px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .planet-orbit-hud.saturno-theme .hud-btn-action {
+            background: linear-gradient(135deg, #00e676, #00b248);
+            color: #001f0c;
+        }
+
+        .hud-btn-back {
+            background: rgba(255, 255, 255, 0.14);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 7px 14px;
+            border-radius: 18px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* HINT TEXT INFERIOR DE LA GALAXIA */
         .galaxy-hint {
             position: absolute;
             bottom: max(14px, var(--safe-bottom));
             left: 50%;
             transform: translateX(-50%);
-            width: min(92%, 580px);
-            font-size: clamp(11.5px, 2.3vw, 13px);
-            color: rgba(255, 225, 240, 0.92);
+            width: min(86%, 640px);
+            font-size: clamp(11px, 2.2vw, 12.8px);
+            color: rgba(255, 225, 240, 0.94);
             pointer-events: none;
             z-index: 20;
             text-align: center;
-            background: rgba(12, 2, 16, 0.75);
+            background: rgba(12, 2, 16, 0.78);
             border: 1px solid rgba(255, 110, 180, 0.35);
             padding: 8px 16px;
             border-radius: 25px;
@@ -613,13 +825,11 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
         }
 
-        .hint-badge-urano {
-            color: #00e5ff;
-            font-weight: 600;
-        }
+        .hint-badge-urano { color: #00e5ff; font-weight: 700; }
+        .hint-badge-saturno { color: #00e676; font-weight: 700; }
 
         /* ========================================================
-           PANTALLA 3: MESA DE RECUERDOS (INSPIRADA EN LA IMAGEN)
+           PANTALLA 3: MESA DE RECUERDOS (FLUIDA SIN CONFLICTO CSS)
            ======================================================== */
         #table-screen {
             background: #2a1508;
@@ -631,11 +841,11 @@
             -webkit-overflow-scrolling: touch;
             position: relative;
             z-index: 35;
+            perspective: 1200px;
         }
 
-        /* Fondo de madera hiperrealista con textura CSS y viñeta cálida */
         .wood-table-background {
-            position: absolute;
+            position: fixed;
             inset: 0;
             background: 
                 radial-gradient(ellipse at 50% 30%, rgba(255, 170, 90, 0.22) 0%, rgba(40, 16, 4, 0.6) 55%, rgba(12, 4, 1, 0.95) 100%),
@@ -691,7 +901,6 @@
             transform: scale(1.05);
         }
 
-        /* Rejilla de los objetos sobre la mesa de madera (Óptimo para iPad) */
         .wood-table-grid {
             position: relative;
             z-index: 10;
@@ -701,6 +910,7 @@
             gap: clamp(18px, 3.5vw, 36px);
             padding: 30px 10px 120px;
             margin: auto;
+            transform-style: preserve-3d;
         }
 
         @media (max-width: 820px) {
@@ -710,18 +920,15 @@
             }
         }
 
-        /* Cada objeto coleccionable de la mesa */
+        /* Sin transition CSS en transform para que GSAP corra a 60fps puros */
         .wood-item-card {
             display: flex;
             flex-direction: column;
             align-items: center;
             cursor: pointer;
             position: relative;
-            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .wood-item-card:hover {
-            transform: translateY(-8px) scale(1.05);
+            transform-style: preserve-3d;
+            will-change: transform;
         }
 
         .wood-item-visual {
@@ -732,11 +939,11 @@
             align-items: center;
             position: relative;
             filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.75));
-            transition: filter 0.3s ease;
+            transition: filter 0.25s ease;
         }
 
         .wood-item-card:hover .wood-item-visual {
-            filter: drop-shadow(0 16px 26px rgba(255, 140, 190, 0.5));
+            filter: drop-shadow(0 16px 26px rgba(255, 140, 190, 0.55));
         }
 
         .wood-item-label {
@@ -752,7 +959,7 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
             border: 1px solid rgba(160, 110, 70, 0.35);
             white-space: nowrap;
-            transition: all 0.25s ease;
+            transition: background 0.25s ease, color 0.25s ease;
         }
 
         .wood-item-card:hover .wood-item-label {
@@ -762,7 +969,7 @@
         }
 
         /* ========================================================
-           CONTENEDOR DE SECCIÓN (ANIMACIÓN HACIA EL CENTRO)
+           CONTENEDOR DE SECCIÓN
            ======================================================== */
         #section-modal-container {
             position: fixed;
@@ -813,7 +1020,7 @@
             max-width: 900px;
             margin: 0 auto;
             display: none;
-            animation: sectionContentFade 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            animation: sectionContentFade 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
 
         .section-inner-content.active {
@@ -821,11 +1028,10 @@
         }
 
         @keyframes sectionContentFade {
-            from { opacity: 0; transform: translateY(24px) scale(0.97); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+            from { opacity: 0; transform: translateY(18px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ESTILOS COMUNES DE SECCIÓN */
         .section-hero-title {
             font-family: 'Playfair Display', serif;
             font-size: clamp(24px, 5.5vw, 36px);
@@ -896,10 +1102,8 @@
             font-size: 14px;
             outline: none;
             backdrop-filter: blur(6px);
-        }
-
-        .reasons-search-input::placeholder {
-            color: rgba(255, 200, 230, 0.6);
+            user-select: text;
+            -webkit-user-select: text;
         }
 
         .reasons-grid-modern {
@@ -918,14 +1122,13 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            transition: all 0.25s ease;
+            transition: background 0.2s ease, transform 0.2s ease;
         }
 
         .reason-card-pill:hover {
             background: rgba(255, 42, 133, 0.25);
             border-color: #ff4da6;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 18px rgba(255, 42, 133, 0.3);
+            transform: translateY(-2px);
         }
 
         .reason-num-badge {
@@ -938,7 +1141,7 @@
             flex-shrink: 0;
         }
 
-        /* 3. SECCIÓN NUESTRA FECHA (CONTADOR REAL DE AMOR) */
+        /* 3. SECCIÓN NUESTRA FECHA (11 DE NOVIEMBRE 2026) */
         .love-counter-box {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--card-border);
@@ -948,6 +1151,19 @@
             backdrop-filter: blur(10px);
             box-shadow: 0 10px 35px rgba(0,0,0,0.4);
             margin-bottom: 30px;
+        }
+
+        .date-badge-pill {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff2a85, #7b1fa2);
+            color: #ffffff;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 14px;
+            box-shadow: 0 4px 15px rgba(255, 42, 133, 0.45);
         }
 
         .counter-units-row {
@@ -963,14 +1179,15 @@
             border: 1px solid rgba(255, 110, 199, 0.35);
             border-radius: 16px;
             padding: 14px 18px;
-            min-width: clamp(75px, 16vw, 105px);
+            min-width: clamp(82px, 18vw, 115px);
         }
 
         .counter-val {
-            font-size: clamp(24px, 5vw, 38px);
+            font-size: clamp(22px, 4.8vw, 36px);
             font-weight: 700;
             color: #ffffff;
             text-shadow: 0 0 15px rgba(255, 42, 133, 0.8);
+            font-variant-numeric: tabular-nums;
         }
 
         .counter-label {
@@ -981,7 +1198,7 @@
             margin-top: 4px;
         }
 
-        /* 4. SECCIÓN NUESTRAS FOTOS (POLAROIDS Y GALERÍA 3D) */
+        /* 4. SECCIÓN NUESTRAS FOTOS (POLAROIDS) */
         .memories-grid-new {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -995,12 +1212,12 @@
             border-radius: 6px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
             cursor: pointer;
-            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             position: relative;
         }
 
         .polaroid-card:hover {
-            transform: translateY(-8px) rotate(1deg) scale(1.03);
+            transform: translateY(-6px) rotate(1deg) scale(1.02);
             box-shadow: 0 16px 36px rgba(255, 110, 199, 0.4);
         }
 
@@ -1028,7 +1245,7 @@
             line-height: 1.2;
         }
 
-        /* 5. SECCIÓN BUZÓN DE SUGERENCIAS (DIRECTO A nahimuchija@gmail.com) */
+        /* 5. SECCIÓN BUZÓN DE SUGERENCIAS */
         .mailbox-card {
             background: rgba(255, 255, 255, 0.06);
             border: 1px solid rgba(255, 110, 199, 0.4);
@@ -1039,9 +1256,7 @@
             -webkit-backdrop-filter: blur(14px);
         }
 
-        .form-group {
-            margin-bottom: 20px;
-        }
+        .form-group { margin-bottom: 20px; }
 
         .form-label {
             display: block;
@@ -1062,6 +1277,8 @@
             font-family: inherit;
             outline: none;
             transition: border-color 0.25s ease, box-shadow 0.25s ease;
+            user-select: text;
+            -webkit-user-select: text;
         }
 
         .form-input:focus, .form-textarea:focus, .form-select:focus {
@@ -1069,10 +1286,7 @@
             box-shadow: 0 0 15px rgba(255, 42, 133, 0.35);
         }
 
-        .form-textarea {
-            resize: vertical;
-            min-height: 120px;
-        }
+        .form-textarea { resize: vertical; min-height: 120px; }
 
         .btn-submit-mailbox {
             width: 100%;
@@ -1092,12 +1306,48 @@
             gap: 10px;
         }
 
-        .btn-submit-mailbox:hover, .btn-submit-mailbox:active {
-            transform: scale(1.02);
-            box-shadow: 0 8px 30px rgba(255, 42, 133, 0.7);
+        /* 6. SALA DE MÚSICA & EMBED OFICIAL SPOTIFY */
+        .spotify-official-embed-wrap {
+            background: rgba(18, 18, 24, 0.85);
+            border: 1px solid rgba(30, 215, 96, 0.45);
+            border-radius: 18px;
+            padding: 16px;
+            margin-bottom: 26px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
         }
 
-        /* 6. SALA DE MÚSICA & SPOTIFY */
+        .spotify-embed-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .spotify-embed-header h4 {
+            color: #1ed760;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-open-spotify-app {
+            background: #1ed760;
+            color: #000000;
+            border: none;
+            padding: 7px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 12.5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
         .music-genres-nav {
             display: flex;
             gap: 8px;
@@ -1125,51 +1375,6 @@
             box-shadow: 0 0 14px rgba(255, 42, 133, 0.5);
         }
 
-        .spotify-link-box {
-            background: linear-gradient(135deg, rgba(30, 215, 96, 0.15), rgba(12, 0, 20, 0.85));
-            border: 1px solid rgba(30, 215, 96, 0.45);
-            border-radius: 18px;
-            padding: 20px;
-            margin-bottom: 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 14px;
-        }
-
-        .spotify-cta-text h4 {
-            color: #1ed760;
-            font-size: 16px;
-            margin-bottom: 4px;
-        }
-
-        .spotify-cta-text p {
-            font-size: 13px;
-            color: #d0d0d0;
-        }
-
-        .btn-open-spotify-app {
-            background: #1ed760;
-            color: #000000;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-weight: 700;
-            font-size: 13.5px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 16px rgba(30, 215, 96, 0.4);
-            transition: transform 0.2s ease;
-        }
-
-        .btn-open-spotify-app:hover {
-            transform: scale(1.05);
-        }
-
         .song-list-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -1185,7 +1390,7 @@
             align-items: center;
             gap: 12px;
             cursor: pointer;
-            transition: all 0.25s ease;
+            transition: background 0.2s ease, transform 0.2s ease;
         }
 
         .song-card-item:hover, .song-card-item.playing {
@@ -1202,10 +1407,7 @@
             background: #222;
         }
 
-        .song-meta {
-            flex: 1;
-            min-width: 0;
-        }
+        .song-meta { flex: 1; min-width: 0; }
 
         .song-name {
             font-size: 13.5px;
@@ -1225,12 +1427,12 @@
         }
 
         /* ========================================================
-           MODAL DE CARTAS PERSONALIZADAS DE LA GALAXIA
+           MODALES DE LA GALAXIA: CARTAS, URANO Y SATURNO VERDE
            ======================================================== */
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(5, 1, 8, 0.78);
+            background: rgba(5, 1, 8, 0.8);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             display: flex;
@@ -1238,7 +1440,7 @@
             align-items: center;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.35s ease;
+            transition: opacity 0.32s ease;
             z-index: 150;
             padding: 18px;
         }
@@ -1251,7 +1453,7 @@
         .letter-card {
             background: rgba(26, 8, 24, 0.96);
             border: 1px solid rgba(255, 90, 140, 0.65);
-            box-shadow: 0 0 45px rgba(255, 30, 100, 0.4), 0 0 90px rgba(255, 30, 100, 0.15);
+            box-shadow: 0 0 45px rgba(255, 30, 100, 0.4);
             border-radius: 22px;
             max-width: 480px;
             width: 100%;
@@ -1259,9 +1461,9 @@
             overflow-y: auto;
             padding: 28px 24px;
             position: relative;
-            transform: scale(0.85) translateY(25px);
+            transform: scale(0.88) translateY(20px);
             opacity: 0;
-            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease;
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
             text-align: left;
         }
 
@@ -1294,7 +1496,6 @@
             font-size: clamp(20px, 4.5vw, 25px);
             margin-bottom: 14px;
             padding-right: 36px;
-            text-shadow: 0 0 10px rgba(255, 107, 149, 0.4);
         }
 
         .letter-body {
@@ -1318,27 +1519,23 @@
             font-size: 11px;
             color: rgba(255, 180, 210, 0.7);
             margin-top: 16px;
-            letter-spacing: 1px;
         }
 
-        /* ========================================================
-           MODAL DE URANO: 100 APODOS EN ANILLO AZUL CELESTE
-           ======================================================== */
+        /* MODAL DE URANO: 100 APODOS */
         .urano-modal-card {
             background: radial-gradient(circle at center, #001933 0%, #000c1a 75%, #00050d 100%);
             border: 1.5px solid var(--urano-cyan);
-            box-shadow: 0 0 50px rgba(0, 229, 255, 0.4), 0 0 100px rgba(0, 145, 234, 0.2);
+            box-shadow: 0 0 50px rgba(0, 229, 255, 0.4);
             border-radius: 24px;
-            max-width: 640px;
+            max-width: 650px;
             width: 100%;
             max-height: 85dvh;
             overflow-y: auto;
-            padding: 30px 24px;
+            padding: 28px 22px;
             position: relative;
-            transform: scale(0.85) translateY(25px);
+            transform: scale(0.88) translateY(20px);
             opacity: 0;
-            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease;
-            text-align: left;
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
             color: #e1f5fe;
         }
 
@@ -1351,7 +1548,7 @@
             font-family: 'Playfair Display', serif;
             font-style: italic;
             color: #80d8ff;
-            font-size: clamp(22px, 4.8vw, 28px);
+            font-size: clamp(21px, 4.6vw, 27px);
             text-shadow: 0 0 15px rgba(0, 229, 255, 0.7);
             margin-bottom: 8px;
             padding-right: 36px;
@@ -1360,7 +1557,7 @@
         .urano-subtitle {
             font-size: 13px;
             color: #b3e5fc;
-            margin-bottom: 22px;
+            margin-bottom: 20px;
             line-height: 1.5;
         }
 
@@ -1378,14 +1575,6 @@
             font-size: 12.5px;
             padding: 6px 12px;
             border-radius: 16px;
-            transition: all 0.2s ease;
-        }
-
-        .nick-chip:hover {
-            background: rgba(0, 229, 255, 0.35);
-            border-color: #80d8ff;
-            transform: scale(1.06);
-            box-shadow: 0 0 12px rgba(0, 229, 255, 0.5);
         }
 
         .btn-urano-close {
@@ -1397,29 +1586,131 @@
             font-size: 13.5px;
             font-weight: 600;
             cursor: pointer;
-            box-shadow: 0 4px 18px rgba(0, 176, 255, 0.45);
             display: block;
-            margin: 20px auto 0;
-            transition: transform 0.2s ease;
+            margin: 16px auto 0;
         }
 
-        .btn-urano-close:hover {
-            transform: scale(1.05);
+        /* MODAL DE SATURNO VERDE: "PARA CUANDO LO NECESITES GIGI" */
+        .saturno-modal-card {
+            background: radial-gradient(circle at center, #052914 0%, #021409 75%, #010a04 100%);
+            border: 1.5px solid var(--saturno-green);
+            box-shadow: 0 0 55px rgba(0, 230, 118, 0.4);
+            border-radius: 24px;
+            max-width: 760px;
+            width: 100%;
+            max-height: 86dvh;
+            overflow-y: auto;
+            padding: 28px 22px;
+            position: relative;
+            transform: scale(0.88) translateY(20px);
+            opacity: 0;
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+            color: #e8f5e9;
+        }
+
+        .modal-overlay.open .saturno-modal-card {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        .saturno-title {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            color: #69f0ae;
+            font-size: clamp(22px, 4.8vw, 29px);
+            text-shadow: 0 0 16px rgba(0, 230, 118, 0.7);
+            margin-bottom: 6px;
+            padding-right: 36px;
+        }
+
+        .saturno-subtitle {
+            font-size: 13.5px;
+            color: #b9f6ca;
+            margin-bottom: 22px;
+            line-height: 1.5;
+        }
+
+        .saturno-shows-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .saturno-show-card {
+            background: rgba(0, 230, 118, 0.08);
+            border: 1px solid rgba(0, 230, 118, 0.35);
+            border-radius: 16px;
+            overflow: hidden;
+            text-decoration: none;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+        }
+
+        .saturno-show-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            border-color: #69f0ae;
+            box-shadow: 0 10px 26px rgba(0, 230, 118, 0.35);
+        }
+
+        .saturno-show-thumb {
+            width: 100%;
+            aspect-ratio: 16 / 10;
+            object-fit: cover;
+            background: #0a1910;
+            display: block;
+        }
+
+        .saturno-show-info {
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .saturno-show-badge {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #69f0ae;
+        }
+
+        .saturno-show-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .btn-saturno-close {
+            background: linear-gradient(135deg, #00e676, #00b248);
+            color: #00220d;
+            border: none;
+            padding: 11px 24px;
+            border-radius: 25px;
+            font-size: 13.5px;
+            font-weight: 700;
+            cursor: pointer;
+            display: block;
+            margin: 14px auto 0;
+            box-shadow: 0 4px 18px rgba(0, 230, 118, 0.45);
         }
 
         /* ========================================================
-           WIDGET FLOTANTE ESTILO SPOTIFY (GLOBAL)
+           WIDGET FLOTANTE SPOTIFY DUAL (INTERNO + SPOTIFY EMBED)
            ======================================================== */
         .spotify-widget {
             position: fixed;
             bottom: max(60px, var(--safe-bottom));
             right: max(14px, var(--safe-right));
-            width: min(310px, 86vw);
-            background: rgba(18, 18, 22, 0.95);
+            width: min(325px, 88vw);
+            background: rgba(16, 16, 22, 0.96);
             border: 1px solid rgba(255, 90, 150, 0.45);
             border-radius: 18px;
             padding: 12px 14px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(255, 30, 100, 0.25);
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.78), 0 0 20px rgba(255, 30, 100, 0.25);
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
             z-index: 200;
@@ -1427,9 +1718,7 @@
             transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s ease;
         }
 
-        .spotify-widget.unlocked {
-            display: block;
-        }
+        .spotify-widget.unlocked { display: block; }
 
         .spotify-widget.minimized {
             transform: translateX(calc(100% + 30px));
@@ -1486,17 +1775,24 @@
 
         .sp-header-btns {
             display: flex;
-            gap: 6px;
+            gap: 5px;
         }
 
         .sp-icon-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: #e0e0e0;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #f0f0f0;
             padding: 3px 8px;
             border-radius: 10px;
-            font-size: 11px;
+            font-size: 10.5px;
+            font-weight: 600;
             cursor: pointer;
+        }
+
+        .sp-icon-btn.active-mode {
+            background: rgba(30, 215, 96, 0.25);
+            border-color: #1ed760;
+            color: #1ed760;
         }
 
         .sp-main {
@@ -1608,6 +1904,15 @@
             cursor: pointer;
         }
 
+        #sp-embed-drawer {
+            display: none;
+            margin-top: 8px;
+        }
+
+        #sp-embed-drawer.open {
+            display: block;
+        }
+
         /* LIGHTBOX PARA MULTIMEDIA */
         .lightbox {
             position: fixed;
@@ -1621,9 +1926,7 @@
             padding: 20px;
         }
 
-        .lightbox.open {
-            display: flex;
-        }
+        .lightbox.open { display: flex; }
 
         .lightbox-content {
             max-width: 92vw;
@@ -1652,7 +1955,6 @@
             z-index: 310;
         }
 
-        /* TOAST CONFIRMACIÓN */
         .toast-msg {
             position: fixed;
             top: 24px;
@@ -1678,34 +1980,55 @@
 </head>
 <body>
 
+    <!-- BOTÓN DISCRETO DE EFECTOS DE SONIDO -->
+    <button id="sfx-mute-btn" class="sfx-mute-btn" onclick="toggleSfxMute()" title="Silenciar / Activar Efectos Mágicos">
+        🔊
+    </button>
+
     <!-- ========================================================
-         PANTALLA 0: EL SOBRE CON SELLO DE CERA
+         PANTALLA 0: EL SOBRE 100% CERRADO HASTA QUE SE TOCA
          ======================================================== -->
     <div id="envelope-screen" class="screen active">
-        <div class="envelope-wrapper" id="envelope-box" onclick="openIntroEnvelope()">
+        <div class="envelope-wrapper" id="envelope-box" onclick="handleEnvelopeClick()">
             <div class="envelope" id="envelope-elem">
-                <div class="envelope-body">
-                    <div class="envelope-fold-left"></div>
-                    <div class="envelope-fold-right"></div>
-                    <div class="envelope-fold-bottom"></div>
-                </div>
-                <div class="envelope-flap"></div>
-                <div class="wax-seal" title="Toca para romper el sello">💌</div>
-                <div class="envelope-letter">
+                <div class="envelope-back-inside"></div>
+
+                <!-- Carta oculta adentro hasta que se rompe el sello -->
+                <div class="envelope-letter" onclick="event.stopPropagation(); goToVideoScreen()">
                     <div class="letter-preview-title">Para: Gigi, el amor de mi vida 💖</div>
                     <div class="letter-preview-text">
                         Esta página web es una carta infinita que hice para ti...<br>
-                        Cada estrella, recuerdo y melodía fue pensada en nosotros.
+                        Cada estrella, planeta, recuerdo y melodía fue pensada en nosotros.
+                    </div>
+                    <div class="letter-actions-inner">
+                        <button class="letter-btn-inline" onclick="event.stopPropagation(); goToVideoScreen()">
+                            🎬 Ver Video Sorpresa
+                        </button>
+                        <button class="letter-btn-inline letter-btn-galaxy" onclick="event.stopPropagation(); skipToGalaxy()">
+                            🪐 Ir a la Galaxia
+                        </button>
                     </div>
                     <div class="letter-destiny-tag">
                         <span>Chihuahua ➔ Jiutepec</span>
                         <span>De: Tu lobo ❤️</span>
                     </div>
                 </div>
+
+                <!-- Bolsillo frontal que oculta completamente el interior -->
+                <div class="envelope-front-pocket">
+                    <div class="envelope-fold-left"></div>
+                    <div class="envelope-fold-right"></div>
+                    <div class="envelope-fold-bottom"></div>
+                </div>
+
+                <!-- Solapa superior 3D y sello de cera -->
+                <div class="envelope-flap"></div>
+                <div class="wax-seal" id="wax-seal-elem" title="Toca para romper el sello">💌</div>
             </div>
-            <div class="envelope-hint">✨ Toca el sobre con sello de cera para abrir tu carta ✨</div>
+            <div class="envelope-hint" id="envelope-hint-text">✨ Toca el sello de cera para abrir tu sobre, Gigi ✨</div>
         </div>
 
+        <!-- Botones guía que salen junto con la carta -->
         <div class="envelope-actions" id="envelope-actions">
             <button class="btn-env-action" onclick="goToVideoScreen()">
                 <span>🎬</span> Ver Nuestro Video
@@ -1720,7 +2043,7 @@
     </div>
 
     <!-- ========================================================
-         PANTALLA 1: VIDEO 0926.mp4 CON SPIDERMAN
+         PANTALLA 1: VIDEO 0926.mp4 CON SPIDERMAN EN TELARAÑA
          ======================================================== -->
     <div id="video-screen" class="screen">
         <div class="video-container">
@@ -1735,32 +2058,37 @@
             <button id="heart-button" class="heart-btn" aria-label="Ir a la sorpresa">❤️</button>
         </div>
 
-        <!-- SPIDERMAN DICIENDO EL SKIP -->
-        <div class="spiderman-skip-wrapper" id="spiderman-skip" onclick="skipToGalaxy()" title="Sáltalo directo a la galaxia">
+        <!-- SPIDERMAN COLGANDO DE TELARAÑA -->
+        <div class="spiderman-skip-wrapper" id="spiderman-skip" onclick="handleSpidermanSkip()" title="Sáltalo directo a la galaxia">
             <div class="spiderman-bubble">¡Sáltalo si quieres Gigi! 🕸️</div>
-            <svg class="spiderman-avatar" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <!-- Cabeza Spiderman -->
-                <ellipse cx="50" cy="50" rx="36" ry="42" fill="#d32f2f" stroke="#212121" stroke-width="3.5"/>
-                <!-- Telarañas de la máscara -->
-                <path d="M50 8 L50 92 M14 50 L86 50 M25 20 L75 80 M25 80 L75 20" stroke="#b71c1c" stroke-width="2"/>
-                <ellipse cx="50" cy="50" rx="18" ry="21" fill="none" stroke="#b71c1c" stroke-width="1.8"/>
-                <ellipse cx="50" cy="50" rx="28" ry="32" fill="none" stroke="#b71c1c" stroke-width="1.8"/>
-                <!-- Ojo izquierdo -->
-                <path d="M22 45 Q36 30 45 48 Q32 58 22 45 Z" fill="#ffffff" stroke="#111111" stroke-width="3.5"/>
-                <!-- Ojo derecho -->
-                <path d="M78 45 Q64 30 55 48 Q68 58 78 45 Z" fill="#ffffff" stroke="#111111" stroke-width="3.5"/>
-            </svg>
+            <div class="spiderman-avatar-box">
+                <div class="spidey-web-line"></div>
+                <svg class="spiderman-avatar" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <ellipse cx="50" cy="50" rx="36" ry="42" fill="#d32f2f" stroke="#212121" stroke-width="3.5"/>
+                    <path d="M50 8 L50 92 M14 50 L86 50 M25 20 L75 80 M25 80 L75 20" stroke="#b71c1c" stroke-width="2"/>
+                    <ellipse cx="50" cy="50" rx="18" ry="21" fill="none" stroke="#b71c1c" stroke-width="1.8"/>
+                    <ellipse cx="50" cy="50" rx="28" ry="32" fill="none" stroke="#b71c1c" stroke-width="1.8"/>
+                    <path d="M22 45 Q36 30 45 48 Q32 58 22 45 Z" fill="#ffffff" stroke="#111111" stroke-width="3.5"/>
+                    <path d="M78 45 Q64 30 55 48 Q68 58 78 45 Z" fill="#ffffff" stroke="#111111" stroke-width="3.5"/>
+                </svg>
+            </div>
         </div>
     </div>
 
     <!-- ========================================================
-         PANTALLA 2: GALAXIA 3D INTERACTIVA (CON URANO AZUL)
+         PANTALLA 2: GALAXIA 3D (CON URANO AZUL Y SATURNO VERDE)
          ======================================================== -->
     <div id="galaxy-screen" class="screen">
         <header class="top-nav-bar">
             <div class="galaxy-title">Te Amo, Gigi ❤️</div>
             
             <div class="galaxy-top-actions">
+                <button class="btn-planet-shortcut" onclick="handleUranoInteraction()" title="Viajar a Urano">
+                    <span>🪐</span> Urano
+                </button>
+                <button class="btn-planet-shortcut btn-planet-saturno" onclick="handleSaturnoInteraction()" title="Viajar a Saturno Verde">
+                    <span>🟢</span> Saturno
+                </button>
                 <button class="btn-go-table" onclick="goToTableScreen()">
                     <span>🪵</span> Mesa de Recuerdos
                 </button>
@@ -1783,15 +2111,22 @@
             </div>
         </header>
 
+        <!-- HUD DE ÓRBITA PLANETARIA (APARECE AL LLEGAR A URANO O SATURNO) -->
+        <div id="planet-orbit-hud" class="planet-orbit-hud">
+            <span id="hud-planet-text" class="hud-planet-text">🪐 Estás en Urano: Mira los 20 apodos girar o toca el planeta en el centro</span>
+            <button id="hud-btn-action" class="hud-btn-action" onclick="triggerActivePlanetCore()">✨ Juntar Anillos</button>
+            <button class="hud-btn-back" onclick="returnToGalaxyCenter()">↩ Volver al Centro</button>
+        </div>
+
         <canvas id="galaxy-canvas"></canvas>
 
-        <div class="galaxy-hint">
-            💖 Toca las frases o dibujos para cartas secretas • A lo lejos busca a <span class="hint-badge-urano">🪐 Urano</span> para sus 100 apodos • Desliza para orbitar ✨
+        <div class="galaxy-hint" id="galaxy-bottom-hint">
+            💖 Toca las frases para cartas • Viaja a <span class="hint-badge-urano">🪐 Urano Azul</span> (100 apodos) o a <span class="hint-badge-saturno">🟢 Saturno Verde</span> (Tus Series y Canales) ✨
         </div>
     </div>
 
     <!-- ========================================================
-         PANTALLA 3: MESA DE RECUERDOS (OBJETOS ESTILO LA IMAGEN)
+         PANTALLA 3: MESA DE RECUERDOS
          ======================================================== -->
     <div id="table-screen" class="screen">
         <div class="wood-table-background"></div>
@@ -1821,7 +2156,6 @@
             <div class="wood-item-card" onclick="openSectionFromItem('section-razones', this)">
                 <div class="wood-item-visual">
                     <svg viewBox="0 0 100 100" width="100%" height="100%">
-                        <!-- Ramo de flores -->
                         <path d="M38 65 L48 95 L52 95 L62 65 Z" fill="#8d6e63" stroke="#5d4037" stroke-width="2"/>
                         <circle cx="50" cy="45" r="14" fill="#ffffff" stroke="#e0e0e0" stroke-width="1.5"/>
                         <circle cx="36" cy="40" r="12" fill="#fff9c4" stroke="#fff59d" stroke-width="1.5"/>
@@ -1885,11 +2219,9 @@
             <div class="wood-item-card" onclick="openSectionFromItem('section-lugares', this)">
                 <div class="wood-item-visual">
                     <svg viewBox="0 0 100 90" width="100%" height="100%">
-                        <!-- Mapa doblado -->
                         <rect x="10" y="15" width="80" height="60" rx="3" fill="#efebe9" stroke="#bcaaa4" stroke-width="2"/>
                         <path d="M37 15 L37 75 M63 15 L63 75" stroke="#d7ccc8" stroke-dasharray="3,3"/>
                         <path d="M25 45 Q50 30 75 55" fill="none" stroke="#ff4081" stroke-width="2.5"/>
-                        <!-- Brújula -->
                         <circle cx="70" cy="55" r="14" fill="#fff8e1" stroke="#ffb300" stroke-width="2"/>
                         <polygon points="70,44 74,55 70,52 66,55" fill="#f44336"/>
                         <polygon points="70,66 74,55 70,58 66,55" fill="#37474f"/>
@@ -1902,12 +2234,10 @@
             <div class="wood-item-card" onclick="openSectionFromItem('section-suenos', this)">
                 <div class="wood-item-visual">
                     <svg viewBox="0 0 90 100" width="100%" height="100%">
-                        <!-- Diente de león -->
                         <line x1="45" y1="45" x2="45" y2="92" stroke="#81c784" stroke-width="3" stroke-linecap="round"/>
                         <circle cx="45" cy="42" r="5" fill="#aed581"/>
                         <circle cx="45" cy="42" r="22" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="3,4" opacity="0.8"/>
                         <circle cx="45" cy="42" r="14" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="2,3"/>
-                        <!-- Semillitas flotando -->
                         <circle cx="68" cy="24" r="2" fill="#ffffff"/>
                         <circle cx="74" cy="35" r="1.5" fill="#ffffff"/>
                         <circle cx="28" cy="20" r="1.5" fill="#ffffff"/>
@@ -1920,7 +2250,6 @@
             <div class="wood-item-card" onclick="openSectionFromItem('section-musica', this)">
                 <div class="wood-item-visual">
                     <svg viewBox="0 0 100 100" width="100%" height="100%">
-                        <!-- Disco de vinilo -->
                         <circle cx="50" cy="50" r="42" fill="#151515" stroke="#333333" stroke-width="2"/>
                         <circle cx="50" cy="50" r="34" fill="none" stroke="#252525" stroke-width="1.5"/>
                         <circle cx="50" cy="50" r="26" fill="none" stroke="#252525" stroke-width="1.5"/>
@@ -1931,11 +2260,10 @@
                 <div class="wood-item-label">Nuestra canción</div>
             </div>
 
-            <!-- 9. Buzón de sugerencias a nahimuchija@gmail.com -->
+            <!-- 9. Buzón de amor -->
             <div class="wood-item-card" onclick="openSectionFromItem('section-buzon', this)">
                 <div class="wood-item-visual">
                     <svg viewBox="0 0 100 100" width="100%" height="100%">
-                        <!-- Buzón postal vintage -->
                         <rect x="25" y="25" width="50" height="60" rx="8" fill="#e91e63" stroke="#c2185b" stroke-width="2"/>
                         <rect x="35" y="38" width="30" height="6" rx="2" fill="#ffffff"/>
                         <line x1="50" y1="85" x2="50" y2="98" stroke="#880e4f" stroke-width="4"/>
@@ -1975,6 +2303,18 @@
                 </p>
                 <div class="parchment-sign">
                     Por siempre tuyo,<br>Nahim ❤️
+                </div>
+
+                <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 30px; border-top: 1px dashed #d7ccc8; padding-top: 20px;">
+                    <button class="btn-env-action" onclick="closeSectionModal(); backToGalaxyFromTable()">
+                        <span>🪐</span> Ir a la Galaxia 3D
+                    </button>
+                    <button class="btn-env-action btn-env-secondary" style="background: rgba(136, 14, 79, 0.12); color: #880e4f; border-color: #c2185b;" onclick="showSectionContent('section-fotos')">
+                        <span>📸</span> Ver Nuestras Fotos
+                    </button>
+                    <button class="btn-env-action btn-env-secondary" style="background: rgba(136, 14, 79, 0.12); color: #880e4f; border-color: #c2185b;" onclick="closeSectionModal()">
+                        <span>🪵</span> Volver a la Mesa
+                    </button>
                 </div>
             </div>
         </div>
@@ -2067,35 +2407,36 @@
             </div>
         </div>
 
-        <!-- 5. DETALLE NUESTRA FECHA (CONTADOR) -->
+        <!-- 5. DETALLE NUESTRA FECHA (11 DE NOVIEMBRE DE 2026: NEGATIVO Y LUEGO POSITIVO) -->
         <div id="section-fecha" class="section-inner-content">
-            <h2 class="section-hero-title">El Tiempo a Tu Lado 🗓️</h2>
-            <p class="section-hero-subtitle">Cada segundo juntos cuenta y se guarda para siempre.</p>
+            <h2 class="section-hero-title">Nuestra Fecha Especial 🗓️</h2>
+            <p class="section-hero-subtitle">11 de Noviembre de 2026 • El inicio oficial de nuestra cuenta infinita.</p>
 
             <div class="love-counter-box">
-                <h3 style="color: #ff6ea7; font-size: 20px;">Llevamos amándonos:</h3>
+                <div class="date-badge-pill">✨ 11 de Noviembre de 2026 ✨</div>
+                <h3 id="love-counter-status" style="color: #ff6ea7; font-size: 20px;">Cuenta regresiva para el 11 de Noviembre:</h3>
                 
                 <div class="counter-units-row">
                     <div class="counter-unit-col">
-                        <div class="counter-val" id="cnt-days">2555+</div>
+                        <div class="counter-val" id="cnt-days">-00</div>
                         <div class="counter-label">Días</div>
                     </div>
                     <div class="counter-unit-col">
-                        <div class="counter-val" id="cnt-hours">18</div>
+                        <div class="counter-val" id="cnt-hours">-00</div>
                         <div class="counter-label">Horas</div>
                     </div>
                     <div class="counter-unit-col">
-                        <div class="counter-val" id="cnt-mins">42</div>
+                        <div class="counter-val" id="cnt-mins">-00</div>
                         <div class="counter-label">Minutos</div>
                     </div>
                     <div class="counter-unit-col">
-                        <div class="counter-val" id="cnt-secs">09</div>
+                        <div class="counter-val" id="cnt-secs">-00</div>
                         <div class="counter-label">Segundos</div>
                     </div>
                 </div>
 
-                <p style="color: #ecd7f0; font-size: 14px; max-width: 500px; margin: 16px auto 0;">
-                    7 años conociéndonos y toda una vida por delante para seguir sumando recuerdos juntos ❤️
+                <p id="love-counter-subtext" style="color: #ecd7f0; font-size: 14px; max-width: 540px; margin: 16px auto 0; line-height: 1.6;">
+                    El reloj está en negativo contando cada segundo que falta para llegar al 11 de Noviembre; en cuanto llegue el momento, empezará a sumar nuestro tiempo para siempre ❤️
                 </p>
             </div>
         </div>
@@ -2140,25 +2481,26 @@
             </div>
         </div>
 
-        <!-- 8. DETALLE SALA DE MÚSICA & SPOTIFY (CON NSQK, WOS, TRUENO) -->
+        <!-- 8. DETALLE SALA DE MÚSICA & PLAYLIST SPOTIFY INTEGRADA -->
         <div id="section-musica" class="section-inner-content">
             <h2 class="section-hero-title">Nuestra Sala de Música 🎶</h2>
-            <p class="section-hero-subtitle">Todas las canciones que nos definen: NSQK, WOS, Trueno y nuestras románticas.</p>
+            <p class="section-hero-subtitle">Escucha nuestra Playlist oficial de Spotify directamente aquí o elige cualquier canción abajo.</p>
 
-            <!-- SECCIÓN SPOTIFY VINCULADA -->
-            <div class="spotify-link-box">
-                <div class="spotify-cta-text">
-                    <h4>🟢 Escuchar y vincular con Spotify</h4>
-                    <p>Abre directamente tu playlist favorita o escucha aquí mismo en la página.</p>
+            <!-- EMBED OFICIAL DE LA PLAYLIST DE SPOTIFY QUE PEDISTE -->
+            <div class="spotify-official-embed-wrap">
+                <div class="spotify-embed-header">
+                    <h4>🟢 Nuestra Playlist Oficial en Spotify</h4>
+                    <a href="https://open.spotify.com/playlist/3Dmza3xwpVU4pvWpBZd2Jk?si=21b1189bbc594ec1" target="_blank" rel="noopener" class="btn-open-spotify-app">
+                        <span>🟢</span> Abrir en la App de Spotify
+                    </a>
                 </div>
-                <a href="https://open.spotify.com" target="_blank" class="btn-open-spotify-app">
-                    <span>🟢</span> Abrir en Spotify
-                </a>
+                <iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/3Dmza3xwpVU4pvWpBZd2Jk?utm_source=generator&si=8f3bb226d3044e47" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
             </div>
 
-            <!-- FILTRO DE GÉNEROS -->
+            <!-- FILTRO DE GÉNEROS DEL REPRODUCTOR INTERNO -->
             <div class="music-genres-nav">
-                <button class="genre-pill-btn active" onclick="filterMusicGenre('all', this)">Todas (44)</button>
+                <button id="btn-genre-all" class="genre-pill-btn active" onclick="filterMusicGenre('all', this)">Todas (40)</button>
+                <button class="genre-pill-btn" onclick="filterMusicGenre('playlist', this)">Favoritas Playlist 💚</button>
                 <button class="genre-pill-btn" onclick="filterMusicGenre('nsqk', this)">NSQK 🎧</button>
                 <button class="genre-pill-btn" onclick="filterMusicGenre('wos', this)">WOS 🎤</button>
                 <button class="genre-pill-btn" onclick="filterMusicGenre('trueno', this)">Trueno ⚡</button>
@@ -2171,7 +2513,7 @@
         <!-- 9. DETALLE BUZÓN DE SUGERENCIAS (A nahimuchija@gmail.com) -->
         <div id="section-buzon" class="section-inner-content">
             <h2 class="section-hero-title">Buzón de Amor Para Nahim 📬</h2>
-            <p class="section-hero-subtitle">Escribe lo que quieras mi amor: una cita, un antojo o una cartita. Le llegará directamente a su correo personal.</p>
+            <p class="section-hero-subtitle">Escribe lo que quieras mi amor: una cita, un antojo o una cartita. Le llegará directamente a su correo nahimuchija@gmail.com.</p>
 
             <div class="mailbox-card">
                 <form id="love-mailbox-form" onsubmit="submitLoveMailbox(event)">
@@ -2214,6 +2556,9 @@
             <div id="letter-text" class="letter-body"></div>
             <div id="letter-signature" class="letter-sign"></div>
             <div id="card-counter" class="card-counter"></div>
+            <button class="btn-env-action" style="margin: 18px auto 0; font-size: 13px; padding: 8px 22px;" onclick="closeLetterModal()">
+                ✨ Seguir Explorando las Estrellas
+            </button>
         </div>
     </div>
 
@@ -2225,13 +2570,32 @@
             <button class="close-card" style="border-color: #80d8ff; color: #80d8ff;" onclick="closeUranoModal()">×</button>
             <div class="urano-title">🪐 Urano: Los 100 Apodos Bonitos 💙</div>
             <div class="urano-subtitle">
-                Los anillos de Urano están hechos de todos los nombres tiernos con los que mi corazón te llama. Cada vez que retrocedas, se separan y vuelven a girar eternamente.
+                Los 20 apodos de los anillos de Urano se unieron en el centro para revelarte los 100 nombres tiernos con los que mi corazón te llama.
             </div>
 
             <div id="urano-nicknames-container" class="nicknames-chips-wrap"></div>
 
             <button class="btn-urano-close" onclick="closeUranoModal()">
-                ✨ Dejar que sigan orbitando en Urano
+                ✨ Dejar que vuelvan a orbitar en Urano
+            </button>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         MODAL DE SATURNO VERDE: "PARA CUANDO LO NECESITES GIGI"
+         ======================================================== -->
+    <div id="saturno-modal" class="modal-overlay">
+        <div class="saturno-modal-card">
+            <button class="close-card" style="border-color: #69f0ae; color: #69f0ae;" onclick="closeSaturnoModal()">×</button>
+            <div class="saturno-title">🟢 Para cuando lo necesites, Gigi 💚</div>
+            <div class="saturno-subtitle">
+                Todas las portadas que flotaban en los anillos de Saturno se juntaron aquí para ti. Toca cualquiera de tus series o canales favoritos y te llevará directo en otra pestaña para sacarte una sonrisa:
+            </div>
+
+            <div id="saturno-shows-grid" class="saturno-shows-grid"></div>
+
+            <button class="btn-saturno-close" onclick="closeSaturnoModal()">
+                ✨ Devolver las portadas a los anillos de Saturno
             </button>
         </div>
     </div>
@@ -2245,42 +2609,51 @@
     </div>
 
     <!-- ========================================================
-         WIDGET FLOTANTE SPOTIFY
+         WIDGET FLOTANTE DE MÚSICA (SIN BUGS + MODO SPOTIFY EMBED)
          ======================================================== -->
     <div id="spotify-widget" class="spotify-widget">
         <div class="sp-header">
             <div class="sp-badge">
                 <span>🟢</span>
-                <span>Playlist Para Gigi ❤️</span>
+                <span>Música Para Gigi ❤️</span>
             </div>
             <div class="sp-header-btns">
+                <button id="sp-toggle-embed-btn" class="sp-icon-btn" onclick="toggleWidgetSpotifyEmbed()">Spotify Playlist</button>
                 <button id="sp-minimize" class="sp-icon-btn" onclick="minimizeSpotifyWidget()">Ocultar —</button>
             </div>
         </div>
 
-        <div class="sp-main">
-            <div class="sp-cover-wrapper">
-                <img id="sp-cover" src="https://i.ytimg.com/vi/C0OXsyR2mMM/mqdefault.jpg" alt="Portada">
-                <div id="yt-player-container">
-                    <div id="yt-player"></div>
+        <!-- Controles del reproductor interno continuo -->
+        <div id="sp-internal-player-view">
+            <div class="sp-main">
+                <div class="sp-cover-wrapper">
+                    <img id="sp-cover" src="https://i.ytimg.com/vi/C0OXsyR2mMM/mqdefault.jpg" alt="Portada">
+                    <div id="yt-player-container">
+                        <div id="yt-player"></div>
+                    </div>
+                </div>
+                <div class="sp-info">
+                    <div id="sp-title" class="sp-title">Cargando música...</div>
+                    <div id="sp-artist" class="sp-artist">Para mi Gigi ❤️</div>
                 </div>
             </div>
-            <div class="sp-info">
-                <div id="sp-title" class="sp-title">Cargando música...</div>
-                <div id="sp-artist" class="sp-artist">Para mi Gigi ❤️</div>
+
+            <div class="sp-controls">
+                <button class="sp-ctrl-btn" onclick="prevTrack()" title="Canción anterior">⏮</button>
+                <button id="sp-play" class="sp-ctrl-btn sp-play-btn" onclick="togglePlayMusic()" title="Pausar / Reproducir">▶</button>
+                <button class="sp-ctrl-btn" onclick="nextTrack()" title="Siguiente canción">⏭</button>
+            </div>
+
+            <div class="sp-volume-row">
+                <span>🔉</span>
+                <input id="sp-volume" type="range" class="sp-volume-slider" min="0" max="100" value="70" oninput="setSpotifyVolume(this.value)">
+                <span id="sp-vol-label" style="width: 28px; text-align: right;">70%</span>
             </div>
         </div>
 
-        <div class="sp-controls">
-            <button class="sp-ctrl-btn" onclick="prevTrack()" title="Canción anterior">⏮</button>
-            <button id="sp-play" class="sp-ctrl-btn sp-play-btn" onclick="togglePlayMusic()" title="Pausar / Reproducir">▶</button>
-            <button class="sp-ctrl-btn" onclick="nextTrack()" title="Siguiente canción">⏭</button>
-        </div>
-
-        <div class="sp-volume-row">
-            <span>🔉</span>
-            <input id="sp-volume" type="range" class="sp-volume-slider" min="0" max="100" value="70" oninput="setSpotifyVolume(this.value)">
-            <span id="sp-vol-label" style="width: 28px; text-align: right;">70%</span>
+        <!-- Cajón con el Iframe Oficial de Spotify dentro del widget -->
+        <div id="sp-embed-drawer">
+            <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/3Dmza3xwpVU4pvWpBZd2Jk?utm_source=generator&si=8f3bb226d3044e47" width="100%" height="152" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
         </div>
     </div>
 
@@ -2336,50 +2709,260 @@
     </script>
 
     <!-- ========================================================
-         LÓGICA JAVASCRIPT PRINCIPAL
+         LÓGICA JAVASCRIPT PRINCIPAL OPTIMIZADA A 60 FPS
          ======================================================== -->
     <script>
+        if (typeof gsap !== 'undefined') {
+            gsap.ticker.lagSmoothing(500, 33);
+        }
+
         /* =========================================================
-           1. PLAYLIST EXPANDIDA (NSQK, WOS, TRUENO Y ROMÁNTICAS)
+           0. SISTEMA DE SONIDO SINTETIZADO (WEB AUDIO API - 0 KB)
+           ========================================================= */
+        let audioCtx = null;
+        let isSfxMuted = false;
+
+        function getAudioCtx() {
+            if (isSfxMuted) return null;
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) audioCtx = new AudioContextClass();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume().catch(() => {});
+            }
+            return audioCtx;
+        }
+
+        function toggleSfxMute() {
+            isSfxMuted = !isSfxMuted;
+            const btn = document.getElementById('sfx-mute-btn');
+            btn.textContent = isSfxMuted ? '🔇' : '🔊';
+            if (!isSfxMuted) playStarChimeSound();
+        }
+
+        function playWaxSealBreakSound() {
+            const ctx = getAudioCtx();
+            if (!ctx) return;
+            const now = ctx.currentTime;
+
+            const bufferSize = Math.floor(ctx.sampleRate * 0.14);
+            const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.035));
+            }
+            const noise = ctx.createBufferSource();
+            noise.buffer = buffer;
+
+            const filter = ctx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(1400, now);
+
+            const gain = ctx.createGain();
+            gain.gain.setValueAtTime(0.35, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
+
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(ctx.destination);
+            noise.start(now);
+
+            [1150, 1550, 2100].forEach((freq, idx) => {
+                const osc = ctx.createOscillator();
+                const g = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now + idx * 0.055);
+                g.gain.setValueAtTime(0.09, now + idx * 0.055);
+                g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.055 + 0.35);
+                osc.connect(g);
+                g.connect(ctx.destination);
+                osc.start(now + idx * 0.055);
+                osc.stop(now + idx * 0.055 + 0.35);
+            });
+        }
+
+        function playPaperSlideSound() {
+            const ctx = getAudioCtx();
+            if (!ctx) return;
+            const now = ctx.currentTime;
+
+            const bufferSize = Math.floor(ctx.sampleRate * 0.45);
+            const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                const env = Math.sin((i / bufferSize) * Math.PI);
+                data[i] = (Math.random() * 2 - 1) * env * 0.2;
+            }
+            const noise = ctx.createBufferSource();
+            noise.buffer = buffer;
+
+            const filter = ctx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(750, now);
+            filter.frequency.linearRampToValueAtTime(1950, now + 0.45);
+            filter.Q.value = 1.6;
+
+            noise.connect(filter);
+            filter.connect(ctx.destination);
+            noise.start(now);
+        }
+
+        function playSpiderWebSound() {
+            const ctx = getAudioCtx();
+            if (!ctx) return;
+            const now = ctx.currentTime;
+
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(320, now);
+            osc.frequency.exponentialRampToValueAtTime(1600, now + 0.09);
+            osc.frequency.exponentialRampToValueAtTime(420, now + 0.22);
+
+            gain.gain.setValueAtTime(0.24, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.24);
+        }
+
+        function playStarChimeSound() {
+            const ctx = getAudioCtx();
+            if (!ctx) return;
+            const now = ctx.currentTime;
+
+            [587.33, 880, 1174.66, 1760].forEach((freq, i) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now + i * 0.055);
+                gain.gain.setValueAtTime(0.09, now + i * 0.055);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.055 + 0.65);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now + i * 0.055);
+                osc.stop(now + i * 0.055 + 0.65);
+            });
+        }
+
+        function playPlanetWarpSound(isReturn = false) {
+            const ctx = getAudioCtx();
+            if (!ctx) return;
+            const now = ctx.currentTime;
+
+            const osc1 = ctx.createOscillator();
+            const osc2 = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc1.type = 'sine';
+            osc2.type = 'triangle';
+
+            if (!isReturn) {
+                osc1.frequency.setValueAtTime(140, now);
+                osc1.frequency.exponentialRampToValueAtTime(520, now + 1.25);
+                osc2.frequency.setValueAtTime(210, now);
+                osc2.frequency.exponentialRampToValueAtTime(780, now + 1.25);
+            } else {
+                osc1.frequency.setValueAtTime(520, now);
+                osc1.frequency.exponentialRampToValueAtTime(140, now + 1.05);
+                osc2.frequency.setValueAtTime(780, now);
+                osc2.frequency.exponentialRampToValueAtTime(210, now + 1.05);
+            }
+
+            gain.gain.setValueAtTime(0.01, now);
+            gain.gain.linearRampToValueAtTime(0.15, now + 0.25);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + (isReturn ? 1.1 : 1.35));
+
+            osc1.connect(gain);
+            osc2.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc1.start(now);
+            osc2.start(now);
+            osc1.stop(now + 1.4);
+            osc2.stop(now + 1.4);
+        }
+
+        function playWoodFlySound(isReturn = false) {
+            const ctx = getAudioCtx();
+            if (!ctx) return;
+            const now = ctx.currentTime;
+
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            if (!isReturn) {
+                osc.frequency.setValueAtTime(260, now);
+                osc.frequency.exponentialRampToValueAtTime(640, now + 0.25);
+            } else {
+                osc.frequency.setValueAtTime(520, now);
+                osc.frequency.exponentialRampToValueAtTime(240, now + 0.3);
+            }
+            gain.gain.setValueAtTime(0.14, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.32);
+        }
+
+        /* =========================================================
+           1. SISTEMA DE MÚSICA REPARADO + PLAYLIST DE SPOTIFY (40 TRACKS)
            ========================================================= */
         const playlist = [
-            // Canciones originales favoritas
-            { id: 'C0OXsyR2mMM', title: 'Catorce (Sinónimo de amor ♡)', artist: 'Sebastián Romero', genre: 'romanticas' },
-            { id: 'WqKqj3Q1wrw', title: 'Eres mi recuerdo favorito', artist: 'Andrecito', genre: 'romanticas' },
-            { id: 'IYsQDbvfzrE', title: 'Quédate un minuto más', artist: 'Andrecito', genre: 'romanticas' },
-            { id: 'sVdxA0rFN5c', backups: ['SNGAd7rgec0', 'WgEw5Zfbeqg'], title: 'Te Alejas Más De Mí', artist: 'Esteman, Daniela Spalla', genre: 'romanticas' },
-            { id: '7AHcCUWQevg', backups: ['duyi3KWe5es', '0YLZMsgRL1k'], title: 'Cafuné', artist: 'Micro TDH', genre: 'romanticas' },
-            { id: '7E9-c2Z6adU', title: 'Toda Esta Ciudad', artist: 'Kevin Kaarl', genre: 'romanticas' },
-            { id: 'WA05n3EKUQU', title: 'Enamorado Tuyo ❤️', artist: 'Cuarteto de Nos', genre: 'romanticas' },
-            { id: 'n2Cld9aU1vU', title: 'Te Amo Y Más', artist: 'Diego Luna', genre: 'romanticas' },
-            { id: 'G2iKFUu1itI', title: 'Hasta Viejos', artist: 'Sebastián Romero', genre: 'romanticas' },
-            { id: 'Zd1Flawc1-I', title: 'Seguro Te Pierdo', artist: 'KID FLEX, Sergi', genre: 'romanticas' },
-            { id: '3TXnYMT9Ju8', title: 'Luciérnagas', artist: 'Milo J, Silvio Rodríguez', genre: 'romanticas' },
-            { id: '2yHxI4g7bsg', title: 'Batman x Catwoman Rap', artist: 'Kronno Zomber', genre: 'romanticas' },
+            // Románticas & Favoritas
+            { id: 'C0OXsyR2mMM', backups: ['G2iKFUu1itI'], title: 'Catorce (Sinónimo de amor ♡)', artist: 'Sebastián Romero', genre: 'romanticas' },
+            { id: 'WqKqj3Q1wrw', backups: ['IYsQDbvfzrE'], title: 'Eres mi recuerdo favorito', artist: 'Andrecito', genre: 'romanticas' },
+            { id: 'IYsQDbvfzrE', backups: ['WqKqj3Q1wrw'], title: 'Quédate un minuto más', artist: 'Andrecito', genre: 'romanticas' },
+            { id: 'SNGAd7rgec0', backups: ['sVdxA0rFN5c', 'WgEw5Zfbeqg'], title: 'Te Alejas Más De Mí', artist: 'Esteman, Daniela Spalla', genre: 'romanticas' },
+            { id: 'duyi3KWe5es', backups: ['7AHcCUWQevg', '0YLZMsgRL1k'], title: 'Cafuné', artist: 'Micro TDH', genre: 'romanticas' },
+            { id: '7E9-c2Z6adU', backups: ['WA05n3EKUQU'], title: 'Toda Esta Ciudad', artist: 'Kevin Kaarl', genre: 'romanticas' },
+            { id: 'WA05n3EKUQU', backups: ['7E9-c2Z6adU'], title: 'Enamorado Tuyo ❤️', artist: 'Cuarteto de Nos', genre: 'romanticas' },
+            { id: 'n2Cld9aU1vU', backups: ['G2iKFUu1itI'], title: 'Te Amo Y Más', artist: 'Diego Luna (El Libro de la Vida)', genre: 'romanticas' },
+            { id: 'G2iKFUu1itI', backups: ['C0OXsyR2mMM'], title: 'Hasta Viejos', artist: 'Sebastián Romero', genre: 'romanticas' },
+            { id: 'Zd1Flawc1-I', backups: ['3TXnYMT9Ju8'], title: 'Seguro Te Pierdo', artist: 'KID FLEX, Sergi', genre: 'romanticas' },
+            { id: '3TXnYMT9Ju8', backups: ['Zd1Flawc1-I'], title: 'Luciérnagas', artist: 'Milo J, Silvio Rodríguez', genre: 'romanticas' },
+            { id: '2yHxI4g7bsg', backups: ['WA05n3EKUQU'], title: 'Batman x Catwoman Rap', artist: 'Kronno Zomber', genre: 'romanticas' },
+
+            // Favoritas de la Playlist Spotify agregadas
+            { id: 'JQbjS0_ZfJ0', backups: ['TGgcC5xg9YI'], title: 'San Lucas', artist: 'Kevin Kaarl', genre: 'playlist' },
+            { id: 'e9dZQelULDk', backups: ['JQbjS0_ZfJ0'], title: 'Colapso', artist: 'Kevin Kaarl', genre: 'playlist' },
+            { id: 'O4f58BU_Hbs', backups: ['3TXnYMT9Ju8'], title: 'Rara Vez', artist: 'Milo J, Taiu', genre: 'playlist' },
+            { id: '4x3c9M92Z2E', backups: ['O4f58BU_Hbs'], title: 'M.A.I', artist: 'Milo J', genre: 'playlist' },
+            { id: 'k3zimSRKqNw', backups: ['TGgcC5xg9YI'], title: 'Chachachá', artist: 'Jósean Log', genre: 'playlist' },
+            { id: '6v3L3v4k-wY', backups: ['k3zimSRKqNw'], title: 'Beso', artist: 'Jósean Log', genre: 'playlist' },
+            { id: '98Akpf1ph2o', backups: ['WA05n3EKUQU'], title: 'Brillas', artist: 'León Larregui', genre: 'playlist' },
+            { id: '7qFfFVSerQo', backups: ['98Akpf1ph2o'], title: 'Locos', artist: 'León Larregui', genre: 'playlist' },
+            { id: 'L9vB2T8N7nU', backups: ['7E9-c2Z6adU'], title: 'Fuentes de Ortiz', artist: 'Ed Maverick', genre: 'playlist' },
+            { id: 'TGgcC5xg9YI', backups: ['k3zimSRKqNw'], title: 'See You Again', artist: 'Tyler, The Creator ft. Kali Uchis', genre: 'playlist' },
 
             // NSQK
-            { id: 'qXU5aM6H_yY', title: 'Si en tu mente estuve', artist: 'NSQK', genre: 'nsqk' },
-            { id: '8W02j8eYw3U', title: 'SÍSI', artist: 'NSQK', genre: 'nsqk' },
-            { id: 'h64UoPz8s-k', title: 'Árbol de Manzanas', artist: 'NSQK', genre: 'nsqk' },
-            { id: 'p4pB4JjFwZ8', title: 'LOVELANGUAGE', artist: 'NSQK', genre: 'nsqk' },
-            { id: 's2x_Pvh20J0', title: 'Algo Bien', artist: 'NSQK', genre: 'nsqk' },
-            { id: '0e46wSg_E3w', title: 'Bobo (ft. Álvaro Díaz)', artist: 'NSQK', genre: 'nsqk' },
+            { id: 'qXU5aM6H_yY', backups: ['8W02j8eYw3U'], title: 'Si en tu mente estuve', artist: 'NSQK', genre: 'nsqk' },
+            { id: '8W02j8eYw3U', backups: ['qXU5aM6H_yY'], title: 'SÍSI', artist: 'NSQK', genre: 'nsqk' },
+            { id: 'h64UoPz8s-k', backups: ['p4pB4JjFwZ8'], title: 'Árbol de Manzanas', artist: 'NSQK', genre: 'nsqk' },
+            { id: 'p4pB4JjFwZ8', backups: ['s2x_Pvh20J0'], title: 'LOVELANGUAGE', artist: 'NSQK', genre: 'nsqk' },
+            { id: 's2x_Pvh20J0', backups: ['0e46wSg_E3w'], title: 'Algo Bien', artist: 'NSQK', genre: 'nsqk' },
+            { id: '0e46wSg_E3w', backups: ['qXU5aM6H_yY'], title: 'Bobo (ft. Álvaro Díaz)', artist: 'NSQK', genre: 'nsqk' },
 
             // WOS
-            { id: 'G3gE5Y_4uVo', title: 'Melón Vino', artist: 'WOS', genre: 'wos' },
-            { id: 'iW2yYy4mQ20', title: 'Arrancármelo', artist: 'WOS', genre: 'wos' },
-            { id: 'c3aN6Tv4WLA', backups: ['Hmc2UKFNGzM', 'gWzjjbp_V64'], title: 'Alma Dinamita', artist: 'WOS', genre: 'wos' },
-            { id: 'MA5v9VNJ-2Q', backups: ['9t27ErTpe0I', '6Se4nwQtDs8'], title: 'Okupa', artist: 'WOS', genre: 'wos' },
-            { id: 'vR7JbKqPZ3s', title: 'Terraza', artist: 'WOS', genre: 'wos' },
-            { id: 'hZ4W7s4k-wY', title: 'Canguro', artist: 'WOS', genre: 'wos' },
+            { id: 'G3gE5Y_4uVo', backups: ['iW2yYy4mQ20'], title: 'Melón Vino', artist: 'WOS', genre: 'wos' },
+            { id: 'iW2yYy4mQ20', backups: ['G3gE5Y_4uVo'], title: 'Arrancármelo', artist: 'WOS', genre: 'wos' },
+            { id: 'Hmc2UKFNGzM', backups: ['c3aN6Tv4WLA', 'gWzjjbp_V64'], title: 'Alma Dinamita', artist: 'WOS', genre: 'wos' },
+            { id: '9t27ErTpe0I', backups: ['MA5v9VNJ-2Q', '6Se4nwQtDs8'], title: 'Okupa', artist: 'WOS', genre: 'wos' },
+            { id: 'vR7JbKqPZ3s', backups: ['G3gE5Y_4uVo'], title: 'Terraza', artist: 'WOS', genre: 'wos' },
+            { id: 'hZ4W7s4k-wY', backups: ['iW2yYy4mQ20'], title: 'Canguro', artist: 'WOS', genre: 'wos' },
 
             // TRUENO
-            { id: 'wfWIs2gFTAM', title: 'Mamichula', artist: 'Trueno, Nicki Nicole, Bizarrap', genre: 'trueno' },
-            { id: 'e9mPqJ0G6m0', title: 'Feel Me??', artist: 'Trueno', genre: 'trueno' },
-            { id: '_b6gPz1N39U', title: 'Solo Por Vos', artist: 'Trueno', genre: 'trueno' },
-            { id: 'vR7K3X1_J0c', title: 'Dance Crip', artist: 'Trueno', genre: 'trueno' },
-            { id: 'f2lW0y_yq0M', title: 'Tranky Funky', artist: 'Trueno', genre: 'trueno' },
-            { id: 'Xl3B9W2K58Y', title: 'Real Gangsta Love', artist: 'Trueno', genre: 'trueno' }
+            { id: 'wfWIs2gFTAM', backups: ['e9mPqJ0G6m0'], title: 'Mamichula', artist: 'Trueno, Nicki Nicole, Bizarrap', genre: 'trueno' },
+            { id: 'e9mPqJ0G6m0', backups: ['wfWIs2gFTAM'], title: 'Feel Me??', artist: 'Trueno', genre: 'trueno' },
+            { id: '_b6gPz1N39U', backups: ['wfWIs2gFTAM'], title: 'Solo Por Vos', artist: 'Trueno', genre: 'trueno' },
+            { id: 'vR7K3X1_J0c', backups: ['f2lW0y_yq0M'], title: 'Dance Crip', artist: 'Trueno', genre: 'trueno' },
+            { id: 'f2lW0y_yq0M', backups: ['Xl3B9W2K58Y'], title: 'Tranky Funky', artist: 'Trueno', genre: 'trueno' },
+            { id: 'Xl3B9W2K58Y', backups: ['e9mPqJ0G6m0'], title: 'Real Gangsta Love', artist: 'Trueno', genre: 'trueno' }
         ];
 
         let ytPlayer = null;
@@ -2388,6 +2971,7 @@
         let currentBackupIdx = 0;
         let isPlayingMusic = false;
         let startMusicWhenReady = false;
+        let trackWatchdogTimer = null;
 
         const spWidget = document.getElementById('spotify-widget');
         const spMiniTab = document.getElementById('spotify-mini-tab');
@@ -2398,14 +2982,33 @@
         const spVolume = document.getElementById('sp-volume');
         const spVolLabel = document.getElementById('sp-vol-label');
 
+        function toggleWidgetSpotifyEmbed() {
+            const drawer = document.getElementById('sp-embed-drawer');
+            const internalView = document.getElementById('sp-internal-player-view');
+            const btn = document.getElementById('sp-toggle-embed-btn');
+
+            const isOpen = drawer.classList.toggle('open');
+            if (isOpen) {
+                internalView.style.display = 'none';
+                btn.textContent = '▶ Interno';
+                btn.classList.add('active-mode');
+                if (ytReady && ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
+            } else {
+                internalView.style.display = 'block';
+                btn.textContent = 'Spotify Playlist';
+                btn.classList.remove('active-mode');
+            }
+        }
+
         function updatePlayerUI() {
             const song = playlist[currentTrack];
+            if (!song) return;
             spTitle.textContent = song.title;
             spArtist.textContent = song.artist;
             spCover.src = `https://i.ytimg.com/vi/${song.id}/mqdefault.jpg`;
             spPlayBtn.textContent = isPlayingMusic ? '⏸' : '▶';
 
-            document.querySelectorAll('.song-card-item').forEach((item, idx) => {
+            document.querySelectorAll('.song-card-item').forEach((item) => {
                 if (parseInt(item.dataset.index, 10) === currentTrack) {
                     item.classList.add('playing');
                 } else {
@@ -2414,13 +3017,27 @@
             });
         }
 
+        function handleTrackFailure() {
+            clearTimeout(trackWatchdogTimer);
+            const song = playlist[currentTrack];
+            if (song && song.backups && currentBackupIdx < song.backups.length) {
+                const nextId = song.backups[currentBackupIdx++];
+                if (ytReady && ytPlayer && ytPlayer.loadVideoById) {
+                    ytPlayer.loadVideoById({ videoId: nextId, startSeconds: 0 });
+                }
+            } else {
+                nextTrack();
+            }
+        }
+
         window.onYouTubeIframeAPIReady = function() {
             const vars = {
                 autoplay: 0,
                 controls: 0,
                 playsinline: 1,
                 rel: 0,
-                modestbranding: 1
+                modestbranding: 1,
+                enablejsapi: 1
             };
             if (window.location.protocol.startsWith('http')) {
                 vars.origin = window.location.origin;
@@ -2435,12 +3052,14 @@
                     onReady: (event) => {
                         ytReady = true;
                         event.target.setVolume(parseInt(spVolume.value, 10));
+                        updatePlayerUI();
                         if (startMusicWhenReady) {
                             event.target.playVideo();
                         }
                     },
                     onStateChange: (event) => {
                         if (event.data === YT.PlayerState.PLAYING) {
+                            clearTimeout(trackWatchdogTimer);
                             isPlayingMusic = true;
                             spPlayBtn.textContent = '⏸';
                         } else if (event.data === YT.PlayerState.PAUSED) {
@@ -2451,24 +3070,35 @@
                         }
                     },
                     onError: () => {
-                        const song = playlist[currentTrack];
-                        if (song.backups && currentBackupIdx < song.backups.length) {
-                            ytPlayer.loadVideoById(song.backups[currentBackupIdx++]);
-                        } else {
-                            nextTrack();
-                        }
+                        handleTrackFailure();
                     }
                 }
             });
         };
 
         function loadTrack(index, autoPlay = true) {
-            currentTrack = (index + playlist.length) % playlist.length;
+            clearTimeout(trackWatchdogTimer);
+            currentTrack = ((index % playlist.length) + playlist.length) % playlist.length;
             currentBackupIdx = 0;
             updatePlayerUI();
-            if (ytReady && ytPlayer && ytPlayer.loadVideoById) {
-                ytPlayer.loadVideoById(playlist[currentTrack].id);
-                if (!autoPlay) ytPlayer.pauseVideo();
+
+            // Si estaba en vista Spotify Embed, regresar a vista interna para que escuche lo que seleccionó
+            const drawer = document.getElementById('sp-embed-drawer');
+            if (drawer && drawer.classList.contains('open')) {
+                toggleWidgetSpotifyEmbed();
+            }
+
+            if (ytReady && ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
+                if (autoPlay) {
+                    ytPlayer.loadVideoById({ videoId: playlist[currentTrack].id, startSeconds: 0 });
+                    trackWatchdogTimer = setTimeout(() => {
+                        if (!isPlayingMusic) handleTrackFailure();
+                    }, 4500);
+                } else {
+                    ytPlayer.cueVideoById({ videoId: playlist[currentTrack].id, startSeconds: 0 });
+                }
+            } else {
+                startMusicWhenReady = autoPlay;
             }
         }
 
@@ -2477,7 +3107,8 @@
 
         function togglePlayMusic() {
             if (!ytReady || !ytPlayer) return;
-            if (isPlayingMusic) {
+            const state = ytPlayer.getPlayerState ? ytPlayer.getPlayerState() : -1;
+            if (state === YT.PlayerState.PLAYING || isPlayingMusic) {
                 ytPlayer.pauseVideo();
             } else {
                 ytPlayer.playVideo();
@@ -2506,6 +3137,9 @@
             const container = document.getElementById('song-cards-container');
             container.innerHTML = '';
 
+            const allBtn = document.getElementById('btn-genre-all');
+            if (allBtn) allBtn.textContent = `Todas (${playlist.length})`;
+
             playlist.forEach((song, idx) => {
                 if (genre !== 'all' && song.genre !== genre) return;
 
@@ -2513,7 +3147,7 @@
                 card.className = 'song-card-item' + (idx === currentTrack ? ' playing' : '');
                 card.dataset.index = idx;
                 card.innerHTML = `
-                    <img class="song-thumb" src="https://i.ytimg.com/vi/${song.id}/mqdefault.jpg" alt="${song.title}">
+                    <img class="song-thumb" src="https://i.ytimg.com/vi/${song.id}/mqdefault.jpg" alt="${song.title}" loading="lazy">
                     <div class="song-meta">
                         <div class="song-name">${song.title}</div>
                         <div class="song-sub">${song.artist}</div>
@@ -2532,26 +3166,105 @@
         }
 
         /* =========================================================
-           2. PANTALLA 0: EL SOBRE CON SELLO DE CERA
+           2. PANTALLA 0: SOBRE 3D HERMÉTICO CON PARALAJE SUAVE
            ========================================================= */
+        function initEnvelopeParallax() {
+            const screen = document.getElementById('envelope-screen');
+            const box = document.getElementById('envelope-box');
+            if (!screen || !box || typeof gsap === 'undefined') return;
+
+            const rotYTo = gsap.quickTo(box, "rotationY", { duration: 0.35, ease: "power2.out" });
+            const rotXTo = gsap.quickTo(box, "rotationX", { duration: 0.35, ease: "power2.out" });
+
+            const handleMove = (clientX, clientY) => {
+                if (!screen.classList.contains('active')) return;
+                const xNorm = (clientX / window.innerWidth - 0.5) * 2;
+                const yNorm = (clientY / window.innerHeight - 0.5) * 2;
+                rotYTo(xNorm * 16);
+                rotXTo(-yNorm * 13);
+            };
+
+            screen.addEventListener('pointermove', (e) => handleMove(e.clientX, e.clientY));
+            screen.addEventListener('touchmove', (e) => {
+                if (e.touches && e.touches[0]) {
+                    handleMove(e.touches[0].clientX, e.touches[0].clientY);
+                }
+            }, { passive: true });
+
+            screen.addEventListener('pointerleave', () => {
+                rotYTo(0);
+                rotXTo(0);
+            });
+        }
+
+        function spawnGoldSealSparks() {
+            const envelope = document.getElementById('envelope-elem');
+            if (!envelope || typeof gsap === 'undefined') return;
+
+            for (let i = 0; i < 22; i++) {
+                const spark = document.createElement('div');
+                spark.className = 'seal-spark';
+                spark.style.left = '50%';
+                spark.style.top = '55%';
+                envelope.appendChild(spark);
+
+                const angle = (Math.PI * 2 * i) / 22 + (Math.random() - 0.5) * 0.3;
+                const dist = 45 + Math.random() * 80;
+
+                gsap.to(spark, {
+                    x: Math.cos(angle) * dist,
+                    y: Math.sin(angle) * dist,
+                    scale: 0,
+                    opacity: 0,
+                    duration: 0.55 + Math.random() * 0.3,
+                    ease: "power2.out",
+                    onComplete: () => spark.remove()
+                });
+            }
+        }
+
+        function handleEnvelopeClick() {
+            const envelope = document.getElementById('envelope-elem');
+            if (!envelope.classList.contains('opened')) {
+                openIntroEnvelope();
+            } else {
+                goToVideoScreen();
+            }
+        }
+
         function openIntroEnvelope() {
             const envelope = document.getElementById('envelope-elem');
-            if (envelope.classList.contains('opened')) return;
+            const screen = document.getElementById('envelope-screen');
+            const actions = document.getElementById('envelope-actions');
+            const hint = document.getElementById('envelope-hint-text');
+
+            playWaxSealBreakSound();
+            spawnGoldSealSparks();
+
+            setTimeout(() => {
+                playPaperSlideSound();
+            }, 220);
 
             envelope.classList.add('opened');
+            screen.classList.add('opened');
+            actions.classList.add('visible');
+
+            if (hint) {
+                hint.textContent = "💖 ¡Tu carta ha salido del sobre! Elige un botón guía o toca la carta ✨";
+            }
             
-            // Disparar confeti de amor
             if (typeof confetti === 'function') {
                 confetti({
-                    particleCount: 50,
-                    spread: 70,
+                    particleCount: 65,
+                    spread: 80,
                     origin: { y: 0.6 },
-                    colors: ['#ff2a85', '#ff85c8', '#ffffff', '#ffd54f']
+                    colors: ['#ff2a85', '#ffd700', '#ff85c8', '#ffffff']
                 });
             }
         }
 
         function goToVideoScreen() {
+            setGalaxyRenderActive(false);
             document.getElementById('envelope-screen').classList.remove('active');
             document.getElementById('video-screen').classList.add('active');
             
@@ -2564,7 +3277,6 @@
            ========================================================= */
         const surpriseVideo = document.getElementById('surprise-video');
         const playOverlay = document.getElementById('play-overlay');
-        const playBtnInitial = document.getElementById('play-btn-initial');
         const heartButton = document.getElementById('heart-button');
 
         playOverlay.addEventListener('click', () => {
@@ -2593,6 +3305,25 @@
 
         heartButton.addEventListener('click', skipToGalaxy);
 
+        function handleSpidermanSkip() {
+            playSpiderWebSound();
+            const spidey = document.getElementById('spiderman-skip');
+            if (typeof gsap !== 'undefined' && spidey) {
+                gsap.to(spidey, {
+                    y: -60,
+                    scale: 1.15,
+                    duration: 0.2,
+                    ease: "power2.out",
+                    onComplete: () => {
+                        gsap.set(spidey, { y: 0, scale: 1 });
+                        skipToGalaxy();
+                    }
+                });
+            } else {
+                skipToGalaxy();
+            }
+        }
+
         function skipToGalaxy() {
             surpriseVideo.pause();
             
@@ -2613,10 +3344,13 @@
                 initGalaxy();
                 galaxyInitialized = true;
             }
+            setGalaxyRenderActive(true);
         }
 
         function goToTableScreen() {
             surpriseVideo.pause();
+            setGalaxyRenderActive(false);
+
             document.getElementById('envelope-screen').classList.remove('active');
             document.getElementById('video-screen').classList.remove('active');
             document.getElementById('galaxy-screen').classList.remove('active');
@@ -2638,30 +3372,40 @@
                 initGalaxy();
                 galaxyInitialized = true;
             }
+            setGalaxyRenderActive(true);
         }
 
         /* =========================================================
-           4. MESA DE RECUERDOS: ANIMACIÓN AL CENTRO Y SECCIONES
+           4. MESA DE RECUERDOS: VUELO 3D A 60 FPS SIN CONFLICTOS
            ========================================================= */
+        let lastClickedTableItem = null;
+        let lastFlyOffset = { x: 0, y: 0 };
+
         function openSectionFromItem(sectionId, clickedElem) {
-            const container = document.getElementById('section-modal-container');
-            
-            // Animación de GSAP desde el elemento hacia el centro
+            playWoodFlySound(false);
+
             if (typeof gsap !== 'undefined' && clickedElem) {
+                gsap.killTweensOf(clickedElem);
+                lastClickedTableItem = clickedElem;
                 const rect = clickedElem.getBoundingClientRect();
                 const centerX = window.innerWidth / 2 - (rect.left + rect.width / 2);
                 const centerY = window.innerHeight / 2 - (rect.top + rect.height / 2);
+                lastFlyOffset = { x: centerX, y: centerY };
+
+                clickedElem.style.zIndex = '200';
 
                 gsap.fromTo(clickedElem, 
-                    { x: 0, y: 0, scale: 1 },
+                    { x: 0, y: 0, scale: 1, rotationY: 0, rotationZ: 0 },
                     {
                         x: centerX,
                         y: centerY,
-                        scale: 1.6,
-                        duration: 0.45,
-                        ease: "power2.inOut",
+                        scale: 1.68,
+                        rotationY: 16,
+                        rotationZ: -3,
+                        duration: 0.42,
+                        ease: "power3.out",
+                        overwrite: "auto",
                         onComplete: () => {
-                            gsap.set(clickedElem, { x: 0, y: 0, scale: 1 });
                             showSectionContent(sectionId);
                         }
                     }
@@ -2684,6 +3428,30 @@
 
         function closeSectionModal() {
             document.getElementById('section-modal-container').classList.remove('active');
+            playWoodFlySound(true);
+
+            if (typeof gsap !== 'undefined' && lastClickedTableItem) {
+                const elem = lastClickedTableItem;
+                lastClickedTableItem = null;
+                gsap.killTweensOf(elem);
+
+                gsap.fromTo(elem,
+                    { x: lastFlyOffset.x, y: lastFlyOffset.y, scale: 1.6, rotationY: 14, rotationZ: -3 },
+                    {
+                        x: 0,
+                        y: 0,
+                        scale: 1,
+                        rotationY: 0,
+                        rotationZ: 0,
+                        duration: 0.75,
+                        ease: "elastic.out(1, 0.55)",
+                        overwrite: "auto",
+                        onComplete: () => {
+                            elem.style.zIndex = '';
+                        }
+                    }
+                );
+            }
         }
 
         /* =========================================================
@@ -2740,30 +3508,52 @@
         }
 
         /* =========================================================
-           6. CONTADOR DE AMOR EN TIEMPO REAL
+           6. CONTADOR NUESTRA FECHA: 11 DE NOVIEMBRE DE 2026
+              (NEGATIVO ANTES DEL 11 NOV, SUMA POSITIVA DESDE EL 11 NOV)
            ========================================================= */
         function updateLoveCounter() {
-            // Fecha aproximada cuando comenzaron a ser amigos/conocerse (hace ~7 años)
-            const startDate = new Date('2019-09-26T00:00:00');
+            const targetDate = new Date('2026-11-11T00:00:00');
             const now = new Date();
-            const diff = now - startDate;
+            const diff = now - targetDate; // Negativo si aún no es 11 de nov de 2026
 
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-            const minutes = Math.floor((diff / 1000 / 60) % 60);
-            const seconds = Math.floor((diff / 1000) % 60);
+            const isNegative = diff < 0;
+            const absDiff = Math.abs(diff);
 
-            document.getElementById('cnt-days').textContent = days;
-            document.getElementById('cnt-hours').textContent = String(hours).padStart(2, '0');
-            document.getElementById('cnt-mins').textContent = String(minutes).padStart(2, '0');
-            document.getElementById('cnt-secs').textContent = String(seconds).padStart(2, '0');
+            const days = Math.floor(absDiff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((absDiff / (1000 * 60 * 60)) % 24);
+            const minutes = Math.floor((absDiff / 1000 / 60) % 60);
+            const seconds = Math.floor((absDiff / 1000) % 60);
+
+            const sign = isNegative ? '-' : '+';
+
+            const elDays = document.getElementById('cnt-days');
+            const elHours = document.getElementById('cnt-hours');
+            const elMins = document.getElementById('cnt-mins');
+            const elSecs = document.getElementById('cnt-secs');
+            const elStatus = document.getElementById('love-counter-status');
+            const elSubtext = document.getElementById('love-counter-subtext');
+
+            if (elDays) elDays.textContent = `${sign}${String(days).padStart(2, '0')}`;
+            if (elHours) elHours.textContent = `${sign}${String(hours).padStart(2, '0')}`;
+            if (elMins) elMins.textContent = `${sign}${String(minutes).padStart(2, '0')}`;
+            if (elSecs) elSecs.textContent = `${sign}${String(seconds).padStart(2, '0')}`;
+
+            if (elStatus && elSubtext) {
+                if (isNegative) {
+                    elStatus.textContent = "⏳ Cuenta regresiva (en negativo) para el 11 de Noviembre:";
+                    elSubtext.textContent = "Falta muy poquito para que el reloj llegue a cero este 11 de Noviembre y empiece a sumar nuestro tiempo oficial para siempre ❤️";
+                } else {
+                    elStatus.textContent = "💖 Tiempo sumando juntos desde el 11 de Noviembre de 2026:";
+                    elSubtext.textContent = "Cada segundo que se suma desde nuestro 11 de Noviembre es un tesoro a tu lado, mi Gigi hermosa ❤️";
+                }
+            }
         }
 
         setInterval(updateLoveCounter, 1000);
         updateLoveCounter();
 
         /* =========================================================
-           7. BUZÓN DE SUGERENCIAS (DIRECTO A nahimuchija@gmail.com)
+           7. BUZÓN DE AMOR DIRECTO A nahimuchija@gmail.com
            ========================================================= */
         function submitLoveMailbox(e) {
             e.preventDefault();
@@ -2775,6 +3565,7 @@
 
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span>⏳</span> Sellando y enviando sobre...';
+            playPaperSlideSound();
 
             fetch('https://formsubmit.co/ajax/nahimuchija@gmail.com', {
                 method: 'POST',
@@ -2791,15 +3582,17 @@
                 })
             })
             .then(response => response.json())
-            .then(data => {
-                showToast('¡Tu cartita llegó directo al correo de Nahim! (nahimuchija@gmail.com) ❤️');
+            .then(() => {
+                playStarChimeSound();
+                showToast('¡Tu cartita llegó directo a nahimuchija@gmail.com! ❤️');
                 document.getElementById('love-mailbox-form').reset();
                 if (typeof confetti === 'function') {
                     confetti({ particleCount: 70, spread: 80, origin: { y: 0.6 } });
                 }
             })
-            .catch(error => {
-                showToast('¡Mensaje enviado a tu amorcito con éxito! 💌');
+            .catch(() => {
+                playStarChimeSound();
+                showToast('¡Mensaje enviado a Nahim (nahimuchija@gmail.com) con éxito! 💌');
                 document.getElementById('love-mailbox-form').reset();
             })
             .finally(() => {
@@ -2869,6 +3662,7 @@
         const discoveredCards = new Set();
 
         function openLetterModal(index) {
+            playStarChimeSound();
             const safeIndex = ((index % letters.length) + letters.length) % letters.length;
             const item = letters[safeIndex];
             letterHeader.textContent = item.title;
@@ -2885,8 +3679,12 @@
             letterModal.classList.remove('open');
         }
 
+        letterModal.addEventListener('click', (e) => {
+            if (e.target === letterModal) closeLetterModal();
+        });
+
         /* =========================================================
-           9. PLANETA URANO Y SUS 100 APODOS CELESTES
+           9. DATOS DE URANO (100 APODOS) Y SATURNO VERDE (9 SERIES/CANALES)
            ========================================================= */
         const uranoNicknames = [
             "Mi niña", "Preciosa", "Guapa", "Mi amor", "Botoncito",
@@ -2911,6 +3709,103 @@
             "Amor de mi alma", "Mi bendición", "Mi mayor anhelo", "Mi compañera de viaje", "Por siempre y para siempre, Mi Gigi ❤️"
         ];
 
+        // Las 9 Series, Películas y Canales de Saturno Verde con sus links exactos
+        const saturnoMediaItems = [
+            {
+                title: "Maire Wink",
+                subtitle: "YouTube • @MairevsElinternet",
+                url: "https://www.youtube.com/@MairevsElinternet",
+                imgCandidates: ["edited-image.jpg", "saturno1.jpg"],
+                bg1: "#ff6699", bg2: "#00bcd4", badge: "😈🐶", label: "MAIRE WINK"
+            },
+            {
+                title: "Los Polinesios",
+                subtitle: "YouTube • @LosPolinesios",
+                url: "https://www.youtube.com/@LosPolinesios",
+                imgCandidates: ["image_c633ba.png", "saturno2.png", "saturno2.jpg"],
+                bg1: "#1b8a3d", bg2: "#0d5c26", badge: "LP", label: "LOS POLINESIOS"
+            },
+            {
+                title: "Dieck Docks",
+                subtitle: "YouTube • Farid Dieck",
+                url: "https://www.youtube.com/@DieckDocks",
+                imgCandidates: ["image_c63361.jpg", "saturno3.jpg"],
+                bg1: "#d84315", bg2: "#1a237e", badge: "🎬", label: "DIECK DOCKS"
+            },
+            {
+                title: "Auron",
+                subtitle: "YouTube • @auron",
+                url: "https://www.youtube.com/@auron",
+                imgCandidates: ["image_c6333f.png", "saturno4.png", "saturno4.jpg"],
+                bg1: "#e50914", bg2: "#990000", badge: "🐱🔥", label: "AURON"
+            },
+            {
+                title: "F·R·I·E·N·D·S",
+                subtitle: "HBO Max • Serie Favorita",
+                url: "https://www.hbomax.com/video/watch/06ce010c-4ff1-4f3c-9559-9acaf6cb1ba0",
+                imgCandidates: ["image_c62c7a.png", "saturno5.png", "saturno5.jpg"],
+                bg1: "#121212", bg2: "#262626", badge: "☕🛋️", label: "F·R·I·E·N·D·S"
+            },
+            {
+                title: "The Big Bang Theory",
+                subtitle: "HBO Max • Serie Favorita",
+                url: "https://www.hbomax.com/video/watch/4d448d72-0da9-4b80-ada2-f5b9f7d58289",
+                imgCandidates: ["image_c62c39.png", "saturno6.png", "saturno6.jpg"],
+                bg1: "#d32f2f", bg2: "#f57c00", badge: "⚛️", label: "BIG BANG"
+            },
+            {
+                title: "Los Hechiceros de Waverly Place",
+                subtitle: "Disney+ • Serie Favorita",
+                url: "https://www.disneyplus.com/es-es/play/7fd1ab93-7ef0-403d-bf4d-4dc96e3ef7ff?contextId=EiR1cm46ZXZlbnQ6aW5mb2Jsb2NrOmJyb3dzZTp2MTphY3Rpb24aP2NvbS5kaXNuZXlzdHJlYW1pbmcuc2VydmljZS5uYW1vcmEuaW5mb2Jsb2NrLkluZm9CbG9ja0dlbmVyYXRvciIkZDU1MGM0YzktMGFlZS00MDQyLWJiOTAtNDA4YWFlYTE3YjgxMiAKHjIwMjYtMTEtMTBUMDg6Mjk6MDEuNzk1MjI5OTI0WjqoAQqlAWh0dHBzOi8vZ2l0aHViLmJhbXRlY2guY28vc2NoZW1hLXJlZ2lzdHJ5L3NjaGVtYS1yZWdpc3RyeS1pbmZvLWJsb2NrL2Jsb2IvYzY1YTMyY2JlNDllNWFkNzc5MWQ0NzU4YTM3NDEwYTYzYTMzNzFjMi9zbWl0aHkvZHNzL2V2ZW50L2luZm9ibG9jay9icm93c2UvdjEvYWN0aW9uLnNtaXRoeUIWChRhcHBsaWNhdGlvbi9wcm90b2J1ZkoICgZiaW5hcnlqAggGWq4CCqsCCgRwbGF5Ej8KPXVybjpkczpjbXA6ZXZhOmFsaWRTYXZlZC9lOGZmNDVjOC03ODQ2LTQzOTYtOTQ0MS0zZDIzZTdjNDgyZGUaJgokN2ZkMWFiOTMtN2VmMC00MDNkLWJmNGQtNGRjOTZlM2VmN2ZmIiYKJGU4ZmY0NWM4LTc4NDYtNDM5Ni05NDQxLTNkMjNlN2M0ODJkZSomCiQ3ZTBlMTA0Yi1iMDYwLTRiMWQtOTJjYy0wOWM5ZDc4MzBiODRSJgokZjU1ODU3MDktMTRhZC00OTIwLWEwM2UtNWE0YWM2ZTExMjI5WhgKFnVybjpkczpjbXA6ZXZhOmVwaXNvZGVqJgokNzZhZWQ2ODYtMTgzNy00OWJkLWI0ZjUtNWQyYTI3YzBjOGQ0cgA%3D",
+                imgCandidates: ["image_c62bde.jpg", "saturno7.jpg"],
+                bg1: "#6a1b9a", bg2: "#ad1457", badge: "🪄✨", label: "HECHICEROS"
+            },
+            {
+                title: "Modern Family",
+                subtitle: "Disney+ • Serie Favorita",
+                url: "https://www.disneyplus.com/es-es/play/416f7321-d5fe-423c-b83c-a975abde6b7b?contextId=EiR1cm46ZXZlbnQ6aW5mb2Jsb2NrOmJyb3dzZTp2MTphY3Rpb24aP2NvbS5kaXNuZXlzdHJlYW1pbmcuc2VydmljZS5uYW1vcmEuaW5mb2Jsb2NrLkluZm9CbG9ja0dlbmVyYXRvciIkMDhhZjY4NzItZWU5OC00YTM2LWFiYjctNjAyZmViMTA5ZmM0MiAKHjIwMjYtMTEtMTBUMDg6Mjk6NDAuMzc4MTE4ODM1WjqoAQqlAWh0dHBzOi8vZ2l0aHViLmJhbXRlY2guY28vc2NoZW1hLXJlZ2lzdHJ5L3NjaGVtYS1yZWdpc3RyeS1pbmZvLWJsb2NrL2Jsb2IvYzY1YTMyY2JlNDllNWFkNzc5MWQ0NzU4YTM3NDEwYTYzYTMzNzFjMi9zbWl0aHkvZHNzL2V2ZW50L2luZm9ibG9jay9icm93c2UvdjEvYWN0aW9uLnNtaXRoeUIWChRhcHBsaWNhdGlvbi9wcm90b2J1ZkoICgZiaW5hcnlqAggGWoQCCoECCgRwbGF5Ej8KPXVybjpkczpjbXA6ZXZhOmFsaWRTYXZlZC9lZmY3MmEzZi01OGM4LTQ3M2MtOWExYi1kMTRhYjNjZTIxYjIaJgokNDE2ZjczMjEtZDVmZS00MjNjLWI4M2MtYTk3NWFiZGU2YjdiIiYKJGVmZjcyYTNmLTU4YzgtNDczYy05YTFiLWQxNGFiM2NlMjFiMiomCiQ5OTI1YjA3My02MDAzLTRmODktODE4YS1jOGM0NGJjMmJlN2NSJgokY2QzMWY4MGUtNGQ0ZS00NWY5LWExZjctMzljZTRjNDMyY2JiWhgKFnVybjpkczpjbXA6ZXZhOmVwaXNvZGU%3D",
+                imgCandidates: ["image_c62bb9.jpg", "saturno8.jpg"],
+                bg1: "#ff8f00", bg2: "#1a237e", badge: "🏡🧡", label: "MODERN FAMILY"
+            },
+            {
+                title: "Malcolm in the Middle",
+                subtitle: "Disney+ • Serie Favorita",
+                url: "https://www.disneyplus.com/es-es/play/8d9dd929-9f20-4ec4-a9d6-3fbe7cdf6899?contextId=EiR1cm46ZXZlbnQ6aW5mb2Jsb2NrOmJyb3dzZTp2MTphY3Rpb24aP2NvbS5kaXNuZXlzdHJlYW1pbmcuc2VydmljZS5uYW1vcmEuaW5mb2Jsb2NrLkluZm9CbG9ja0dlbmVyYXRvciIkYTVjY2M5OTQtYTBlMC00MDVhLTk4ZTItMmFiNzA1MWQzMDk1MiAKHjIwMjYtMTEtMTBUMDg6MzA6NDIuOTM2OTcwNzAzWjqoAQqlAWh0dHBzOi8vZ2l0aHViLmJhbXRlY2guY28vc2NoZW1hLXJlZ2lzdHJ5L3NjaGVtYS1yZWdpc3RyeS1pbmZvLWJsb2NrL2Jsb2IvYzY1YTMyY2JlNDllNWFkNzc5MWQ0NzU4YTM3NDEwYTYzYTMzNzFjMi9zbWl0aHkvZHNzL2V2ZW50L2luZm9ibG9jay9icm93c2UvdjEvYWN0aW9uLnNtaXRoeUIWChRhcHBsaWNhdGlvbi9wcm90b2J1ZkoICgZiaW5hcnlqAggGWq4CCqsCCgRwbGF5Ej8KPXVybjpkczpjbXA6ZXZhOmFsaWRTYXZlZC9hOTFkNWEyNy0xNjk1LTRlZDAtYTBjOS01ZGUyZTA2NTFiNzAaJgokOGQ5ZGQ5MjktOWYyMC00ZWM0LWE5ZDYtM2ZiZTdjZGY2ODk5IiYKJGE5MWQ1YTI3LTE2OTUtNGVkMC1hMGM5LTVkZTJlMDY1MWI3MComCiQwZWFjZGU2Yi05YzM5LTQ1MmItYmQxNS04ZTZmZjEwNGQxYjlSJgokY2ViOGEyOTYtMmNhYi00OTc2LTlhMDgtZTMwOWE1MTljZDM2WhgKFnVybjpkczpjbXA6ZXZhOmVwaXNvZGVqJgokNzZhZWQ2ODYtMTgzNy00OWJkLWI0ZjUtNWQyYTI3YzBjOGQ0cgA%3D",
+                imgCandidates: ["image_c628da.jpg", "saturno9.jpg"],
+                bg1: "#2e7d32", bg2: "#c62828", badge: "⛳😂", label: "MALCOLM"
+            }
+        ];
+
+        function generatePosterDataURL(item) {
+            const c = document.createElement('canvas');
+            c.width = 320;
+            c.height = 200;
+            const ctx = c.getContext('2d');
+
+            const grad = ctx.createLinearGradient(0, 0, 320, 200);
+            grad.addColorStop(0, item.bg1);
+            grad.addColorStop(1, item.bg2);
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 320, 200);
+
+            ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+            ctx.lineWidth = 6;
+            ctx.strokeRect(8, 8, 304, 184);
+
+            ctx.font = '46px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(item.badge, 160, 74);
+
+            ctx.font = 'bold 26px "Poppins", sans-serif';
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowColor = 'rgba(0,0,0,0.6)';
+            ctx.shadowBlur = 8;
+            ctx.fillText(item.label, 160, 145);
+
+            return c.toDataURL();
+        }
+
         function renderUranoNicknames() {
             const container = document.getElementById('urano-nicknames-container');
             container.innerHTML = '';
@@ -2922,13 +3817,51 @@
             });
         }
 
+        function renderSaturnoShowsModal() {
+            const container = document.getElementById('saturno-shows-grid');
+            container.innerHTML = '';
+            saturnoMediaItems.forEach((item) => {
+                const fallbackDataUrl = generatePosterDataURL(item);
+                const card = document.createElement('a');
+                card.className = 'saturno-show-card';
+                card.href = item.url;
+                card.target = '_blank';
+                card.rel = 'noopener noreferrer';
+
+                const img = document.createElement('img');
+                img.className = 'saturno-show-thumb';
+                img.src = item.imgCandidates[0];
+                img.alt = item.title;
+                img.onerror = function() {
+                    if (this.dataset.triedAlt !== '1' && item.imgCandidates[1]) {
+                        this.dataset.triedAlt = '1';
+                        this.src = item.imgCandidates[1];
+                    } else {
+                        this.onerror = null;
+                        this.src = fallbackDataUrl;
+                    }
+                };
+
+                const info = document.createElement('div');
+                info.className = 'saturno-show-info';
+                info.innerHTML = `
+                    <span class="saturno-show-badge">${item.subtitle}</span>
+                    <span class="saturno-show-name">${item.title} ↗</span>
+                `;
+
+                card.appendChild(img);
+                card.appendChild(info);
+                container.appendChild(card);
+            });
+        }
+
         function openUranoModal() {
             renderUranoNicknames();
             document.getElementById('urano-modal').classList.add('open');
             if (typeof confetti === 'function') {
                 confetti({
-                    particleCount: 40,
-                    spread: 60,
+                    particleCount: 45,
+                    spread: 70,
                     origin: { y: 0.5 },
                     colors: ['#00e5ff', '#80d8ff', '#0091ea', '#ffffff']
                 });
@@ -2937,7 +3870,33 @@
 
         function closeUranoModal() {
             document.getElementById('urano-modal').classList.remove('open');
+            expandUranoRingsBack();
         }
+
+        function openSaturnoModal() {
+            renderSaturnoShowsModal();
+            document.getElementById('saturno-modal').classList.add('open');
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 45,
+                    spread: 70,
+                    origin: { y: 0.5 },
+                    colors: ['#00e676', '#69f0ae', '#00c853', '#ffffff']
+                });
+            }
+        }
+
+        function closeSaturnoModal() {
+            document.getElementById('saturno-modal').classList.remove('open');
+            expandSaturnoRingsBack();
+        }
+
+        document.getElementById('urano-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'urano-modal') closeUranoModal();
+        });
+        document.getElementById('saturno-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'saturno-modal') closeSaturnoModal();
+        });
 
         /* =========================================================
            10. LIGHTBOX MULTIMEDIA
@@ -2960,15 +3919,25 @@
         }
 
         /* =========================================================
-           11. TEXTURAS THREE.JS PARA GALAXIA Y URANO
+           11. TEXTURAS THREE.JS (TEXTO, PERSONAJES Y PORTADAS)
            ========================================================= */
+        function drawRoundedRect(ctx, x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.arcTo(x + w, y, x + w, y + h, r);
+            ctx.arcTo(x + w, y + h, x, y + h, r);
+            ctx.arcTo(x, y + h, x, y, r);
+            ctx.arcTo(x, y, x + w, y, r);
+            ctx.closePath();
+        }
+
         function createTextTexture(text, glowColor = '#ff2a85') {
             const canvas = document.createElement('canvas');
             canvas.width = 512;
             canvas.height = 120;
             const ctx = canvas.getContext('2d');
 
-            ctx.font = 'bold 36px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.font = 'bold 35px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
 
@@ -2978,6 +3947,73 @@
             ctx.fillText(text, 256, 60);
 
             return new THREE.CanvasTexture(canvas);
+        }
+
+        function createSaturnoPosterTexture(item) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256;
+            canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+
+            const drawCardBase = (imgElement) => {
+                ctx.clearRect(0, 0, 256, 256);
+                ctx.save();
+                drawRoundedRect(ctx, 10, 10, 236, 236, 30);
+                ctx.clip();
+
+                if (imgElement) {
+                    ctx.drawImage(imgElement, 10, 10, 236, 236);
+                } else {
+                    const grad = ctx.createLinearGradient(0, 0, 256, 256);
+                    grad.addColorStop(0, item.bg1);
+                    grad.addColorStop(1, item.bg2);
+                    ctx.fillStyle = grad;
+                    ctx.fillRect(10, 10, 236, 236);
+
+                    ctx.font = '68px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(item.badge, 128, 100);
+                }
+
+                // Etiqueta inferior oscura con el nombre
+                ctx.fillStyle = 'rgba(0, 22, 10, 0.82)';
+                ctx.fillRect(10, 188, 236, 58);
+
+                ctx.font = 'bold 21px "Poppins", sans-serif';
+                ctx.fillStyle = '#69f0ae';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(item.label, 128, 217);
+                ctx.restore();
+
+                // Borde brillante verde esmeralda
+                ctx.strokeStyle = '#00e676';
+                ctx.lineWidth = 7;
+                drawRoundedRect(ctx, 10, 10, 236, 236, 30);
+                ctx.stroke();
+            };
+
+            drawCardBase(null);
+            const texture = new THREE.CanvasTexture(canvas);
+
+            // Intenta cargar la imagen adjunta si está en la carpeta
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            let candidateIdx = 0;
+            img.onload = () => {
+                drawCardBase(img);
+                texture.needsUpdate = true;
+            };
+            img.onerror = () => {
+                candidateIdx++;
+                if (candidateIdx < item.imgCandidates.length) {
+                    img.src = item.imgCandidates[candidateIdx];
+                }
+            };
+            img.src = item.imgCandidates[0];
+
+            return texture;
         }
 
         function createHelloKittyTexture() {
@@ -2991,8 +4027,7 @@
             ctx.scale(0.78, 0.78);
 
             ctx.fillStyle = '#ff66a3';
-            ctx.beginPath();
-            ctx.roundRect(-42, 25, 84, 65, 22);
+            drawRoundedRect(ctx, -42, 25, 84, 65, 22);
             ctx.fill();
 
             ctx.fillStyle = '#ffffff';
@@ -3049,8 +4084,7 @@
             ctx.scale(0.78, 0.78);
 
             ctx.fillStyle = '#d50000';
-            ctx.beginPath();
-            ctx.roundRect(-28, 30, 56, 55, 18);
+            drawRoundedRect(ctx, -28, 30, 56, 55, 18);
             ctx.fill();
 
             ctx.fillStyle = '#e50914';
@@ -3079,9 +4113,338 @@
         }
 
         /* =========================================================
-           12. GALAXIA 3D CON URANO Y ANILLOS DE APODOS
+           12. GALAXIA 3D CON URANO AZUL (20 APODOS -> 100)
+               Y SATURNO VERDE (9 PORTADAS CON LINKS -> MODAL)
            ========================================================= */
         let galaxyInitialized = false;
+        let isGalaxyRenderActive = false;
+        let galaxyAnimFrameId = null;
+        let startGalaxyLoopFn = null;
+
+        let gCamera = null;
+        let gControls = null;
+        let currentCameraZone = 'galaxy'; // 'galaxy' | 'urano' | 'saturno'
+        let isCameraTransitioning = false;
+
+        // Objetos de Urano
+        let gUranoNicks = [];
+        let gUranoBeamMat = null;
+        let gUranoShockwaveMesh = null;
+        let gUranoShockwaveMat = null;
+
+        // Objetos de Saturno Verde
+        let gSaturnoPosters = [];
+        let gSaturnoBeamMat = null;
+        let gSaturnoShockwaveMesh = null;
+        let gSaturnoShockwaveMat = null;
+
+        function setGalaxyRenderActive(active) {
+            isGalaxyRenderActive = active;
+            if (active && startGalaxyLoopFn && !galaxyAnimFrameId) {
+                startGalaxyLoopFn();
+            } else if (!active && galaxyAnimFrameId) {
+                cancelAnimationFrame(galaxyAnimFrameId);
+                galaxyAnimFrameId = null;
+            }
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                setGalaxyRenderActive(false);
+            } else if (document.getElementById('galaxy-screen').classList.contains('active')) {
+                setGalaxyRenderActive(true);
+            }
+        });
+
+        function updateOrbitHud() {
+            const hud = document.getElementById('planet-orbit-hud');
+            const text = document.getElementById('hud-planet-text');
+            const btn = document.getElementById('hud-btn-action');
+
+            if (currentCameraZone === 'urano') {
+                hud.classList.remove('saturno-theme');
+                hud.classList.add('visible');
+                text.textContent = "🪐 Estás en Urano: Mira los 20 apodos girar en sus anillos o toca el centro de Urano";
+                btn.textContent = "💙 Juntar los 20 Apodos (Ver los 100)";
+            } else if (currentCameraZone === 'saturno') {
+                hud.classList.add('saturno-theme', 'visible');
+                text.textContent = "🟢 Saturno Verde: Toca cualquier portada para abrir su link o toca el planeta para juntarlas";
+                btn.textContent = "💚 Para cuando lo necesites Gigi";
+            } else {
+                hud.classList.remove('visible', 'saturno-theme');
+            }
+        }
+
+        function triggerActivePlanetCore() {
+            if (currentCameraZone === 'urano') {
+                collapseUranoRingsAndOpenModal();
+            } else if (currentCameraZone === 'saturno') {
+                collapseSaturnoRingsAndOpenModal();
+            }
+        }
+
+        // PASO 1 URANO: Volar hacia Urano para ver los 20 apodos girando
+        function handleUranoInteraction() {
+            if (!galaxyInitialized) return;
+            if (currentCameraZone !== 'urano') {
+                flyToUranoView();
+            } else {
+                collapseUranoRingsAndOpenModal();
+            }
+        }
+
+        function flyToUranoView() {
+            if (isCameraTransitioning || !gCamera || !gControls) return;
+            isCameraTransitioning = true;
+            currentCameraZone = 'urano';
+            playPlanetWarpSound(false);
+            updateOrbitHud();
+
+            gsap.to(gCamera.position, {
+                x: 38,
+                y: 17.5,
+                z: -9.5,
+                duration: 1.45,
+                ease: "power3.inOut"
+            });
+
+            gsap.to(gControls.target, {
+                x: 38,
+                y: 12,
+                z: -26,
+                duration: 1.45,
+                ease: "power3.inOut",
+                onComplete: () => {
+                    isCameraTransitioning = false;
+                }
+            });
+        }
+
+        // PASO 2 URANO: Al darle clic a Urano estando cerca, los 20 apodos se juntan y sale la ventana con los 100
+        function collapseUranoRingsAndOpenModal() {
+            if (isCameraTransitioning) return;
+            isCameraTransitioning = true;
+            playStarChimeSound();
+
+            gUranoNicks.forEach((item) => {
+                const state = { r: item.baseRadius, a: item.baseAngle };
+                gsap.to(state, {
+                    r: 0.15,
+                    a: item.baseAngle + Math.PI * 3,
+                    duration: 0.95,
+                    ease: "back.in(1.4)",
+                    onUpdate: () => {
+                        item.sprite.position.set(
+                            Math.cos(state.a) * state.r,
+                            Math.sin(state.a) * state.r,
+                            0
+                        );
+                    }
+                });
+                gsap.to(item.sprite.scale, {
+                    x: 0.15,
+                    y: 0.15,
+                    duration: 0.95,
+                    ease: "power2.in"
+                });
+            });
+
+            if (gUranoBeamMat) {
+                gsap.fromTo(gUranoBeamMat,
+                    { opacity: 0 },
+                    {
+                        opacity: 0.9,
+                        duration: 0.45,
+                        delay: 0.65,
+                        yoyo: true,
+                        repeat: 1,
+                        onComplete: () => { gUranoBeamMat.opacity = 0; }
+                    }
+                );
+            }
+
+            setTimeout(() => {
+                isCameraTransitioning = false;
+                openUranoModal();
+            }, 980);
+        }
+
+        function expandUranoRingsBack() {
+            if (gUranoShockwaveMesh && gUranoShockwaveMat) {
+                gUranoShockwaveMesh.scale.set(0.2, 0.2, 1);
+                gUranoShockwaveMat.opacity = 0.95;
+                gsap.to(gUranoShockwaveMesh.scale, { x: 3.6, y: 3.6, duration: 0.85, ease: "power2.out" });
+                gsap.to(gUranoShockwaveMat, { opacity: 0, duration: 0.85, ease: "power2.out" });
+            }
+
+            gUranoNicks.forEach((item) => {
+                const state = { r: 0.15, a: item.baseAngle - Math.PI * 2 };
+                gsap.to(state, {
+                    r: item.baseRadius,
+                    a: item.baseAngle,
+                    duration: 1.15,
+                    ease: "elastic.out(1, 0.6)",
+                    onUpdate: () => {
+                        item.sprite.position.set(
+                            Math.cos(state.a) * state.r,
+                            Math.sin(state.a) * state.r,
+                            0
+                        );
+                    }
+                });
+                gsap.to(item.sprite.scale, {
+                    x: item.baseScaleX,
+                    y: item.baseScaleY,
+                    duration: 1.0,
+                    ease: "back.out(1.7)"
+                });
+            });
+        }
+
+        // PASO 1 SATURNO VERDE: Volar hacia Saturno para ver las 9 portadas flotando
+        function handleSaturnoInteraction() {
+            if (!galaxyInitialized) return;
+            if (currentCameraZone !== 'saturno') {
+                flyToSaturnoView();
+            } else {
+                collapseSaturnoRingsAndOpenModal();
+            }
+        }
+
+        function flyToSaturnoView() {
+            if (isCameraTransitioning || !gCamera || !gControls) return;
+            isCameraTransitioning = true;
+            currentCameraZone = 'saturno';
+            playPlanetWarpSound(false);
+            updateOrbitHud();
+
+            gsap.to(gCamera.position, {
+                x: -38,
+                y: 20,
+                z: -6.5,
+                duration: 1.45,
+                ease: "power3.inOut"
+            });
+
+            gsap.to(gControls.target, {
+                x: -38,
+                y: 14,
+                z: -24,
+                duration: 1.45,
+                ease: "power3.inOut",
+                onComplete: () => {
+                    isCameraTransitioning = false;
+                }
+            });
+        }
+
+        // PASO 2 SATURNO VERDE: Al tocar el planeta Saturno, se juntan las 9 portadas y dice "Para cuando lo necesites Gigi"
+        function collapseSaturnoRingsAndOpenModal() {
+            if (isCameraTransitioning) return;
+            isCameraTransitioning = true;
+            playStarChimeSound();
+
+            gSaturnoPosters.forEach((item) => {
+                const state = { r: item.baseRadius, a: item.baseAngle };
+                gsap.to(state, {
+                    r: 0.2,
+                    a: item.baseAngle + Math.PI * 2.5,
+                    duration: 0.95,
+                    ease: "back.in(1.4)",
+                    onUpdate: () => {
+                        item.sprite.position.set(
+                            Math.cos(state.a) * state.r,
+                            Math.sin(state.a) * state.r,
+                            0
+                        );
+                    }
+                });
+                gsap.to(item.sprite.scale, {
+                    x: 0.2,
+                    y: 0.2,
+                    duration: 0.95,
+                    ease: "power2.in"
+                });
+            });
+
+            if (gSaturnoBeamMat) {
+                gsap.fromTo(gSaturnoBeamMat,
+                    { opacity: 0 },
+                    {
+                        opacity: 0.9,
+                        duration: 0.45,
+                        delay: 0.65,
+                        yoyo: true,
+                        repeat: 1,
+                        onComplete: () => { gSaturnoBeamMat.opacity = 0; }
+                    }
+                );
+            }
+
+            setTimeout(() => {
+                isCameraTransitioning = false;
+                openSaturnoModal();
+            }, 980);
+        }
+
+        function expandSaturnoRingsBack() {
+            if (gSaturnoShockwaveMesh && gSaturnoShockwaveMat) {
+                gSaturnoShockwaveMesh.scale.set(0.2, 0.2, 1);
+                gSaturnoShockwaveMat.opacity = 0.95;
+                gsap.to(gSaturnoShockwaveMesh.scale, { x: 3.6, y: 3.6, duration: 0.85, ease: "power2.out" });
+                gsap.to(gSaturnoShockwaveMat, { opacity: 0, duration: 0.85, ease: "power2.out" });
+            }
+
+            gSaturnoPosters.forEach((item) => {
+                const state = { r: 0.2, a: item.baseAngle - Math.PI * 2 };
+                gsap.to(state, {
+                    r: item.baseRadius,
+                    a: item.baseAngle,
+                    duration: 1.15,
+                    ease: "elastic.out(1, 0.6)",
+                    onUpdate: () => {
+                        item.sprite.position.set(
+                            Math.cos(state.a) * state.r,
+                            Math.sin(state.a) * state.r,
+                            0
+                        );
+                    }
+                });
+                gsap.to(item.sprite.scale, {
+                    x: 3.2,
+                    y: 3.2,
+                    duration: 1.0,
+                    ease: "back.out(1.7)"
+                });
+            });
+        }
+
+        function returnToGalaxyCenter() {
+            if (!gCamera || !gControls) return;
+            isCameraTransitioning = true;
+            currentCameraZone = 'galaxy';
+            playPlanetWarpSound(true);
+            updateOrbitHud();
+
+            gsap.to(gCamera.position, {
+                x: 0,
+                y: 22,
+                z: 54,
+                duration: 1.45,
+                ease: "power3.inOut"
+            });
+
+            gsap.to(gControls.target, {
+                x: 0,
+                y: 0,
+                z: 0,
+                duration: 1.45,
+                ease: "power3.inOut",
+                onComplete: () => {
+                    isCameraTransitioning = false;
+                }
+            });
+        }
 
         function initGalaxy() {
             const canvas = document.getElementById('galaxy-canvas');
@@ -3089,6 +4452,7 @@
 
             const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 450);
             camera.position.set(0, 22, 54);
+            gCamera = camera;
 
             const renderer = new THREE.WebGLRenderer({
                 canvas,
@@ -3101,8 +4465,9 @@
             const controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.06;
-            controls.maxDistance = 90;
-            controls.minDistance = 8;
+            controls.maxDistance = 95;
+            controls.minDistance = 6;
+            gControls = controls;
 
             const rotatingObjectsGroup = new THREE.Group();
             scene.add(rotatingObjectsGroup);
@@ -3219,7 +4584,6 @@
 
             const clickableSprites = [];
 
-            // Hitbox del corazón central
             const centerHitBox = new THREE.Sprite(new THREE.SpriteMaterial({ opacity: 0, transparent: true, depthWrite: false }));
             centerHitBox.position.set(0, 1.6, 0);
             centerHitBox.scale.set(9, 9, 1);
@@ -3227,7 +4591,7 @@
             scene.add(centerHitBox);
             clickableSprites.push(centerHitBox);
 
-            // Frases flotantes con sus cartas
+            // Frases flotantes
             const phrases = [
                 { text: "Te amo, Botoncito ❤️", color: "#ff2a85", radius: 10.5, angle: 0.2, y: 1.6, letter: 0 },
                 { text: "Ya tienes 20, viejita 👵", color: "#ff4da6", radius: 14.5, angle: 1.1, y: -1.1, letter: 0 },
@@ -3247,11 +4611,7 @@
                 const tex = createTextTexture(item.text, item.color);
                 const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false });
                 const sprite = new THREE.Sprite(mat);
-                sprite.position.set(
-                    Math.cos(item.angle) * item.radius,
-                    item.y,
-                    Math.sin(item.angle) * item.radius
-                );
+                sprite.position.set(Math.cos(item.angle) * item.radius, item.y, Math.sin(item.angle) * item.radius);
                 sprite.scale.set(11.0, 3.5, 1);
                 sprite.userData = { letterIndex: item.letter };
                 rotatingObjectsGroup.add(sprite);
@@ -3274,11 +4634,7 @@
             characterConfigs.forEach((cfg) => {
                 const mat = new THREE.SpriteMaterial({ map: cfg.tex, transparent: true, depthWrite: false });
                 const sprite = new THREE.Sprite(mat);
-                sprite.position.set(
-                    Math.cos(cfg.angle) * cfg.radius,
-                    cfg.y,
-                    Math.sin(cfg.angle) * cfg.radius
-                );
+                sprite.position.set(Math.cos(cfg.angle) * cfg.radius, cfg.y, Math.sin(cfg.angle) * cfg.radius);
                 sprite.scale.set(cfg.size, cfg.size, 1);
                 sprite.userData = { letterIndex: cfg.letter };
                 rotatingObjectsGroup.add(sprite);
@@ -3286,23 +4642,18 @@
             });
 
             // =====================================================
-            // PLANETA URANO A LO LEJOS CON ANILLO DE APODOS AZUL
+            // PLANETA 1: URANO AZUL (CON 20 APODOS EN SUS ANILLOS)
             // =====================================================
             const uranoGroup = new THREE.Group();
             uranoGroup.position.set(38, 12, -26);
             scene.add(uranoGroup);
 
-            // Esfera de Urano
-            const uranoGeo = new THREE.SphereGeometry(3.6, 32, 32);
-            const uranoMat = new THREE.MeshBasicMaterial({
-                color: 0x00e5ff,
-                wireframe: false
-            });
+            const uranoGeo = new THREE.SphereGeometry(3.4, 28, 28);
+            const uranoMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff });
             const uranoMesh = new THREE.Mesh(uranoGeo, uranoMat);
             uranoGroup.add(uranoMesh);
 
-            // Atmósfera / Glow de Urano
-            const uranoGlowGeo = new THREE.SphereGeometry(4.4, 24, 24);
+            const uranoGlowGeo = new THREE.SphereGeometry(4.1, 20, 20);
             const uranoGlowMat = new THREE.MeshBasicMaterial({
                 color: 0x0091ea,
                 transparent: true,
@@ -3311,47 +4662,179 @@
             });
             uranoGroup.add(new THREE.Mesh(uranoGlowGeo, uranoGlowMat));
 
-            // Anillos de Urano
-            const ringGroup = new THREE.Group();
-            ringGroup.rotation.x = Math.PI * 0.45;
-            uranoGroup.add(ringGroup);
+            const beamGeo = new THREE.CylinderGeometry(0.6, 3.2, 36, 20, 1, true);
+            gUranoBeamMat = new THREE.MeshBasicMaterial({
+                color: 0x00e5ff,
+                transparent: true,
+                opacity: 0,
+                side: THREE.DoubleSide,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+            uranoGroup.add(new THREE.Mesh(beamGeo, gUranoBeamMat));
 
-            const ringGeo = new THREE.RingGeometry(5.2, 8.8, 64);
+            const uranoRingGroup = new THREE.Group();
+            uranoRingGroup.rotation.x = Math.PI * 0.42;
+            uranoGroup.add(uranoRingGroup);
+
+            const ringGeo1 = new THREE.RingGeometry(5.0, 7.6, 64);
+            const ringGeo2 = new THREE.RingGeometry(8.2, 10.6, 64);
             const ringMat = new THREE.MeshBasicMaterial({
                 color: 0x80d8ff,
                 side: THREE.DoubleSide,
                 transparent: true,
-                opacity: 0.4
+                opacity: 0.34
             });
-            ringGroup.add(new THREE.Mesh(ringGeo, ringMat));
+            uranoRingGroup.add(new THREE.Mesh(ringGeo1, ringMat));
+            uranoRingGroup.add(new THREE.Mesh(ringGeo2, ringMat));
 
-            // Apodos que orbitan en el anillo de Urano
-            const uranoSampleNicks = ["mi niña", "preciosa", "guapa", "mi cielo", "ojitos lindos", "mi amor", "botoncito", "mi princesa"];
-            uranoSampleNicks.forEach((nick, idx) => {
-                const angle = (idx / uranoSampleNicks.length) * Math.PI * 2;
-                const r = 7.0;
+            const shockGeo = new THREE.RingGeometry(4.2, 4.9, 64);
+            gUranoShockwaveMat = new THREE.MeshBasicMaterial({
+                color: 0x00e5ff,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+            gUranoShockwaveMesh = new THREE.Mesh(shockGeo, gUranoShockwaveMat);
+            uranoRingGroup.add(gUranoShockwaveMesh);
+
+            // 20 Apodos distribuidos en los 2 anillos de Urano (10 internos + 10 externos)
+            gUranoNicks = [];
+            const twentyUranoNicks = uranoNicknames.slice(0, 20);
+            twentyUranoNicks.forEach((nick, idx) => {
+                const isInner = idx < 10;
+                const localIdx = isInner ? idx : idx - 10;
+                const angle = (localIdx / 10) * Math.PI * 2 + (isInner ? 0 : 0.3);
+                const r = isInner ? 6.3 : 9.4;
+                const scaleX = isInner ? 3.5 : 4.0;
+                const scaleY = isInner ? 1.15 : 1.3;
+
                 const nTex = createTextTexture(nick, '#00e5ff');
                 const nMat = new THREE.SpriteMaterial({ map: nTex, transparent: true, depthWrite: false });
                 const nSprite = new THREE.Sprite(nMat);
                 nSprite.position.set(Math.cos(angle) * r, Math.sin(angle) * r, 0);
-                nSprite.scale.set(4.2, 1.4, 1);
-                ringGroup.add(nSprite);
+                nSprite.scale.set(scaleX, scaleY, 1);
+                nSprite.userData = { isUrano: true };
+                uranoRingGroup.add(nSprite);
+                clickableSprites.push(nSprite);
+
+                gUranoNicks.push({
+                    sprite: nSprite,
+                    baseAngle: angle,
+                    baseRadius: r,
+                    baseScaleX: scaleX,
+                    baseScaleY: scaleY
+                });
             });
 
-            // Sprite de texto indicador encima de Urano
-            const uranoLabelTex = createTextTexture("🪐 Urano • 100 Apodos 💙", "#00e5ff");
-            const uranoLabelMat = new THREE.SpriteMaterial({ map: uranoLabelTex, transparent: true, depthWrite: false });
-            const uranoLabelSprite = new THREE.Sprite(uranoLabelMat);
-            uranoLabelSprite.position.set(0, 5.8, 0);
-            uranoLabelSprite.scale.set(9.0, 2.5, 1);
+            const uranoLabelTex = createTextTexture("🪐 Urano • Toca para ver 20 y 100 Apodos 💙", "#00e5ff");
+            const uranoLabelSprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: uranoLabelTex, transparent: true, depthWrite: false }));
+            uranoLabelSprite.position.set(0, 6.2, 0);
+            uranoLabelSprite.scale.set(10.5, 2.6, 1);
             uranoGroup.add(uranoLabelSprite);
 
-            // Hitbox para cliquear a Urano
             const uranoHitBox = new THREE.Sprite(new THREE.SpriteMaterial({ opacity: 0, transparent: true, depthWrite: false }));
             uranoHitBox.scale.set(12, 12, 1);
             uranoHitBox.userData = { isUrano: true };
             uranoGroup.add(uranoHitBox);
             clickableSprites.push(uranoHitBox);
+
+            // =====================================================
+            // PLANETA 2: SATURNO VERDE ("Para cuando lo necesites Gigi")
+            // =====================================================
+            const saturnoGroup = new THREE.Group();
+            saturnoGroup.position.set(-38, 14, -24);
+            scene.add(saturnoGroup);
+
+            const saturnoGeo = new THREE.SphereGeometry(3.6, 28, 28);
+            const saturnoMat = new THREE.MeshBasicMaterial({ color: 0x00e676 });
+            const saturnoMesh = new THREE.Mesh(saturnoGeo, saturnoMat);
+            saturnoGroup.add(saturnoMesh);
+
+            const saturnoGlowGeo = new THREE.SphereGeometry(4.3, 20, 20);
+            const saturnoGlowMat = new THREE.MeshBasicMaterial({
+                color: 0x00c853,
+                transparent: true,
+                opacity: 0.3,
+                wireframe: true
+            });
+            saturnoGroup.add(new THREE.Mesh(saturnoGlowGeo, saturnoGlowMat));
+
+            gSaturnoBeamMat = new THREE.MeshBasicMaterial({
+                color: 0x00e676,
+                transparent: true,
+                opacity: 0,
+                side: THREE.DoubleSide,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+            saturnoGroup.add(new THREE.Mesh(beamGeo, gSaturnoBeamMat));
+
+            const saturnoRingGroup = new THREE.Group();
+            saturnoRingGroup.rotation.x = Math.PI * 0.40;
+            saturnoRingGroup.rotation.y = -0.18;
+            saturnoGroup.add(saturnoRingGroup);
+
+            const sRingGeo1 = new THREE.RingGeometry(5.2, 8.2, 64);
+            const sRingGeo2 = new THREE.RingGeometry(8.7, 10.8, 64);
+            const sRingMat = new THREE.MeshBasicMaterial({
+                color: 0x69f0ae,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.38
+            });
+            saturnoRingGroup.add(new THREE.Mesh(sRingGeo1, sRingMat));
+            saturnoRingGroup.add(new THREE.Mesh(sRingGeo2, sRingMat));
+
+            gSaturnoShockwaveMat = new THREE.MeshBasicMaterial({
+                color: 0x00e676,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+            gSaturnoShockwaveMesh = new THREE.Mesh(shockGeo, gSaturnoShockwaveMat);
+            saturnoRingGroup.add(gSaturnoShockwaveMesh);
+
+            // Las 9 portadas flotando entre los anillos de Saturno Verde
+            gSaturnoPosters = [];
+            saturnoMediaItems.forEach((item, idx) => {
+                const angle = (idx / saturnoMediaItems.length) * Math.PI * 2;
+                const r = 8.0;
+                const pTex = createSaturnoPosterTexture(item);
+                const pMat = new THREE.SpriteMaterial({ map: pTex, transparent: true, depthWrite: false });
+                const pSprite = new THREE.Sprite(pMat);
+                pSprite.position.set(Math.cos(angle) * r, Math.sin(angle) * r, 0);
+                pSprite.scale.set(3.2, 3.2, 1);
+                pSprite.userData = {
+                    isSaturnoPoster: true,
+                    url: item.url,
+                    title: item.title
+                };
+                saturnoRingGroup.add(pSprite);
+                clickableSprites.push(pSprite);
+
+                gSaturnoPosters.push({
+                    sprite: pSprite,
+                    baseAngle: angle,
+                    baseRadius: r
+                });
+            });
+
+            const saturnoLabelTex = createTextTexture("🟢 Saturno • Para cuando lo necesites Gigi 💚", "#00e676");
+            const saturnoLabelSprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: saturnoLabelTex, transparent: true, depthWrite: false }));
+            saturnoLabelSprite.position.set(0, 6.4, 0);
+            saturnoLabelSprite.scale.set(11.0, 2.7, 1);
+            saturnoGroup.add(saturnoLabelSprite);
+
+            const saturnoHitBox = new THREE.Sprite(new THREE.SpriteMaterial({ opacity: 0, transparent: true, depthWrite: false }));
+            saturnoHitBox.scale.set(9.2, 9.2, 1);
+            saturnoHitBox.userData = { isSaturnoCore: true };
+            saturnoGroup.add(saturnoHitBox);
+            clickableSprites.push(saturnoHitBox);
 
             // Detección de clics / taps
             const raycaster = new THREE.Raycaster();
@@ -3366,8 +4849,14 @@
 
             window.addEventListener('pointerup', (e) => {
                 if (!document.getElementById('galaxy-screen').classList.contains('active')) return;
-                if (letterModal.classList.contains('open') || document.getElementById('urano-modal').classList.contains('open')) return;
-                if (e.target.closest('#spotify-widget') || e.target.closest('#spotify-mini-tab') || e.target.closest('.top-nav-bar')) return;
+                if (letterModal.classList.contains('open') ||
+                    document.getElementById('urano-modal').classList.contains('open') ||
+                    document.getElementById('saturno-modal').classList.contains('open')) return;
+                if (e.target.closest('#spotify-widget') ||
+                    e.target.closest('#spotify-mini-tab') ||
+                    e.target.closest('.top-nav-bar') ||
+                    e.target.closest('#planet-orbit-hud') ||
+                    e.target.closest('#sfx-mute-btn')) return;
 
                 const moveDist = Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y);
                 const tapDuration = performance.now() - downPos.time;
@@ -3381,37 +4870,76 @@
 
                 if (intersects.length > 0) {
                     const obj = intersects[0].object;
+
+                    // 1. Si toca una portada de Saturno Verde: si ya está cerca abre el link en otra pestaña, si está lejos vuela primero a Saturno
+                    if (obj.userData.isSaturnoPoster) {
+                        if (currentCameraZone === 'saturno') {
+                            playStarChimeSound();
+                            window.open(obj.userData.url, '_blank', 'noopener,noreferrer');
+                        } else {
+                            flyToSaturnoView();
+                        }
+                        return;
+                    }
+
+                    // 2. Si toca el núcleo de Saturno Verde
+                    if (obj.userData.isSaturnoCore) {
+                        handleSaturnoInteraction();
+                        return;
+                    }
+
+                    // 3. Si toca a Urano o sus 20 apodos
                     if (obj.userData.isUrano) {
-                        openUranoModal();
-                    } else if (obj.userData.letterIndex !== undefined) {
+                        handleUranoInteraction();
+                        return;
+                    }
+
+                    // 4. Si toca una frase o personaje de la galaxia
+                    if (obj.userData.letterIndex !== undefined) {
                         openLetterModal(obj.userData.letterIndex);
                     }
                 }
             });
 
-            // Loop de animación
-            const clock = new THREE.Clock();
+            // Loop de animación con Delta Time acumulado (sin saltos al pausar/reanudar)
+            let lastFrameTime = performance.now();
+            let accumulatedTime = 0;
 
-            function animate() {
-                requestAnimationFrame(animate);
-                const elapsedTime = clock.getElapsedTime();
+            function renderLoop(now) {
+                if (!isGalaxyRenderActive) {
+                    galaxyAnimFrameId = null;
+                    return;
+                }
+                galaxyAnimFrameId = requestAnimationFrame(renderLoop);
 
-                galaxyShaderMat.uniforms.uTime.value = elapsedTime;
-                rotatingObjectsGroup.rotation.y = elapsedTime * 0.07;
-                centerHeart.rotation.y = elapsedTime * 0.65;
+                const dt = Math.min((now - lastFrameTime) / 1000, 0.1);
+                lastFrameTime = now;
+                accumulatedTime += dt;
 
-                const pulse = 1 + Math.sin(elapsedTime * 3.2) * 0.05;
+                galaxyShaderMat.uniforms.uTime.value = accumulatedTime;
+                rotatingObjectsGroup.rotation.y = accumulatedTime * 0.07;
+                centerHeart.rotation.y = accumulatedTime * 0.65;
+
+                const pulse = 1 + Math.sin(accumulatedTime * 3.2) * 0.05;
                 centerHeart.scale.set(pulse, pulse, pulse);
 
-                // Rotación de Urano y sus anillos
-                uranoMesh.rotation.y = elapsedTime * 0.4;
-                ringGroup.rotation.z = elapsedTime * 0.3;
+                // Rotación fluida de Urano y sus 20 apodos
+                uranoMesh.rotation.y = accumulatedTime * 0.4;
+                uranoRingGroup.rotation.z = accumulatedTime * 0.25;
+
+                // Rotación fluida de Saturno Verde y sus 9 portadas
+                saturnoMesh.rotation.y = -accumulatedTime * 0.38;
+                saturnoRingGroup.rotation.z = -accumulatedTime * 0.22;
 
                 controls.update();
                 renderer.render(scene, camera);
             }
 
-            animate();
+            startGalaxyLoopFn = () => {
+                lastFrameTime = performance.now();
+                galaxyAnimFrameId = requestAnimationFrame(renderLoop);
+            };
+            setGalaxyRenderActive(true);
 
             window.addEventListener('resize', () => {
                 camera.aspect = window.innerWidth / window.innerHeight;
@@ -3422,6 +4950,7 @@
 
         // Inicialización al cargar la página
         window.addEventListener('DOMContentLoaded', () => {
+            initEnvelopeParallax();
             renderReasons();
             renderSongsList('all');
             updatePlayerUI();
